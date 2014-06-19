@@ -102,18 +102,11 @@ AC_ARG_WITH(timezone-dir,
    [  --with-timezone-dir=path   Use path as the directory to get the timezone files],
    timezonedir=$with_timezone_dir)
 
-AC_ARG_WITH(ld-library-path,
-   [  --with-ld-library-path=path  Set LD_LIBRARY_PATH during runtime to the value given],
-   env_ld_library_path=$with_ld_library_path)
-
 AC_ARG_WITH([systemdsystemunitdir],
    AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]))
 
 AC_ARG_ENABLE(debug,
               [  --enable-debug      Enable debugging code.],, enable_debug="no")
-
-AC_ARG_ENABLE(env-wrapper,
-              [  --enable-env-wrapper    Enable wrapper program to set up various environment variables],, enable_env_wrapper=auto)
 
 AC_ARG_ENABLE(gprof,
               [  --enable-gprof      Enable gcc profiling.],, enable_gprof="no")
@@ -1147,15 +1140,6 @@ else
         AC_MSG_RESULT(no)
 fi
 
-
-if test "x$enable_env_wrapper" = "xauto"; then
-	if test "x$env_ld_library_path" != "x"; then
-		enable_env_wrapper="yes"
-	else
-		enable_env_wrapper="no"
-	fi
-fi
-
 if test "x$enable_ipv6" = "xauto"; then
 	AC_MSG_CHECKING(whether to enable IPv6 support)
         if test "x$blb_cv_c_struct_sockaddr_in6" = "xyes"; then
@@ -1390,9 +1374,6 @@ AC_DEFINE_UNQUOTED(PATH_LIBEXECDIR, "$libexecdir", [libexec directory])
 if test -n "$timezonedir"; then
         AC_DEFINE_UNQUOTED(PATH_TIMEZONEDIR, "$timezonedir", [timezone base directory])
 fi
-if test -n "$env_ld_library_path"; then
-        AC_DEFINE_UNQUOTED(ENV_LD_LIBRARY_PATH, "$env_ld_library_path", [set LD_LIBRARY_PATH to this value])
-fi
 AC_DEFINE_UNQUOTED(MODULE_PATH, "$module_path", [module search path])
 AC_DEFINE_UNQUOTED(JAVA_MODULE_PATH, "$java_module_path", [java module search path])
 
@@ -1407,12 +1388,10 @@ AC_DEFINE_UNQUOTED(ENABLE_SPOOF_SOURCE, `enable_value $enable_spoof_source`, [En
 AC_DEFINE_UNQUOTED(ENABLE_IPV6, `enable_value $enable_ipv6`, [Enable IPv6 support])
 AC_DEFINE_UNQUOTED(ENABLE_TCP_WRAPPER, `enable_value $enable_tcp_wrapper`, [Enable TCP wrapper support])
 AC_DEFINE_UNQUOTED(ENABLE_LINUX_CAPS, `enable_value $enable_linux_caps`, [Enable Linux capability management support])
-AC_DEFINE_UNQUOTED(ENABLE_ENV_WRAPPER, `enable_value $enable_env_wrapper`, [Enable environment wrapper support])
 AC_DEFINE_UNQUOTED(ENABLE_SYSTEMD, `enable_value $enable_systemd`, [Enable systemd support])
 AC_DEFINE_UNQUOTED(SYSTEMD_JOURNAL_MODE, `journald_mode`, [Systemd-journal support mode])
 
 
-AM_CONDITIONAL(ENABLE_ENV_WRAPPER, [test "$enable_env_wrapper" = "yes"])
 AM_CONDITIONAL(ENABLE_SYSTEMD, [test "$enable_systemd" = "yes"])
 AM_CONDITIONAL(ENABLE_SYSTEMD_UNIT_INSTALL, [test "$systemdsystemunitdir" != ""])
 AM_CONDITIONAL(ENABLE_SQL, [test "$enable_sql" = "yes"])
@@ -1523,8 +1502,7 @@ echo "  Memtrace                    : ${enable_memtrace:=no}"
 echo "  IPV6 support                : ${enable_ipv6:=no}"
 echo "  spoof-source support        : ${enable_spoof_source:=no}"
 echo "  tcp-wrapper support         : ${enable_tcp_wrapper:=no}"
-echo "  Linux capability support    : ${has_linux_caps:=no}"
-echo "  Env wrapper support         : ${enable_env_wrapper:=no}"
+echo "  Linux capability support    : ${enable_linux_caps:=no}"
 echo "  systemd support             : ${enable_systemd:=no} (unit dir: ${systemdsystemunitdir:=none})"
 echo "  systemd-journal support     : ${with_systemd_journal:=no}"
 echo " Modules:"
