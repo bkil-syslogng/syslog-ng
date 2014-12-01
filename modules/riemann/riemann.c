@@ -311,9 +311,7 @@ _value_pairs_always_exclude_properties(RiemannDestDriver *self)
   gint i;
 
   if (!self->fields.attributes)
-    {
       return;
-    }
 
   for (i = 0; properties[i]; i++)
     value_pairs_add_glob_pattern(self->fields.attributes, properties[i], FALSE);
