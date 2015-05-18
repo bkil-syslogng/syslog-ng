@@ -33,4 +33,8 @@
 #define g_mapped_file_unref g_mapped_file_free
 #endif
 
+#if !defined(g_list_free_full)
+  void g_list_free_full(GList *list, void(*destroy_fun)(gpointer s));
+#endif
+
 #endif
