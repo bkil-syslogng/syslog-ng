@@ -79,6 +79,49 @@ typedef struct
   bson_t *bson;
 } MongoDBDestDriver;
 
+static gboolean
+afmongodb_dd_parse_addr (const char *str, char **host, gint *port)
+{
+  if (!host || !port)
+    return FALSE;
+  char *protoStr = bson_strdup_printf("mongodb://%s", str);
+  mongoc_uri_t *uri = mongoc_uri_new (protoStr);
+  free(protoStr);
+  if (!uri)
+    return FALSE;
+
+  const mongoc_host_list_t *hosts = mongoc_uri_get_hosts (uri);
+  if (!hosts || hosts->next)
+    {
+      mongoc_uri_destroy (uri);
+      return FALSE;
+    }
+  *port = hosts->port;
+  *host = g_strdup (hosts->host);
+  mongoc_uri_destroy (uri);
+  if (!*host)
+    return FALSE;
+  return TRUE;
+}
+
+typedef struct
+{
+  char *host;
+  gint port;
+} MongoDBHostPort;
+
+static gboolean
+afmongodb_dd_append_host (GList **list, const char *host, gint port)
+{
+  if (!list)
+    return FALSE;
+  MongoDBHostPort *hp = g_new0(MongoDBHostPort, 1);
+  hp->host = g_strdup(host);
+  hp->port = port;
+  *list = g_list_prepend(*list, hp);
+  return TRUE;
+}
+
 /*
  * Configuration
  */
@@ -249,13 +292,58 @@ afmongodb_dd_disconnect(LogThrDestDriver *s)
   self->client = NULL;
 }
 
+static void
+afmongodb_dd_append_servers(bson_string_t *uri_str,
+                            const GList *recovery_cache)
+{
+  const GList *iterator = recovery_cache;
+  do
+    {
+      const MongoDBHostPort *hp = (const MongoDBHostPort *) iterator->data;
+      bson_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
+      iterator = iterator->next;
+      if (iterator)
+        bson_string_append_printf (uri_str, ",");
+    }
+  while (iterator);
+}
+
 static gboolean
 afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
 {
+  bson_string_t *uri_str;
+
   if (reconnect && self->client)
     return TRUE;
 
-  self->client = mongoc_client_new_from_uri (self->uri_obj);
+  uri_str = bson_string_new ("mongodb://");
+  if (NULL == uri_str)
+    return FALSE;
+
+  if (self->user || self->password)
+    {
+      bson_string_append_printf (uri_str, "%s:%s", self->user, self->password);
+    }
+
+  if (!self->recovery_cache)
+    {
+      msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id), NULL);
+      return FALSE;
+    }
+
+  afmongodb_dd_append_servers(uri_str, self->recovery_cache);
+
+  bson_string_append_printf (uri_str, "/%s", self->db);
+
+  bson_string_append_printf (uri_str, "?slaveOk=true&sockettimeoutms=%d",
+                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+
+  msg_debug(uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
+            NULL);
+
+  self->client = mongoc_client_new (uri_str->str);
+  bson_string_free (uri_str, TRUE);
+
   if (!self->client)
     {
       msg_error("Error connecting to MongoDB",
@@ -603,9 +691,9 @@ afmongodb_dd_init(LogPipe *s)
           for (l=self->servers; l; l = g_list_next(l))
             {
               gchar *host = NULL;
-              gint port = 27017;
+              gint port = MONGOC_DEFAULT_PORT;
 
-              if (!mongo_util_parse_addr(l->data, &host, &port))
+              if (!afmongodb_dd_parse_addr(l->data, &host, &port))
                 {
                   msg_warning("Cannot parse MongoDB server address, ignoring",
                               evt_tag_str("address", l->data),
@@ -613,7 +701,7 @@ afmongodb_dd_init(LogPipe *s)
                               NULL);
                   continue;
                 }
-              mongo_sync_conn_recovery_cache_seed_add (self->recovery_cache, host, port);
+              afmongodb_dd_append_host (&self->recovery_cache, host, port);
               msg_verbose("Added MongoDB server seed",
                           evt_tag_str("host", host),
                           evt_tag_int("port", port),
@@ -624,13 +712,16 @@ afmongodb_dd_init(LogPipe *s)
         }
       else
         {
-          afmongodb_dd_set_servers((LogDriver *)self, g_list_append (NULL, g_strdup ("127.0.0.1:27017")));
-          mongo_sync_conn_recovery_cache_seed_add (self->recovery_cache, "127.0.0.1", 27017);
+          gchar *port = g_strdup_printf ("%d", MONGOC_DEFAULT_PORT);
+          gchar *localhost = g_strconcat ("127.0.0.1", port, NULL);
+          g_free(port);
+          afmongodb_dd_set_servers((LogDriver *)self, g_list_append (NULL, localhost));
+          afmongodb_dd_append_host (&self->recovery_cache, "127.0.0.1", MONGOC_DEFAULT_PORT);
         }
 
       self->address = NULL;
-      self->port = 27017;
-      if (!mongo_util_parse_addr(g_list_nth_data(self->servers, 0),
+      self->port = MONGOC_DEFAULT_PORT;
+      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0),
                                  &self->address,
                                  &self->port))
         {
@@ -643,7 +734,15 @@ afmongodb_dd_init(LogPipe *s)
     }
   else
     {
-      mongo_sync_conn_recovery_cache_seed_add (self->recovery_cache, self->address, self->port);
+      if (!self->address)
+        {
+          msg_error("Cannot parse address",
+                    evt_tag_str ("primary", g_list_nth_data (self->servers, 0)),
+                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+          return FALSE;
+        }
+      afmongodb_dd_append_host (&self->recovery_cache, self->address,
+                                self->port);
     }
 
   self->uri_obj = mongoc_uri_new (self->uri);
@@ -677,6 +776,15 @@ afmongodb_dd_init(LogPipe *s)
 }
 
 static void
+afmongodb_dd_free_host_port (gpointer data)
+{
+  MongoDBHostPort *hp = (MongoDBHostPort *) data;
+  g_free (hp->host);
+  hp->host = NULL;
+  g_free (hp);
+}
+
+static void
 afmongodb_dd_free(LogPipe *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
@@ -690,9 +798,11 @@ afmongodb_dd_free(LogPipe *d)
   g_free(self->password);
   g_free(self->address);
   string_list_free(self->servers);
-  self->recovery_cache = NULL;
   value_pairs_unref(self->vp);
 
+  g_list_free_full (self->recovery_cache,
+                    (GDestroyNotify) & afmongodb_dd_free_host_port);
+  self->recovery_cache = NULL;
   mongoc_uri_destroy(self->uri_obj);
   mongoc_collection_destroy (self->coll_obj);
   mongoc_cleanup ();
