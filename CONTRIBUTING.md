@@ -93,13 +93,13 @@ is the repository of new and experimental modules.
 
 ## Licensing
 
-...............................................................................
-Please ensure that your contribution is clean in respect to licensing,
-copyright and patent rights.
+Please ensure that your contribution is clean in respect to licensing and
+copyright.
 
 If your contribution is eligible for copyright, you may also extend the list
 of copyright holders at the top of the relevant files which carry your
 modifications.
+
 The absolute minimum to specify is the identity of the author entity, which is
 usually one or more of an e-mail address and your full name or the name of the
 legal entity who holds the intellectual rights if it is not you.
@@ -111,7 +111,8 @@ contribution will not be changed in a legally incompatibly manner.
 
 You may also choose not to identify yourself as per above, in which case we
 assume that you would like to remain anonymous regarding the given
-modifications.
+modifications or additions and thus waive your copyright claim for the
+benefit of the existing holders of copyright of the given files.
 
 Every new file must carry a standard copyright notice and be compatible with
 our licensing scheme described in COPYING.
