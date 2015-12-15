@@ -31,6 +31,7 @@ include modules/kvformat/Makefile.am
 include modules/date/Makefile.am
 include modules/native/Makefile.am
 include modules/cef/Makefile.am
+include modules/builtin-serializer/Makefile.am
 
 SYSLOG_NG_MODULES	=	\
 	mod-afsocket mod-afstreams mod-affile mod-afprog \
@@ -41,6 +42,7 @@ SYSLOG_NG_MODULES	=	\
 	mod-redis mod-pseudofile mod-graphite mod-riemann \
 	mod-python mod-java mod-java-modules mod-kvformat mod-date \
 	mod-native mod-cef
+	mod-builtin-serializer
 
 modules modules/: ${SYSLOG_NG_MODULES}
 
@@ -54,6 +56,6 @@ modules_test_subdirs	=	\
 	modules_cryptofuncs modules_geoip modules_afstomp \
 	modules_graphite modules_riemann modules_python \
 	modules_systemd_journal modules_kvformat modules_date \
-	modules_cef
+	modules_cef modules_builtin_serializers
 
 .PHONY: modules modules/
