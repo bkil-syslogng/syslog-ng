@@ -96,7 +96,7 @@ is the repository of new and experimental modules.
 Please ensure that your contribution is clean in respect to licensing and
 copyright.
 
-If your contribution is eligible for copyright, you may also extend the list
+If your contribution is eligible for copyright, you should also extend the list
 of copyright holders at the top of the relevant files which carry your
 modifications.
 
@@ -105,14 +105,10 @@ usually one or more of an e-mail address and your full name or the name of the
 legal entity who holds the intellectual rights if it is not you.
 Please make it clear which is the case, because this may depend on your
 contract if you are employed or are a subcontractor.
+
 Note that from time to time, we may rephrase the exact text surrounding
 attributions, however the specified identities and the license binding a given
 contribution will not be changed in a legally incompatibly manner.
-
-You may also choose not to identify yourself as per above, in which case we
-assume that you would like to remain anonymous regarding the given
-modifications or additions and thus waive your copyright claim for the
-benefit of the existing holders of copyright of the given files.
 
 Every new file must carry a standard copyright notice and be compatible with
 our licensing scheme described in COPYING.
