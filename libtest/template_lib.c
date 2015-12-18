@@ -117,10 +117,17 @@ assert_template_format(const gchar *template, const gchar *expected)
 }
 
 void
-assert_template_format_with_escaping(const gchar *template, gboolean escaping,
-                                     const gchar *expected)
+assert_template_format_msg (const gchar *template, const gchar *expected,
+                            LogMessage *msg)
 {
-  LogMessage *msg;
+  assert_template_format_with_escaping_msg(template, FALSE, expected, msg);
+}
+
+
+void
+assert_template_format_with_escaping_msg(const gchar *template, gboolean escaping,
+                                     const gchar *expected, LogMessage *msg)
+{
   LogTemplate *templ = compile_template(template, escaping);
   if (!templ)
     return;
@@ -128,12 +135,20 @@ assert_template_format_with_escaping(const gchar *template, gboolean escaping,
   GString *res = g_string_sized_new(128);
   const gchar *context_id = "test-context-id";
 
-  msg = create_sample_message();
-
   log_template_format(templ, msg, NULL, LTZ_LOCAL, 999, context_id, res);
   expect_nstring(res->str, res->len, expected, strlen(expected), "template test failed, template=%s", template);
   log_template_unref(templ);
   g_string_free(res, TRUE);
+}
+
+void
+assert_template_format_with_escaping(const gchar *template, gboolean escaping,
+                                     const gchar *expected)
+{
+  LogMessage *msg = create_sample_message();
+
+  assert_template_format_with_escaping_msg(template, escaping, expected, msg);
+
   log_msg_unref(msg);
 }
 
