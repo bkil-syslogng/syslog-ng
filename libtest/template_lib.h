@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2012-2013 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2012-2015 Balabit
  * Copyright (c) 2012 Balázs Scheidler
+ * Copyright (c) 2015 bkil.hu
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
