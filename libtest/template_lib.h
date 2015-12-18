@@ -34,6 +34,7 @@ void assert_template_format_with_escaping(const gchar *template, gboolean escapi
 void assert_template_format_with_context(const gchar *template, const gchar *expected);
 void assert_template_failure(const gchar *template, const gchar *expected_failure);
 
+LogMessage *create_empty_message(void);
 LogMessage *create_sample_message(void);
 LogTemplate *compile_template(const gchar *template, gboolean escaping);
 void init_template_tests(void);
