@@ -73,7 +73,7 @@ before_script:
   - ./autogen.sh
   - env
   - unset PYTHON_CFLAGS # HACK
-  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl || { cat config.log; false; }
+  - ./configure CFLAGS=-Werror --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl || { cat config.log; false; }
   - if [ "$CC" = "clang" ]; then export COPYRIGHTVERBOSITY=1; make check-copyright; fi
   - make -j || make V=1 # to make error messages more readable on error
 script:
