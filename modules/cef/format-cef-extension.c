@@ -65,10 +65,10 @@ tf_cef_is_valid_key (const gchar *str)
 }
 
 static inline void
-tf_cef_append_escaped (GString *escaped_string, const gchar *str)
+tf_cef_append_escaped (GString *escaped_string, const GString *str)
 {
-  const gchar *char_ptr = str;
-  const gchar *const end = char_ptr + strlen(str);
+  const gchar *char_ptr = str->str;
+  const gchar *const end = char_ptr + str->len;
 
   while (char_ptr < end)
     {
@@ -109,7 +109,7 @@ tf_cef_append_escaped (GString *escaped_string, const gchar *str)
 }
 
 static gboolean
-tf_cef_append_value(const gchar *name, const gchar *value,
+tf_cef_append_value(const gchar *name, const GString *value,
                      CefWalkerState *state)
 {
   if (state->need_separator)
@@ -131,7 +131,7 @@ tf_cef_walk_cmp(const gchar *s1, const gchar *s2)
 }
 
 static gboolean
-tf_cef_walker(const gchar *name, TypeHint type, const gchar *value,
+tf_cef_walker(const gchar *name, TypeHint type, const GString *value,
               gpointer user_data)
 {
   CefWalkerState *state = (CefWalkerState *)user_data;

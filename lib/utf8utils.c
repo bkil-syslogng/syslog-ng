@@ -44,13 +44,14 @@
  *   - utf8 characters are reproduced as is
  */
 void
-append_unsafe_utf8_as_escaped_binary(GString *escaped_string, const gchar *str, const gchar *unsafe_chars)
+append_unsafe_utf8_as_escaped_binary(GString *escaped_string, const GString *str, const gchar *unsafe_chars)
 {
-  const gchar *char_ptr = str;
+  const gchar *char_ptr = str->str;
+  const gchar *const end = char_ptr + str->len;
 
-  while (*char_ptr)
+  while (char_ptr < end)
     {
-      gunichar uchar = g_utf8_get_char_validated(char_ptr, -1);
+      gunichar uchar = g_utf8_get_char_validated(char_ptr, end - char_ptr);
 
       switch (uchar)
         {
@@ -91,13 +92,24 @@ append_unsafe_utf8_as_escaped_binary(GString *escaped_string, const gchar *str, 
     }
 }
 
-gchar *
-convert_unsafe_utf8_to_escaped_binary(const gchar *str, const gchar *unsafe_chars)
+void
+append_unsafe_utf8_as_escaped_binary_c (GString *escaped_string,
+                                        const gchar *str,
+                                        const gchar *unsafe_chars)
 {
-  GString *escaped_string;
+  GString *gstr = g_string_new (str);
+  append_unsafe_utf8_as_escaped_binary (escaped_string, gstr, unsafe_chars);
+  g_string_free (gstr, FALSE);
+}
 
-  escaped_string = g_string_sized_new(strlen(str));
-  append_unsafe_utf8_as_escaped_binary(escaped_string, str, unsafe_chars);
+gchar *
+convert_unsafe_utf8_to_escaped_binary_c(const gchar *str, const gchar *unsafe_chars)
+{
+  GString *original = g_string_new(str);
+  GString *escaped_string = g_string_sized_new(original->len);
+
+  append_unsafe_utf8_as_escaped_binary(escaped_string, original, unsafe_chars);
+  g_string_free(original, FALSE);
   return g_string_free(escaped_string, FALSE);
 }
 
@@ -122,13 +134,14 @@ convert_unsafe_utf8_to_escaped_binary(const gchar *str, const gchar *unsafe_char
  *   - utf8 characters are reproduced as is
  **/
 void
-append_unsafe_utf8_as_escaped_text(GString *escaped_string, const gchar *str, const gchar *unsafe_chars)
+append_unsafe_utf8_as_escaped_text(GString *escaped_string, const GString *str, const gchar *unsafe_chars)
 {
-  const gchar *char_ptr = str;
+  const gchar *char_ptr = str->str;
+  const gchar *const end = char_ptr + str->len;
 
-  while (*char_ptr)
+  while (char_ptr < end)
     {
-      gunichar uchar = g_utf8_get_char_validated(char_ptr, -1);
+      gunichar uchar = g_utf8_get_char_validated(char_ptr, end - char_ptr);
 
       switch (uchar)
         {
@@ -168,12 +181,22 @@ append_unsafe_utf8_as_escaped_text(GString *escaped_string, const gchar *str, co
     }
 }
 
-gchar *
-convert_unsafe_utf8_to_escaped_text(const gchar *str, const gchar *unsafe_chars)
+void
+append_unsafe_utf8_as_escaped_text_c (GString *escaped_string, const gchar *str,
+                                      const gchar *unsafe_chars)
 {
-  GString *escaped_string;
+  GString *gstr = g_string_new (str);
+  append_unsafe_utf8_as_escaped_text (escaped_string, gstr, unsafe_chars);
+  g_string_free (gstr, FALSE);
+}
 
-  escaped_string = g_string_sized_new(strlen(str));
-  append_unsafe_utf8_as_escaped_text(escaped_string, str, unsafe_chars);
+gchar *
+convert_unsafe_utf8_to_escaped_text_c(const gchar *str, const gchar *unsafe_chars)
+{
+  GString *original = g_string_new(str);
+  GString *escaped_string = g_string_sized_new(original->len);
+
+  append_unsafe_utf8_as_escaped_text(escaped_string, original, unsafe_chars);
+  g_string_free(original, FALSE);
   return g_string_free(escaped_string, FALSE);
 }

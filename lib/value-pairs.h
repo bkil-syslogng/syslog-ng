@@ -33,10 +33,10 @@
 
 typedef struct _ValuePairs ValuePairs;
 typedef gboolean (*VPForeachFunc)(const gchar *name, TypeHint type,
-                                  const gchar *value, gpointer user_data);
+                                  const GString *value, gpointer user_data);
 
 typedef gboolean (*VPWalkValueCallbackFunc)(const gchar *name, const gchar *prefix,
-                                            TypeHint type, const gchar *value,
+                                            TypeHint type, const GString *value,
                                             gpointer *prefix_data, gpointer user_data);
 typedef gboolean (*VPWalkCallbackFunc)(const gchar *name,
                                        const gchar *prefix, gpointer *prefix_data,

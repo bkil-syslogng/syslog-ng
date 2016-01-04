@@ -115,6 +115,7 @@ create_sample_message(void)
   log_msg_set_value_by_name(msg, ".json.sub.value1", "subvalue1", -1);
   log_msg_set_value_by_name(msg, ".json.sub.value2", "subvalue2", -1);
   log_msg_set_value_by_name(msg, "escaping", "binary stuff follows \"\xad árvíztűrőtükörfúrógép", -1);
+  log_msg_set_value_by_name(msg, "null", "binary\0stuff", 12);
 
   return msg;
 }
