@@ -88,7 +88,9 @@ gboolean assert_msg_field_equals_non_fatal(LogMessage *msg, gchar *field_name, g
 #define assert_string(actual, expected, error_message, ...) (assert_nstring_non_fatal(actual, -1, expected, -1, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 #define assert_nstring(actual, actual_len, expected, expected_len, error_message, ...) (assert_nstring_non_fatal(actual, actual_len, expected, expected_len, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 
-#define expect_nstring(actual, actual_len, expected, expected_len, error_message, ...) (assert_nstring_non_fatal(actual, actual_len, expected, expected_len, error_message, ##__VA_ARGS__) ? 1 : (slng_template_lib_failure = TRUE,0))
+#define expect_nstring(actual, actual_len, expected, expected_len, error_message, ...) \
+  (assert_nstring_non_fatal(actual, actual_len, expected, expected_len, error_message, \
+                            ##__VA_ARGS__) ? 1 : (slng_template_lib_failure = TRUE,0))
 
 #define assert_guint32_array(actual, actual_length, expected, expected_length, error_message, ...) ( \
     assert_guint32_array_non_fatal(actual, actual_length, expected, expected_length, error_message, ##__VA_ARGS__)\

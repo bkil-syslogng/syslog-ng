@@ -27,6 +27,7 @@
 #include "msg_parse_lib.h"
 
 #include <string.h>
+#include <stdarg.h>
 
 gboolean slng_template_lib_failure = FALSE;
 
@@ -42,6 +43,29 @@ deinit_template_tests(void)
   deinit_syslogformat_module();
   if (slng_template_lib_failure)
     exit(1);
+}
+
+LogMessage *
+message_from_list(va_list ap)
+{
+  char *key, *value;
+  LogMessage *msg = create_empty_message ();
+
+  if (!msg)
+    return NULL;
+
+  key = va_arg(ap, char *);
+  while (key)
+    {
+      value = va_arg(ap, char *);
+      if (!value)
+        return msg;
+
+      log_msg_set_value_by_name (msg, key, value, -1);
+      key = va_arg(ap, char *);
+    }
+
+  return msg;
 }
 
 LogMessage *
@@ -104,7 +128,9 @@ compile_template(const gchar *template, gboolean escaping)
 
   log_template_set_escape(templ, escaping);
   success = log_template_compile(templ, template, &error);
-  expect_true(success, "template expected to compile cleanly, but it didn't, template=%s, error=%s", template, error ? error->message : "(none)");
+  expect_true(success, "template expected to compile cleanly,"
+              " but it didn't, template=%s, error=%s",
+              template, error ? error->message : "(none)");
   g_clear_error(&error);
 
   return templ;
@@ -136,7 +162,8 @@ assert_template_format_with_escaping_msg(const gchar *template, gboolean escapin
   const gchar *context_id = "test-context-id";
 
   log_template_format(templ, msg, NULL, LTZ_LOCAL, 999, context_id, res);
-  expect_nstring(res->str, res->len, expected, strlen(expected), "template test failed, template=%s", template);
+  expect_nstring(res->str, res->len, expected, strlen(expected),
+                 "template test failed, template=%s", template);
   log_template_unref(templ);
   g_string_free(res, TRUE);
 }
@@ -181,7 +208,8 @@ assert_template_failure(const gchar *template, const gchar *expected_error)
   GError *error = NULL;
 
   expect_false(log_template_compile(templ, template, &error),
-               "compilation failure expected to template, but success was returned, template=%s, expected_error=%s\n",
+               "compilation failure expected to template,"
+               " but success was returned, template=%s, expected_error=%s\n",
                template, expected_error);
   expect_true(strstr(error->message, expected_error) != NULL,
               "FAIL: compilation error doesn't match, error=%s, expected_error=%s\n",

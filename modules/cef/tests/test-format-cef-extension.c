@@ -32,33 +32,10 @@
 #define _DROP_PROPERTY(...) _drop_property_va(__VA_ARGS__, NULL)
 #define _OK_FORMAT(X, ...) _ok_format_va(X, __VA_ARGS__, NULL);
 
-static LogMessage *
-_msg(va_list ap)
-{
-  char *key, *value;
-  LogMessage *msg = create_empty_message ();
-
-  if (!msg)
-    return NULL;
-
-  key = va_arg(ap, char *);
-  while (key)
-    {
-      value = va_arg(ap, char *);
-      if (!value)
-        return msg;
-
-      log_msg_set_value_by_name (msg, key, value, -1);
-      key = va_arg(ap, char *);
-    }
-
-  return msg;
-}
-
 static void
 _assert(const gchar *expected, va_list ap)
 {
-  LogMessage *msg = _msg(ap);
+  LogMessage *msg = message_from_list(ap);
 
   assert_template_format_msg ("$(format-cef-extension --prefix .cef.)", expected, msg);
   log_msg_unref (msg);
@@ -91,7 +68,7 @@ _ok_format_va(const gchar *format, const gchar *expected, ...)
 {
   va_list ap;
   va_start (ap, expected);
-  LogMessage *msg = _msg(ap);
+  LogMessage *msg = message_from_list(ap);
   va_end (ap);
 
   configuration->template_options.on_error = ON_ERROR_DROP_MESSAGE | ON_ERROR_SILENT;
