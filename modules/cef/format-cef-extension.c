@@ -106,7 +106,7 @@ tf_cef_append_value(const gchar *name, const gchar *value,
 static gint
 tf_cef_walk_cmp(const gchar *s1, const gchar *s2)
 {
-  return strcmp(s2, s1);
+  return strcmp(s1, s2);
 }
 
 static gboolean

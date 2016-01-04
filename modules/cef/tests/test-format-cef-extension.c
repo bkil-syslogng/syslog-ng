@@ -108,15 +108,15 @@ _test_filter (void)
 static void
 _test_space_multiple (void)
 {
-  _OK("fname=c:/program files dst=10.0.0.1",
-      ".cef.fname", "c:/program files",
+  _OK("act=c:/program files dst=10.0.0.1",
+      ".cef.act", "c:/program files",
       ".cef.dst", "10.0.0.1");
 }
 
 static void
 _test_multiple (void)
 {
-  _OK("x=y k=v",
+  _OK("k=v x=y",
       ".cef.k", "v",
       ".cef.x", "y");
 }
