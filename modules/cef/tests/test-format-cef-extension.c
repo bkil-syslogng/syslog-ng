@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2015 Balabit
- * Copyright (c) 2015 bkil.hu
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -138,6 +137,11 @@ _test_charset (void)
 {
   _DROP_MSG (".cef.árvíztűrőtükörfúrógép", "v");
   _OK("k=árvíztűrőtükörfúrógép", ".cef.k", "árvíztűrőtükörfúrógép");
+
+  _OK("k=\\xff", ".cef.k", "\xff");
+  _OK("k=\\xc3", ".cef.k", "\xc3");
+  _DROP_MSG(".cef.k\xff", "v");
+  _DROP_MSG(".cef.k\xc3", "v");
 }
 
 static void
@@ -147,6 +151,7 @@ _test_escaping (void)
   _OK ("act=\\\\\\\\", ".cef.act", "\\\\");
   _OK ("act=\\=", ".cef.act", "=");
   _OK ("act=|", ".cef.act", "|");
+  _OK ("act=\\u0009", ".cef.act", "\t");
   _OK ("act=\\n", ".cef.act", "\n");
   _OK ("act=\\r", ".cef.act", "\r");
   _OK ("act=v\\n", ".cef.act", "v\n");
@@ -206,7 +211,7 @@ main(int argc, char *argv[])
   putenv("TZ=UTC");
   tzset();
   init_template_tests();
-  plugin_load_module("cef-plugin", configuration, NULL);
+  plugin_load_module("cef", configuration, NULL);
 
   _test_filter ();
   _test_space_multiple ();

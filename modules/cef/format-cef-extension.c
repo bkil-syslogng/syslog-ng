@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2015 Balabit
- * Copyright (c) 2015 bkil.hu
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -54,51 +53,73 @@ typedef struct
   gboolean need_separator;
   GString *buffer;
   const LogTemplateOptions *template_options;
-} cef_state_t;
+} CefWalkerState;
+
+static gboolean
+tf_cef_is_valid_key (const gchar *str)
+{
+  size_t end = strspn (str, "0123456789"
+                       "abcdefghijklmnopqrstuvwxyz"
+                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  return str[end] == '\0';
+}
 
 static inline void
-g_string_append_escaped (GString *escaped_string, const char *str)
+tf_cef_append_escaped (GString *escaped_string, const gchar *str)
 {
   const gchar *char_ptr = str;
+  const gchar *const end = char_ptr + strlen(str);
 
-  while (*char_ptr)
+  while (char_ptr < end)
     {
-      gunichar uchar = g_utf8_get_char_validated (char_ptr, -1);
+      gunichar uchar = g_utf8_get_char_validated (char_ptr, end - char_ptr);
 
-      switch (uchar)
+      if (!g_unichar_isdefined(uchar))
         {
-        case '=':
-          g_string_append (escaped_string, "\\=");
-          break;
-        case '\n':
-          g_string_append (escaped_string, "\\n");
-          break;
-        case '\r':
-          g_string_append (escaped_string, "\\r");
-          break;
-        case '\\':
-          g_string_append (escaped_string, "\\\\");
-          break;
-        default:
-          g_string_append_unichar (escaped_string, uchar);
-          break;
+          g_string_append_printf (escaped_string, "\\x%02x",
+                                  *(guint8 *) char_ptr);
+          char_ptr++;
         }
-      char_ptr = g_utf8_next_char (char_ptr);
+      else
+        {
+          switch (uchar)
+            {
+            case '=':
+              g_string_append (escaped_string, "\\=");
+              break;
+            case '\n':
+              g_string_append (escaped_string, "\\n");
+              break;
+            case '\r':
+              g_string_append (escaped_string, "\\r");
+              break;
+            case '\\':
+              g_string_append (escaped_string, "\\\\");
+              break;
+            default:
+              if (uchar < 32)
+                g_string_append_printf (escaped_string, "\\u%04x", uchar);
+              else
+                g_string_append_unichar (escaped_string, uchar);
+              break;
+            }
+          char_ptr = g_utf8_next_char (char_ptr);
+        }
     }
 }
 
 static gboolean
 tf_cef_append_value(const gchar *name, const gchar *value,
-                     cef_state_t *state)
+                     CefWalkerState *state)
 {
   if (state->need_separator)
     g_string_append_c(state->buffer, ' ');
 
-  g_string_append_escaped(state->buffer, name);
+  g_string_append(state->buffer, name);
 
-  g_string_append(state->buffer, "=");
+  g_string_append_c(state->buffer, '=');
 
-  g_string_append_escaped(state->buffer, value);
+  tf_cef_append_escaped(state->buffer, value);
 
   return TRUE;
 }
@@ -110,32 +131,13 @@ tf_cef_walk_cmp(const gchar *s1, const gchar *s2)
 }
 
 static gboolean
-_is_valid_cef_key (const gchar *str)
-{
-  const gchar *char_ptr = str;
-
-  while (*char_ptr)
-    {
-      gunichar uchar = g_utf8_get_char_validated (char_ptr, -1);
-
-      if (!(((uchar >= 'a') && (uchar <= 'z'))
-          || ((uchar >= 'A') && (uchar <= 'Z'))
-          || ((uchar >= '0') && (uchar <= '9'))))
-        return FALSE;
-
-      char_ptr = g_utf8_next_char (char_ptr);
-    }
-  return TRUE;
-}
-
-static gboolean
 tf_cef_walker(const gchar *name, TypeHint type, const gchar *value,
               gpointer user_data)
 {
-  cef_state_t *state = (cef_state_t *)user_data;
+  CefWalkerState *state = (CefWalkerState *)user_data;
   gint on_error = state->template_options->on_error;
 
-  if (!_is_valid_cef_key(name))
+  if (!tf_cef_is_valid_key(name))
     return !!(on_error & ON_ERROR_DROP_MESSAGE);
 
   tf_cef_append_value(name, value, state);
@@ -149,7 +151,7 @@ static gboolean
 tf_cef_append(GString *result, ValuePairs *vp, LogMessage *msg,
                const LogTemplateOptions *template_options, gint32 seq_num, gint time_zone_mode)
 {
-  cef_state_t state;
+  CefWalkerState state;
 
   state.need_separator = FALSE;
   state.buffer = result;

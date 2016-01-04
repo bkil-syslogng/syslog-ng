@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2015 Balabit
- * Copyright (c) 2015 bkil.hu
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -30,7 +29,7 @@ static Plugin cef_plugins[] =
 };
 
 gboolean
-cef_plugin_module_init(GlobalConfig *cfg, CfgArgs *args)
+cef_module_init(GlobalConfig *cfg, CfgArgs *args)
 {
   plugin_register(cfg, cef_plugins, G_N_ELEMENTS(cef_plugins));
   return TRUE;
@@ -38,7 +37,7 @@ cef_plugin_module_init(GlobalConfig *cfg, CfgArgs *args)
 
 const ModuleInfo module_info =
 {
-  .canonical_name = "cef-plugin",
+  .canonical_name = "cef",
   .version = SYSLOG_NG_VERSION,
   .description = "The CEF module provides CEF formatting support for syslog-ng.",
   .core_revision = SYSLOG_NG_SOURCE_REVISION,
