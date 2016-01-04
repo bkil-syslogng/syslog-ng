@@ -37,7 +37,7 @@ _assert(const gchar *expected, va_list ap)
 {
   LogMessage *msg = message_from_list(ap);
 
-  assert_template_format_msg ("$(format-cef-extension --prefix .cef.)", expected, msg);
+  assert_template_format_msg ("$(format-cef-extension --subkeys .cef.)", expected, msg);
   log_msg_unref (msg);
 }
 
@@ -124,7 +124,7 @@ _test_empty(void)
 static void
 _test_inline(void)
 {
-  _OK_FORMAT ("$(format-cef-extension --prefix .cef. .cef.k=v)", "k=v");
+  _OK_FORMAT ("$(format-cef-extension --subkeys .cef. .cef.k=v)", "k=v");
 }
 
 static void
@@ -169,22 +169,22 @@ _test_prefix(void)
 {
   configuration->template_options.on_error = ON_ERROR_DROP_MESSAGE | ON_ERROR_SILENT;
 
-  _OK_FORMAT("$(format-cef-extension --prefix ..)", "k=v", "..k", "v");
-  _OK_FORMAT("$(format-cef-extension --prefix ..)", "k=v", "..k", "v");
-  _OK_FORMAT("$(format-cef-extension --prefix ,)", "k=v", ",k", "v");
-  _OK_FORMAT("$(format-cef-extension --prefix .cef.)", "", "k", "v");
-  _OK_FORMAT("$(format-cef-extension --prefix ' ')", "k=v", " k", "v");
-  _OK_FORMAT("$(format-cef-extension --prefix \" \")", "k=v", " k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys ..)", "k=v", "..k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys ..)", "k=v", "..k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys ,)", "k=v", ",k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys .cef.)", "", "k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys ' ')", "k=v", " k", "v");
+  _OK_FORMAT("$(format-cef-extension --subkeys \" \")", "k=v", " k", "v");
 
   _OK_FORMAT("$(format-cef-extension x=y)", "x=y", "k", "v");
   _OK_FORMAT("$(format-cef-extension)", "", "k", "v");
 
-  assert_template_failure("$(format-cef-extension --prefix)",
-                         "Missing argument for --prefix");
-  assert_template_failure("$(format-cef-extension --prefix '')",
-                         "Missing argument for --prefix");
-  assert_template_failure("$(format-cef-extension --prefix \"\")",
-                         "Missing argument for --prefix");
+  assert_template_failure("$(format-cef-extension --subkeys)",
+                         "Missing argument for --subkeys");
+  assert_template_failure("$(format-cef-extension --subkeys '')",
+                         "Missing argument for --subkeys");
+  assert_template_failure("$(format-cef-extension --subkeys \"\")",
+                         "Missing argument for --subkeys");
 }
 
 static void

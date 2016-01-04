@@ -981,7 +981,7 @@ vp_cmdline_rekey_verify (const gchar *key, ValuePairsTransformSet *vpts,
 }
 
 static gboolean
-vp_cmdline_parse_prefix(const gchar *option_name, const gchar *value,
+vp_cmdline_parse_subkeys(const gchar *option_name, const gchar *value,
                        gpointer data, GError **error)
 {
   gpointer *args = (gpointer *) data;
@@ -998,7 +998,7 @@ vp_cmdline_parse_prefix(const gchar *option_name, const gchar *value,
   if (!vpts)
     {
       g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_FAILED,
-                   "Error parsing value-pairs: --prefix failed to create key");
+                   "Error parsing value-pairs: --subkeys failed to create key");
       g_string_free(prefix, TRUE);
       return FALSE;
     }
@@ -1274,7 +1274,7 @@ value_pairs_new_from_cmdline (GlobalConfig *cfg,
       NULL, NULL },
     { "replace", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK,
       vp_cmdline_parse_rekey_replace_prefix, NULL, NULL },
-    { "prefix", 0, 0, G_OPTION_ARG_CALLBACK, vp_cmdline_parse_prefix,
+    { "subkeys", 0, 0, G_OPTION_ARG_CALLBACK, vp_cmdline_parse_subkeys,
       NULL, NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_CALLBACK, vp_cmdline_parse_pair_or_key,
       NULL, NULL },
