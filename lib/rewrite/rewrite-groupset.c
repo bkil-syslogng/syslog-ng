@@ -32,7 +32,9 @@ typedef struct _LogRewriteGroupSetCallbackData
 } LogRewriteGroupSetCallbackData;
 
 static gboolean
-log_rewrite_groupset_foreach_func(const gchar *name, TypeHint type,const gchar *value, gpointer user_data)
+log_rewrite_groupset_foreach_func (const gchar *name, TypeHint type,
+                                   const gchar *value, gsize value_len,
+                                   gpointer user_data)
 {
   LogRewriteGroupSetCallbackData *callback_data = (LogRewriteGroupSetCallbackData*) user_data;
   LogMessage *msg = callback_data->msg;
@@ -41,7 +43,7 @@ log_rewrite_groupset_foreach_func(const gchar *name, TypeHint type,const gchar *
 
   result = g_string_sized_new(64);
 
-  log_template_format(template, msg, NULL, LTZ_LOCAL, 0, value, result);
+  log_template_format(template, msg, NULL, LTZ_LOCAL, 0, value, result); // TODO escape '\0'
 
   NVHandle handle = log_msg_get_value_handle(name);
   log_msg_set_value(msg, handle, result->str, result->len);

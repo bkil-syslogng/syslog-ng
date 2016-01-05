@@ -114,13 +114,14 @@ typedef struct _TFGraphiteForeachUserData
 } TFGraphiteForeachUserData;
 
 static gboolean
-tf_graphite_foreach_func(const gchar *name, TypeHint type, const gchar *value, gpointer user_data)
+tf_graphite_foreach_func (const gchar *name, TypeHint type, const gchar *value,
+                          gsize value_len, gpointer user_data)
 {
   TFGraphiteForeachUserData *data = (TFGraphiteForeachUserData*) user_data;
 
   g_string_append(data->result, name);
   g_string_append_c(data->result,' ');
-  g_string_append(data->result, value);
+  g_string_append(data->result, value); // TODO escape '\0'
   g_string_append_c(data->result,' ');
   g_string_append(data->result, data->formatted_unixtime->str);
   g_string_append_c(data->result,'\n');
