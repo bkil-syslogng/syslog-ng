@@ -31,6 +31,7 @@ typedef struct _LogRewriteGroupSetCallbackData
   LogTemplate *template;
 } LogRewriteGroupSetCallbackData;
 
+/* TODO escape '\0' when passing down the value */
 static gboolean
 log_rewrite_groupset_foreach_func (const gchar *name, TypeHint type,
                                    const gchar *value, gsize value_len,
@@ -43,7 +44,7 @@ log_rewrite_groupset_foreach_func (const gchar *name, TypeHint type,
 
   result = g_string_sized_new(64);
 
-  log_template_format(template, msg, NULL, LTZ_LOCAL, 0, value, result); // TODO escape '\0'
+  log_template_format(template, msg, NULL, LTZ_LOCAL, 0, value, result);
 
   NVHandle handle = log_msg_get_value_handle(name);
   log_msg_set_value(msg, handle, result->str, result->len);

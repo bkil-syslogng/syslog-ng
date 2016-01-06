@@ -107,6 +107,22 @@ _append_unsafe_utf8_as_escaped (GString *escaped_output, const gchar *raw,
 }
 
 /**
+ * This function escapes an unsanitized input (e.g. that can contain binary
+ * characters, and produces an escaped format that can be deescaped in need,
+ * which is guaranteed to be utf8 clean.  The major difference between
+ * "binary" and "text" form is that the receiver is able to cope with \xXX
+ * sequences that can incorporate invalid utf8 sequences when decoded.  With
+ * "text" format, we never embed anything that would become not valid utf8
+ * when decoded.
+ *
+ * Here are the rules that the routine follows:
+ *   - well-known control characters are escaped (0x0a as \n and so on)
+ *   - other control characters as per control_format (\xXX)
+ *   - backslash is escaped as \\
+ *   - any additional characters (only ASCII is supported) as \<char>
+ *   - invalid utf8 sequences are converted as per invalid_format (\xXX)
+ *   - utf8 characters are reproduced as is
+ *
  * This is basically meant to be used when sending data to
  * 8 bit clean receivers, e.g. syslog-ng or WELF.
  * @see _append_unsafe_utf8_as_escaped()
@@ -131,6 +147,22 @@ convert_unsafe_utf8_to_escaped_binary (const gchar *str, gssize str_len,
 }
 
 /**
+ * This function escapes an unsanitized input (e.g. that can contain binary
+ * characters, and produces an escaped format that can be deescaped in need,
+ * which is guaranteed to be utf8 clean.  The major difference between
+ * "binary" and "text" form is that the receiver is able to cope with \xXX
+ * sequences that can incorporate invalid utf8 sequences when decoded.  With
+ * "text" format, we never embed anything that would become not valid utf8
+ * when decoded.
+ *
+ * Here are the rules that the routine follows:
+ *   - well-known control characters are escaped (0x0a as \n and so on)
+ *   - other control characters as per control_format (\u00XX)
+ *   - backslash is escaped as \\
+ *   - any additional characters (only ASCII is supported) as \<char>
+ *   - invalid utf8 sequences are converted as per invalid_format (\\xXX)
+ *   - utf8 characters are reproduced as is
+ *
  * This is basically meant to be used when sending data to
  * utf8 only receivers, e.g. JSON.
  * @see _append_unsafe_utf8_as_escaped()

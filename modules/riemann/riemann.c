@@ -400,6 +400,7 @@ riemann_dd_field_add_msg_tag(const LogMessage *msg,
   return TRUE;
 }
 
+/* TODO escape '\0' when passing down the value */
 static gboolean
 riemann_dd_field_add_attribute_vp(const gchar *name,
                                   TypeHint type, const gchar *value,
@@ -409,7 +410,7 @@ riemann_dd_field_add_attribute_vp(const gchar *name,
   riemann_event_t *event = (riemann_event_t *)user_data;
   riemann_attribute_t *attrib = riemann_attribute_new();
 
-  riemann_attribute_set(attrib, name, value); // TODO escape '\0'
+  riemann_attribute_set(attrib, name, value);
   riemann_event_attribute_add(event, attrib);
 
   return FALSE;

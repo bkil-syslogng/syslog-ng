@@ -26,7 +26,7 @@
 
 /** Value pairs **/
 
-// TODO escape '\0' in value
+/* TODO escape '\0' when passing down the value */
 static gboolean
 python_worker_vp_add_one(const gchar *name,
                        TypeHint type, const gchar *value, gsize value_len,
