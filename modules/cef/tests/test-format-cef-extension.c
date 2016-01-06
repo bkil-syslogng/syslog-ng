@@ -26,13 +26,13 @@
 
 #include <stdarg.h>
 
-#define _OK(...) _ok_va(__VA_ARGS__, NULL)
-#define _DROP_MSG(...) _ok_va("", __VA_ARGS__, NULL)
-#define _DROP_PROPERTY(...) _drop_property_va(__VA_ARGS__, NULL)
-#define _OK_FORMAT(X, ...) _ok_format_va(X, __VA_ARGS__, NULL);
+#define _EXPECT_CEF_RESULT(...) _expect_cef_result_va(__VA_ARGS__, NULL)
+#define _EXPECT_DROP_MESSAGE(...) _expect_cef_result_va("", __VA_ARGS__, NULL)
+#define _EXPECT_SKIP_BAD_PROPERTY(...) _expect_skip_bad_property_va(__VA_ARGS__, NULL)
+#define _EXPECT_CEF_RESULT_FORMAT(X, ...) _expect_cef_result_format_va(X, __VA_ARGS__, NULL);
 
 static void
-_assert(const gchar *expected, va_list ap)
+_expect_cef_result_properties_list(const gchar *expected, va_list ap)
 {
   LogMessage *msg = message_from_list(ap);
 
@@ -41,29 +41,29 @@ _assert(const gchar *expected, va_list ap)
 }
 
 static void
-_ok_va(const gchar *expected, ...)
+_expect_cef_result_va(const gchar *expected, ...)
 {
   va_list ap;
   configuration->template_options.on_error = ON_ERROR_DROP_MESSAGE | ON_ERROR_SILENT;
 
   va_start (ap, expected);
-  _assert(expected, ap);
+  _expect_cef_result_properties_list(expected, ap);
   va_end (ap);
 }
 
 static void
-_drop_property_va(const gchar *expected, ...)
+_expect_skip_bad_property_va(const gchar *expected, ...)
 {
   va_list ap;
   configuration->template_options.on_error = ON_ERROR_DROP_PROPERTY | ON_ERROR_SILENT;
 
   va_start (ap, expected);
-  _assert(expected, ap);
+  _expect_cef_result_properties_list(expected, ap);
   va_end (ap);
 }
 
 static void
-_ok_format_va(const gchar *format, const gchar *expected, ...)
+_expect_cef_result_format_va(const gchar *format, const gchar *expected, ...)
 {
   va_list ap;
   va_start (ap, expected);
@@ -76,7 +76,7 @@ _ok_format_va(const gchar *format, const gchar *expected, ...)
 }
 
 static void
-_null_in_value()
+_test_null_in_value()
 {
   LogMessage *msg = create_empty_message ();
 
@@ -89,95 +89,95 @@ _null_in_value()
 static void
 _test_filter (void)
 {
-  _OK("k=v", ".cef.k", "v", "x", "w");
+  _EXPECT_CEF_RESULT("k=v", ".cef.k", "v", "x", "w");
 }
 
 static void
-_test_space_multiple (void)
+_test_multiple_properties_with_space (void)
 {
-  _OK("act=c:/program files dst=10.0.0.1",
+  _EXPECT_CEF_RESULT("act=c:/program files dst=10.0.0.1",
       ".cef.act", "c:/program files",
       ".cef.dst", "10.0.0.1");
 }
 
 static void
-_test_multiple (void)
+_test_multiple_properties (void)
 {
-  _OK("k=v x=y",
-      ".cef.k", "v",
-      ".cef.x", "y");
+  _EXPECT_CEF_RESULT("k=v x=y",
+                     ".cef.k", "v",
+                     ".cef.x", "y");
 }
 
 static void
 _test_drop_property(void)
 {
-  _DROP_PROPERTY("kkk=v",
-                 ".cef.a|b", "c",
-                 ".cef.kkk", "v",
-                 ".cef.x=y", "w");
+  _EXPECT_SKIP_BAD_PROPERTY("kkk=v",
+                           ".cef.a|b", "c",
+                           ".cef.kkk", "v",
+                           ".cef.x=y", "w");
 }
 
 static void
 _test_drop_message(void)
 {
-  _DROP_MSG(".cef.a|b", "c",
-            ".cef.kkk", "v",
-            ".cef.x=y", "w");
+  _EXPECT_DROP_MESSAGE(".cef.a|b", "c",
+                       ".cef.kkk", "v",
+                       ".cef.x=y", "w");
 }
 
 static void
 _test_empty(void)
 {
-  _OK("");
+  _EXPECT_CEF_RESULT("");
 }
 
 static void
 _test_inline(void)
 {
-  _OK_FORMAT ("$(format-cef-extension --subkeys .cef. .cef.k=v)", "k=v");
+  _EXPECT_CEF_RESULT_FORMAT ("$(format-cef-extension --subkeys .cef. .cef.k=v)", "k=v");
 }
 
 static void
 _test_space (void)
 {
-  _OK ("act=blocked a ping", ".cef.act", "blocked a ping");
+  _EXPECT_CEF_RESULT ("act=blocked a ping", ".cef.act", "blocked a ping");
 }
 
 static void
 _test_charset (void)
 {
-  _DROP_MSG (".cef.árvíztűrőtükörfúrógép", "v");
-  _OK("k=árvíztűrőtükörfúrógép", ".cef.k", "árvíztűrőtükörfúrógép");
+  _EXPECT_DROP_MESSAGE(".cef.árvíztűrőtükörfúrógép", "v");
+  _EXPECT_CEF_RESULT("k=árvíztűrőtükörfúrógép", ".cef.k", "árvíztűrőtükörfúrógép");
 
-  _OK("k=\\xff", ".cef.k", "\xff");
-  _OK("k=\\xc3", ".cef.k", "\xc3");
-  _DROP_MSG(".cef.k\xff", "v");
-  _DROP_MSG(".cef.k\xc3", "v");
+  _EXPECT_CEF_RESULT("k=\\xff", ".cef.k", "\xff");
+  _EXPECT_CEF_RESULT("k=\\xc3", ".cef.k", "\xc3");
+  _EXPECT_DROP_MESSAGE(".cef.k\xff", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k\xc3", "v");
 }
 
 static void
 _test_escaping (void)
 {
-  _OK ("act=\\\\", ".cef.act", "\\");
-  _OK ("act=\\\\\\\\", ".cef.act", "\\\\");
-  _OK ("act=\\=", ".cef.act", "=");
-  _OK ("act=|", ".cef.act", "|");
-  _OK ("act=\\u0009", ".cef.act", "\t");
-  _OK ("act=\\n", ".cef.act", "\n");
-  _OK ("act=\\r", ".cef.act", "\r");
-  _OK ("act=v\\n", ".cef.act", "v\n");
-  _OK ("act=v\\r", ".cef.act", "v\r");
-  _OK ("act=u\\nv", ".cef.act", "u\nv");
-  _OK ("act=\\r\\n", ".cef.act", "\r\n");
-  _OK ("act=\\n\\r", ".cef.act", "\n\r");
-  _OK ("act=this is a long value \\= something",
+  _EXPECT_CEF_RESULT("act=\\\\", ".cef.act", "\\");
+  _EXPECT_CEF_RESULT("act=\\\\\\\\", ".cef.act", "\\\\");
+  _EXPECT_CEF_RESULT("act=\\=", ".cef.act", "=");
+  _EXPECT_CEF_RESULT("act=|", ".cef.act", "|");
+  _EXPECT_CEF_RESULT("act=\\u0009", ".cef.act", "\t");
+  _EXPECT_CEF_RESULT("act=\\n", ".cef.act", "\n");
+  _EXPECT_CEF_RESULT("act=\\r", ".cef.act", "\r");
+  _EXPECT_CEF_RESULT("act=v\\n", ".cef.act", "v\n");
+  _EXPECT_CEF_RESULT("act=v\\r", ".cef.act", "v\r");
+  _EXPECT_CEF_RESULT("act=u\\nv", ".cef.act", "u\nv");
+  _EXPECT_CEF_RESULT("act=\\r\\n", ".cef.act", "\r\n");
+  _EXPECT_CEF_RESULT("act=\\n\\r", ".cef.act", "\n\r");
+  _EXPECT_CEF_RESULT("act=this is a long value \\= something",
        ".cef.act", "this is a long value = something");
 
-  _DROP_MSG (".cef.k=w", "v");
-  _DROP_MSG (".cef.k|w", "v");
-  _DROP_MSG (".cef.k\\w", "v");
-  _DROP_MSG (".cef.k\nw", "v");
-  _DROP_MSG (".cef.k w", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k=w", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k|w", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k\\w", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k\nw", "v");
+  _EXPECT_DROP_MESSAGE(".cef.k w", "v");
 }
 
 static void
@@ -185,15 +185,14 @@ _test_prefix(void)
 {
   configuration->template_options.on_error = ON_ERROR_DROP_MESSAGE | ON_ERROR_SILENT;
 
-  _OK_FORMAT("$(format-cef-extension --subkeys ..)", "k=v", "..k", "v");
-  _OK_FORMAT("$(format-cef-extension --subkeys ..)", "k=v", "..k", "v");
-  _OK_FORMAT("$(format-cef-extension --subkeys ,)", "k=v", ",k", "v");
-  _OK_FORMAT("$(format-cef-extension --subkeys .cef.)", "", "k", "v");
-  _OK_FORMAT("$(format-cef-extension --subkeys ' ')", "k=v", " k", "v");
-  _OK_FORMAT("$(format-cef-extension --subkeys \" \")", "k=v", " k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension --subkeys ..)", "k=v", "..k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension --subkeys ,)", "k=v", ",k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension --subkeys .cef.)", "", "k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension --subkeys ' ')", "k=v", " k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension --subkeys \" \")", "k=v", " k", "v");
 
-  _OK_FORMAT("$(format-cef-extension x=y)", "x=y", "k", "v");
-  _OK_FORMAT("$(format-cef-extension)", "", "k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension x=y)", "x=y", "k", "v");
+  _EXPECT_CEF_RESULT_FORMAT("$(format-cef-extension)", "", "k", "v");
 
   assert_template_failure("$(format-cef-extension --subkeys)",
                          "Missing argument for --subkeys");
@@ -206,13 +205,13 @@ _test_prefix(void)
 static void
 _test_macro_parity(void)
 {
-  _OK("", "k");
-  _OK_FORMAT("", "");
-  _OK_FORMAT("", "", "k");
-  _DROP_MSG("");
-  _DROP_MSG("", "k");
-  _DROP_PROPERTY("");
-  _DROP_PROPERTY("", "k");
+  _EXPECT_CEF_RESULT("", "k");
+  _EXPECT_CEF_RESULT_FORMAT("", "");
+  _EXPECT_CEF_RESULT_FORMAT("", "", "k");
+  _EXPECT_DROP_MESSAGE("");
+  _EXPECT_DROP_MESSAGE("", "k");
+  _EXPECT_SKIP_BAD_PROPERTY("");
+  _EXPECT_SKIP_BAD_PROPERTY("", "k");
 }
 
 int
@@ -225,8 +224,8 @@ main(int argc, char *argv[])
   plugin_load_module("cef", configuration, NULL);
 
   _test_filter ();
-  _test_space_multiple ();
-  _test_multiple ();
+  _test_multiple_properties_with_space ();
+  _test_multiple_properties ();
   _test_drop_property();
   _test_drop_message();
   _test_empty();
@@ -236,7 +235,7 @@ main(int argc, char *argv[])
   _test_escaping ();
   _test_prefix();
   _test_macro_parity();
-  _null_in_value();
+  _test_null_in_value();
 
   deinit_template_tests();
   app_shutdown();
