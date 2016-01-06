@@ -40,6 +40,56 @@
  *   - invalid utf8 sequences are converted as per invalid_format
  *   - utf8 characters are reproduced as is
  */
+static gsize
+_append_escaped_utf8_character(GString *escaped_output, const gchar **raw,
+                               gssize *raw_len, const gchar *unsafe_chars,
+                               const gchar *control_format,
+                               const gchar *invalid_format)
+{
+  const gchar *char_ptr = *raw;
+  gunichar uchar = g_utf8_get_char_validated(char_ptr, raw_len);
+  switch (uchar)
+    {
+      case (gunichar) -1:
+      case (gunichar) -2:
+        g_string_append_printf(escaped_output, invalid_format, *(guint8 *) char_ptr);
+        (*raw)++;
+        return 1;
+        break;
+      case '\b':
+        g_string_append(escaped_output, "\\b");
+        break;
+      case '\f':
+        g_string_append(escaped_output, "\\f");
+        break;
+      case '\n':
+        g_string_append(escaped_output, "\\n");
+        break;
+      case '\r':
+        g_string_append(escaped_output, "\\r");
+        break;
+      case '\t':
+        g_string_append(escaped_output, "\\t");
+        break;
+      case '\\':
+        g_string_append(escaped_output, "\\\\");
+        break;
+      default:
+        if (uchar < 32)
+          g_string_append_printf(escaped_output, control_format, uchar);
+        else if (uchar < 256 && unsafe_chars && strchr(unsafe_chars, (gchar) uchar))
+          g_string_append_printf(escaped_output, "\\%c", (gchar) uchar);
+        else
+          g_string_append_unichar(escaped_output, uchar);
+        break;
+    }
+  *raw = g_utf8_next_char(char_ptr);
+  return *raw - char_ptr;
+}
+
+/**
+ * @see _append_escaped_utf8_character()
+ */
 static void
 _append_unsafe_utf8_as_escaped (GString *escaped_output, const gchar *raw,
                                       gssize raw_len, const gchar *unsafe_chars,
@@ -47,51 +97,13 @@ _append_unsafe_utf8_as_escaped (GString *escaped_output, const gchar *raw,
                                       const gchar *invalid_format)
 {
   if (raw_len < 0)
-    raw_len = strlen(raw);
-  const gchar *char_ptr = raw;
-  const gchar *const end = char_ptr + raw_len;
-
-  while (char_ptr < end)
-    {
-      gunichar uchar = g_utf8_get_char_validated(char_ptr, end - char_ptr);
-
-      switch (uchar)
-        {
-          case (gunichar) -1:
-          case (gunichar) -2:
-            g_string_append_printf(escaped_output, invalid_format, *(guint8 *) char_ptr);
-            char_ptr++;
-            continue;
-            break;
-          case '\b':
-            g_string_append(escaped_output, "\\b");
-            break;
-          case '\f':
-            g_string_append(escaped_output, "\\f");
-            break;
-          case '\n':
-            g_string_append(escaped_output, "\\n");
-            break;
-          case '\r':
-            g_string_append(escaped_output, "\\r");
-            break;
-          case '\t':
-            g_string_append(escaped_output, "\\t");
-            break;
-          case '\\':
-            g_string_append(escaped_output, "\\\\");
-            break;
-          default:
-            if (uchar < 32)
-              g_string_append_printf(escaped_output, control_format, uchar);
-            else if (uchar < 256 && unsafe_chars && strchr(unsafe_chars, (gchar) uchar))
-              g_string_append_printf(escaped_output, "\\%c", (gchar) uchar);
-            else
-              g_string_append_unichar(escaped_output, uchar);
-            break;
-        }
-      char_ptr = g_utf8_next_char(char_ptr);
-    }
+      while (*raw)
+        _append_escaped_utf8_character (escaped_output, &raw, -1, unsafe_chars,
+                                        control_format, invalid_format);
+  else
+      while (raw_len)
+        raw_len -= _append_escaped_utf8_character (escaped_output, &raw, raw_len, unsafe_chars,
+                                                   control_format, invalid_format);
 }
 
 /**
@@ -137,7 +149,6 @@ convert_unsafe_utf8_to_escaped_text (const gchar *str, gssize str_len,
 {
   if (str_len < 0)
     str_len = strlen(str);
-  GString *original = g_string_new(str);
   GString *escaped_string = g_string_sized_new(str_len);
 
   append_unsafe_utf8_as_escaped_text(escaped_string, str, str_len, unsafe_chars);
