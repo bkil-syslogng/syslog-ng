@@ -27,7 +27,6 @@
 #include "msg_parse_lib.h"
 
 #include <string.h>
-#include <stdarg.h>
 
 gboolean slng_template_lib_failure = FALSE;
 
