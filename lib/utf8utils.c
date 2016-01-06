@@ -23,6 +23,18 @@
 #include "utf8utils.h"
 #include <string.h>
 
+static inline gboolean
+_is_character_unsafe(gunichar uchar, const gchar *unsafe_chars)
+{
+  if (uchar >= 256)
+    return FALSE;
+
+  if (!unsafe_chars)
+    return FALSE;
+
+  return strchr(unsafe_chars, (gchar) uchar) != NULL;
+}
+
 /**
  * This function escapes an unsanitized input (e.g. that can contain binary
  * characters, and produces an escaped format that can be deescaped in need,
@@ -77,7 +89,7 @@ _append_escaped_utf8_character(GString *escaped_output, const gchar **raw,
       default:
         if (uchar < 32)
           g_string_append_printf(escaped_output, control_format, uchar);
-        else if (uchar < 256 && unsafe_chars && strchr(unsafe_chars, (gchar) uchar))
+        else if (_is_character_unsafe(uchar, unsafe_chars))
           g_string_append_printf(escaped_output, "\\%c", (gchar) uchar);
         else
           g_string_append_unichar(escaped_output, uchar);
