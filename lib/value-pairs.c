@@ -364,9 +364,9 @@ vp_foreach_helper (const gchar *name, const SBTHGString *hinted_value,
   gpointer user_data = ((gpointer *)data)[1];
   gboolean *r = ((gpointer *)data)[2];
 
-  *r &= !func (name, hinted_value->type_hint,
-               sb_th_gstring_string(hinted_value)->str,
-               sb_th_gstring_string(hinted_value)->len, user_data);
+  *r &= !func(name, hinted_value->type_hint,
+              sb_th_gstring_string(hinted_value)->str,
+              sb_th_gstring_string(hinted_value)->len, user_data);
   return !*r;
 }
 

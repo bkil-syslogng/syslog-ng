@@ -25,14 +25,14 @@
 
 #include "syslog-ng.h"
 
-void append_unsafe_utf8_as_escaped_binary (GString *escaped_string, const gchar *str,
-                                      gssize str_len, const gchar *unsafe_chars);
-gchar *convert_unsafe_utf8_to_escaped_binary (const gchar *str, gssize str_len,
-                                       const gchar *unsafe_chars);
+void append_unsafe_utf8_as_escaped_binary(GString *escaped_string, const gchar *str,
+                                          gssize str_len, const gchar *unsafe_chars);
+gchar *convert_unsafe_utf8_to_escaped_binary(const gchar *str, gssize str_len,
+                                             const gchar *unsafe_chars);
 
-void append_unsafe_utf8_as_escaped_text (GString *escaped_string, const gchar *str,
-                                    gssize str_len, const gchar *unsafe_chars);
-gchar *convert_unsafe_utf8_to_escaped_text (const gchar *str, gssize str_len,
-                                       const gchar *unsafe_chars);
+void append_unsafe_utf8_as_escaped_text(GString *escaped_string, const gchar *str,
+                                        gssize str_len, const gchar *unsafe_chars);
+gchar *convert_unsafe_utf8_to_escaped_text(const gchar *str, gssize str_len,
+                                           const gchar *unsafe_chars);
 
 #endif

@@ -91,19 +91,19 @@ _append_escaped_utf8_character(GString *escaped_output, const gchar **raw,
  * @see _append_escaped_utf8_character()
  */
 static void
-_append_unsafe_utf8_as_escaped (GString *escaped_output, const gchar *raw,
-                                      gssize raw_len, const gchar *unsafe_chars,
-                                      const gchar *control_format,
-                                      const gchar *invalid_format)
+_append_unsafe_utf8_as_escaped(GString *escaped_output, const gchar *raw,
+                               gssize raw_len, const gchar *unsafe_chars,
+                               const gchar *control_format,
+                               const gchar *invalid_format)
 {
   if (raw_len < 0)
       while (*raw)
-        _append_escaped_utf8_character (escaped_output, &raw, -1, unsafe_chars,
-                                        control_format, invalid_format);
+        _append_escaped_utf8_character(escaped_output, &raw, -1, unsafe_chars,
+                                       control_format, invalid_format);
   else
       while (raw_len)
-        raw_len -= _append_escaped_utf8_character (escaped_output, &raw, raw_len, unsafe_chars,
-                                                   control_format, invalid_format);
+        raw_len -= _append_escaped_utf8_character(escaped_output, &raw, raw_len, unsafe_chars,
+                                                  control_format, invalid_format);
 }
 
 /**
@@ -128,15 +128,15 @@ _append_unsafe_utf8_as_escaped (GString *escaped_output, const gchar *raw,
  * @see _append_unsafe_utf8_as_escaped()
  */
 void
-append_unsafe_utf8_as_escaped_binary (GString *escaped_string, const gchar *str,
-                                      gssize str_len, const gchar *unsafe_chars)
+append_unsafe_utf8_as_escaped_binary(GString *escaped_string, const gchar *str,
+                                     gssize str_len, const gchar *unsafe_chars)
 {
-  _append_unsafe_utf8_as_escaped (escaped_string, str, str_len, unsafe_chars,
-                                  "\\x%02x", "\\x%02x");
+  _append_unsafe_utf8_as_escaped(escaped_string, str, str_len, unsafe_chars,
+                                 "\\x%02x", "\\x%02x");
 }
 gchar *
-convert_unsafe_utf8_to_escaped_binary (const gchar *str, gssize str_len,
-                                       const gchar *unsafe_chars)
+convert_unsafe_utf8_to_escaped_binary(const gchar *str, gssize str_len,
+                                      const gchar *unsafe_chars)
 {
   if (str_len < 0)
     str_len = strlen(str);
@@ -168,16 +168,16 @@ convert_unsafe_utf8_to_escaped_binary (const gchar *str, gssize str_len,
  * @see _append_unsafe_utf8_as_escaped()
  */
 void
-append_unsafe_utf8_as_escaped_text (GString *escaped_string, const gchar *str,
+append_unsafe_utf8_as_escaped_text(GString *escaped_string, const gchar *str,
                                     gssize str_len, const gchar *unsafe_chars)
 {
-  _append_unsafe_utf8_as_escaped (escaped_string, str, str_len, unsafe_chars,
-                                  "\\u%04x", "\\\\x%02x");
+  _append_unsafe_utf8_as_escaped(escaped_string, str, str_len, unsafe_chars,
+                                 "\\u%04x", "\\\\x%02x");
 }
 
 gchar *
-convert_unsafe_utf8_to_escaped_text (const gchar *str, gssize str_len,
-                                       const gchar *unsafe_chars)
+convert_unsafe_utf8_to_escaped_text(const gchar *str, gssize str_len,
+                                    const gchar *unsafe_chars)
 {
   if (str_len < 0)
     str_len = strlen(str);
