@@ -66,9 +66,15 @@ typedef struct
 } json_state_t;
 
 static inline void
-g_string_append_escaped(GString *dest, const char *str)
+tf_json_append_escaped(GString *dest, const GString *str)
 {
   append_unsafe_utf8_as_escaped_text(dest, str, "\"");
+}
+
+static inline void
+tf_json_append_escaped_c(GString *dest, const gchar *str)
+{
+  append_unsafe_utf8_as_escaped_text_c(dest, str, "\"");
 }
 
 static gboolean
@@ -85,7 +91,7 @@ tf_json_obj_start(const gchar *name,
   if (name)
     {
       g_string_append_c(state->buffer, '"');
-      g_string_append_escaped(state->buffer, name);
+      tf_json_append_escaped_c(state->buffer, name);
       g_string_append(state->buffer, "\":{");
     }
   else
@@ -112,21 +118,44 @@ tf_json_obj_end(const gchar *name,
 }
 
 static gboolean
-tf_json_append_value(const gchar *name, const gchar *value,
+tf_json_append_value(const gchar *name, const GString *value,
                      json_state_t *state, gboolean quoted)
 {
   if (state->need_comma)
     g_string_append_c(state->buffer, ',');
 
   g_string_append_c(state->buffer, '"');
-  g_string_append_escaped(state->buffer, name);
+  tf_json_append_escaped_c(state->buffer, name);
 
   if (quoted)
     g_string_append(state->buffer, "\":\"");
   else
     g_string_append(state->buffer, "\":");
 
-  g_string_append_escaped(state->buffer, value);
+  tf_json_append_escaped(state->buffer, value);
+
+  if (quoted)
+    g_string_append_c(state->buffer, '"');
+
+  return TRUE;
+}
+
+static gboolean
+tf_json_append_value_c(const gchar *name, const gchar *value,
+                     json_state_t *state, gboolean quoted)
+{
+  if (state->need_comma)
+    g_string_append_c(state->buffer, ',');
+
+  g_string_append_c(state->buffer, '"');
+  tf_json_append_escaped_c(state->buffer, name);
+
+  if (quoted)
+    g_string_append(state->buffer, "\":\"");
+  else
+    g_string_append(state->buffer, "\":");
+
+  tf_json_append_escaped_c(state->buffer, value);
 
   if (quoted)
     g_string_append_c(state->buffer, '"');
@@ -136,7 +165,7 @@ tf_json_append_value(const gchar *name, const gchar *value,
 
 static gboolean
 tf_json_value(const gchar *name, const gchar *prefix,
-              TypeHint type, const gchar *value,
+              TypeHint type, const GString *value,
               gpointer *prefix_data, gpointer user_data)
 {
   json_state_t *state = (json_state_t *)user_data;
@@ -155,37 +184,44 @@ tf_json_value(const gchar *name, const gchar *prefix,
     case TYPE_HINT_INT32:
     case TYPE_HINT_INT64:
     case TYPE_HINT_DOUBLE:
-    case TYPE_HINT_BOOLEAN:
       {
         gint32 i32;
         gint64 i64;
         gdouble d;
-        gboolean b;
         gboolean r = FALSE, fail = FALSE;
-        const gchar *v = value;
+        const GString *v = value;
 
         if (type == TYPE_HINT_INT32 &&
-            (fail = !type_cast_to_int32(value, &i32 , NULL)) == TRUE)
-          r = type_cast_drop_helper(on_error, value, "int32");
+            (fail = !type_cast_to_int32(value->str, &i32 , NULL)) == TRUE)
+          r = type_cast_drop_helper(on_error, value->str, "int32");
         else if (type == TYPE_HINT_INT64 &&
-            (fail = !type_cast_to_int64(value, &i64 , NULL)) == TRUE)
-          r = type_cast_drop_helper(on_error, value, "int64");
+            (fail = !type_cast_to_int64(value->str, &i64 , NULL)) == TRUE)
+          r = type_cast_drop_helper(on_error, value->str, "int64");
         else if (type == TYPE_HINT_DOUBLE &&
-            (fail = !type_cast_to_double(value, &d, NULL)) == TRUE)
-          r = type_cast_drop_helper(on_error, value, "double");
-        else if (type == TYPE_HINT_BOOLEAN)
-          {
-            if ((fail = !type_cast_to_boolean(value, &b , NULL)) == TRUE)
-              r = type_cast_drop_helper(on_error, value, "boolean");
-            else
-              v = b ? "true" : "false";
-          }
+            (fail = !type_cast_to_double(value->str, &d, NULL)) == TRUE)
+          r = type_cast_drop_helper(on_error, value->str, "double");
 
         if (fail &&
             !(on_error & ON_ERROR_FALLBACK_TO_STRING))
           return r;
 
         tf_json_append_value(name, v, state, fail);
+        break;
+      }
+    case TYPE_HINT_BOOLEAN:
+      {
+        gboolean b;
+        gboolean fail = FALSE;
+
+        if ((fail = !type_cast_to_boolean (value->str, &b, NULL)) == TRUE) {
+          gboolean r = type_cast_drop_helper (on_error, value->str, "boolean");
+          if (!(on_error & ON_ERROR_FALLBACK_TO_STRING))
+            return r;
+          tf_json_append_value(name, value, state, fail);
+        } else {
+          const gchar *v = b ? "true" : "false";
+          tf_json_append_value_c(name, v, state, fail);
+        }
         break;
       }
     }

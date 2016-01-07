@@ -28,7 +28,7 @@
 
 static gboolean
 python_worker_vp_add_one(const gchar *name,
-                       TypeHint type, const gchar *value,
+                       TypeHint type, const GString *value,
                        gpointer user_data)
 {
   const LogTemplateOptions *template_options = (const LogTemplateOptions *)((gpointer *)user_data)[0];
@@ -43,24 +43,24 @@ python_worker_vp_add_one(const gchar *name,
       {
         gint64 i;
 
-        if (type_cast_to_int64(value, &i, NULL))
+        if (type_cast_to_int64(value->str, &i, NULL))
           PyDict_SetItemString(dict, name, PyLong_FromLong(i));
         else
           {
             need_drop = type_cast_drop_helper(template_options->on_error,
-                                              value, "int");
+                                              value->str, "int");
 
             if (fallback)
-              PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+              PyDict_SetItemString(dict, name, PyUnicode_FromString(value->str));
           }
         break;
       }
     case TYPE_HINT_STRING:
-      PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+      PyDict_SetItemString(dict, name, PyUnicode_FromString(value->str));
       break;
     default:
       need_drop = type_cast_drop_helper(template_options->on_error,
-                                        value, "<unknown>");
+                                        value->str, "<unknown>");
       break;
     }
   return need_drop;

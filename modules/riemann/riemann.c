@@ -402,13 +402,13 @@ riemann_dd_field_add_msg_tag(const LogMessage *msg,
 
 static gboolean
 riemann_dd_field_add_attribute_vp(const gchar *name,
-                                  TypeHint type, const gchar *value,
+                                  TypeHint type, const GString *value,
                                   gpointer user_data)
 {
   riemann_event_t *event = (riemann_event_t *)user_data;
   riemann_attribute_t *attrib = riemann_attribute_new();
 
-  riemann_attribute_set(attrib, name, value);
+  riemann_attribute_set(attrib, name, value->str);
   riemann_event_attribute_add(event, attrib);
 
   return FALSE;
