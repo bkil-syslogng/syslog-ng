@@ -10,7 +10,7 @@
 gboolean success = TRUE;
 
 gboolean
-vp_keys_foreach(const gchar  *name, TypeHint type, const gchar *value, gpointer user_data)
+vp_keys_foreach(const gchar  *name, TypeHint type, const GString *value, gpointer user_data)
 {
   gpointer *args = (gpointer *) user_data;
   GList **keys = (GList **) args[0];

@@ -329,7 +329,7 @@ afmongodb_vp_obj_end(const gchar *name,
 
 static gboolean
 afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
-                           TypeHint type, const gchar *value,
+                           TypeHint type, const GString *value,
                            gpointer *prefix_data, gpointer user_data)
 {
   bson *o;
@@ -347,15 +347,15 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gboolean b;
 
-        if (type_cast_to_boolean (value, &b, NULL))
+        if (type_cast_to_boolean (value->str, &b, NULL))
           bson_append_boolean (o, name, b);
         else
           {
             gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "boolean");
+                                               value->str, "boolean");
 
             if (fallback)
-              bson_append_string (o, name, value, -1);
+              bson_append_string (o, name, value->str, value->len);
             else
               return r;
           }
@@ -365,15 +365,15 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gint32 i;
 
-        if (type_cast_to_int32 (value, &i, NULL))
+        if (type_cast_to_int32 (value->str, &i, NULL))
           bson_append_int32 (o, name, i);
         else
           {
             gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "int32");
+                                               value->str, "int32");
 
             if (fallback)
-              bson_append_string (o, name, value, -1);
+              bson_append_string (o, name, value->str, value->len);
             else
               return r;
           }
@@ -383,7 +383,7 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gint64 i;
 
-        if (type_cast_to_int64 (value, &i, NULL))
+        if (type_cast_to_int64 (value->str, &i, NULL))
           bson_append_int64 (o, name, i);
         else
           {
@@ -391,7 +391,7 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
                                                value, "int64");
 
             if (fallback)
-              bson_append_string(o, name, value, -1);
+              bson_append_string(o, name, value->str, value->len);
             else
               return r;
           }
@@ -402,14 +402,14 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gdouble d;
 
-        if (type_cast_to_double (value, &d, NULL))
+        if (type_cast_to_double (value->str, &d, NULL))
           bson_append_double (o, name, d);
         else
           {
             gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "double");
+                                               value->str, "double");
             if (fallback)
-              bson_append_string(o, name, value, -1);
+              bson_append_string(o, name, value->str, value->len);
             else
               return r;
           }
@@ -420,15 +420,15 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         guint64 i;
 
-        if (type_cast_to_datetime_int (value, &i, NULL))
+        if (type_cast_to_datetime_int (value->str, &i, NULL))
           bson_append_utc_datetime (o, name, (gint64)i);
         else
           {
             gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "datetime");
+                                               value->str, "datetime");
 
             if (fallback)
-              bson_append_string(o, name, value, -1);
+              bson_append_string(o, name, value->str, value->len);
             else
               return r;
           }
@@ -437,7 +437,7 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       }
     case TYPE_HINT_STRING:
     case TYPE_HINT_LITERAL:
-      bson_append_string (o, name, value, -1);
+      bson_append_string (o, name, value->str, value->len);
       break;
     default:
       return TRUE;
