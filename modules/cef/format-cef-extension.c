@@ -67,44 +67,43 @@ tf_cef_is_valid_key (const gchar *str)
 static inline void
 tf_cef_append_escaped (GString *escaped_string, const gchar *str, gsize str_len)
 {
-  const gchar *char_ptr = str;
-  const gchar *const end = char_ptr + str_len;
+  const gchar *char_ptr;
+  gunichar uchar;
 
-  while (char_ptr < end)
+  while (str_len)
     {
-      gunichar uchar = g_utf8_get_char_validated (char_ptr, end - char_ptr);
+      uchar = g_utf8_get_char_validated (str, str_len);
 
-      if (!g_unichar_isdefined(uchar))
+      switch (uchar)
         {
-          g_string_append_printf (escaped_string, "\\x%02x",
-                                  *(guint8 *) char_ptr);
-          char_ptr++;
+        case (gunichar) - 1:
+        case (gunichar) - 2:
+          g_string_append_printf (escaped_string, "\\x%02x", *(guint8 *) str++);
+          str_len--;
+          continue;
+          break;
+        case '=':
+          g_string_append (escaped_string, "\\=");
+          break;
+        case '\n':
+          g_string_append (escaped_string, "\\n");
+          break;
+        case '\r':
+          g_string_append (escaped_string, "\\r");
+          break;
+        case '\\':
+          g_string_append (escaped_string, "\\\\");
+          break;
+        default:
+          if (uchar < 32)
+            g_string_append_printf (escaped_string, "\\u%04x", uchar);
+          else
+            g_string_append_unichar(escaped_string, uchar);
+          break;
         }
-      else
-        {
-          switch (uchar)
-            {
-            case '=':
-              g_string_append (escaped_string, "\\=");
-              break;
-            case '\n':
-              g_string_append (escaped_string, "\\n");
-              break;
-            case '\r':
-              g_string_append (escaped_string, "\\r");
-              break;
-            case '\\':
-              g_string_append (escaped_string, "\\\\");
-              break;
-            default:
-              if (uchar < 32)
-                g_string_append_printf (escaped_string, "\\u%04x", uchar);
-              else
-                g_string_append_unichar (escaped_string, uchar);
-              break;
-            }
-          char_ptr = g_utf8_next_char (char_ptr);
-        }
+      char_ptr = g_utf8_next_char (str);
+      str_len -= char_ptr - str;
+      str = char_ptr;
     }
 }
 
