@@ -65,6 +65,15 @@ tf_cef_is_valid_key (const gchar *str)
 }
 
 static inline void
+tf_cef_append_unichar(GString *string, gunichar wc)
+{
+  if (wc < 0xc0)
+    g_string_append_c(string, (gchar) wc);
+  else
+    g_string_append_unichar(string, wc);
+}
+
+static inline void
 tf_cef_append_escaped (GString *escaped_string, const gchar *str, gsize str_len)
 {
   const gchar *char_ptr;
@@ -98,7 +107,7 @@ tf_cef_append_escaped (GString *escaped_string, const gchar *str, gsize str_len)
           if (uchar < 32)
             g_string_append_printf (escaped_string, "\\u%04x", uchar);
           else
-            g_string_append_unichar(escaped_string, uchar);
+            tf_cef_append_unichar(escaped_string, uchar);
           break;
         }
       char_ptr = g_utf8_next_char (str);
