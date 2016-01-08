@@ -1,20 +1,84 @@
+sudo: false
+#sudo: required
+#dist: trusty
 language: c
+cache:
+  directories:
+    - $HOME/.local/bin
+    - $HOME/.local/include
+    - $HOME/.local/lib
+    - $HOME/.local/man
+    - $HOME/.cache/pip
+    - $HOME/.ccache
+    - $HOME/.gradle/caches
+    - .autoconf
+    - autom4te.cache
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+  - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
+  - ccache -s
+  - ls -la $HOME $HOME/.[^.]* $HOME/..?*
+addons:
+  apt:
+    packages:
+      - curl
+      - wget
+      - ccache
+      - pkg-config
+      - flex
+      - bison
+      - xsltproc
+      - docbook-xsl
+      - libevtlog-dev
+      - libevtlog0
+      - libnet1-dev
+      - libglib2.0-dev
+      - libdbi-dev # old libdbi0-dev ?
+      - libssl-dev
+      - libjson0-dev
+      - libwrap0-dev
+      - libpcre3-dev
+      - libcap-dev
+      - libesmtp-dev
+      - libesmtp6
+      - libssl1.0.0
+      - libgeoip-dev
+      - libhiredis-dev
+      - sqlite3
+      - libdbd-sqlite3
+#      - libriemann-client-dev # disallowed
+#      - libriemann-client0 # dep disallowed
+      - libprotobuf-c0-dev
+      - openjdk-7-jdk
+#      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
+      - autoconf-archive
 install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq curl
-  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-  - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq pkg-config flex bison xsltproc docbook-xsl libevtlog-dev libnet1-dev libglib2.0-dev libdbi0-dev libssl-dev libjson0-dev libwrap0-dev libpcre3-dev libcap-dev libesmtp-dev libgeoip-dev libhiredis-dev sqlite3 libdbd-sqlite3 libriemann-client-dev openjdk-7-jdk gradle-2.2.1 autoconf-archive
-  - sudo pip install -r requirements.txt
+  - export PATH=/usr/lib/ccache:$PATH
+  - export PATH=$HOME/.local/bin:$PATH
+  - ccache -z
+#  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
+  - echo "max_size = 150M" > ~/.ccache/ccache.conf
+  - if [ "$CC" = "clang" ]; then printf "run_second_cpp = true\nprefix_command = -Qunused-arguments\n" >> ~/.ccache/ccache.conf; fi
+  - if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
+#  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+#  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+#  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key | sudo apt-key add -
+#  - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+#  - sudo apt-get update -qq
+#  - sudo apt-get --force-yes -y install libriemann-client-dev # gradle-2.2.1
+  - pip install --user -r requirements.txt
+  - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH; if ! pkg-config --exists eventlog; then apt-get source eventlog && cd eventlog-* && { ./autogen.sh && ./configure --prefix=$HOME/.local/ && make -j install && cd .. && rm -R eventlog* ; }; fi
+  - export GRADLE_HOME=$HOME/.local/gradle-2.9 && export PATH=$GRADLE_HOME/bin:$PATH; if ! which gradle; then wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip && { unzip gradle-2.9-bin.zip -d $HOME/.local/ && rm -v gradle-2.9-bin.zip; }; fi
 before_script:
   - ./autogen.sh
+  - env
   - unset PYTHON_CFLAGS # HACK
-  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl 
+  - ./configure --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl || { cat config.log; false; }
   - if [ "$CC" = "clang" ]; then export COPYRIGHTVERBOSITY=1; make check-copyright; fi
   - make -j || make V=1 # to make error messages more readable on error
 script:
   - if [ "$CC" = "gcc" ]; then make distcheck V=1; else make func-test V=1; fi
+  - ccache -s
 compiler:
   - gcc
   - clang
