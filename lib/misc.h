@@ -87,4 +87,6 @@ void string_list_free(GList *l);
 gchar *__normalize_key(const gchar* buffer);
 gchar *replace_char(gchar *buffer,gchar from,gchar to,gboolean in_place);
 
+gboolean pwrite_strict(gint fd, const void *buf, size_t count, off_t offset);
+
 #endif

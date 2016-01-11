@@ -328,3 +328,23 @@ __normalize_key(const gchar* buffer)
 {
   return str_replace_char(buffer, '-', '_');
 }
+
+gboolean
+pwrite_strict(gint fd, const void *buf, size_t count, off_t offset)
+{
+  ssize_t written = pwrite(fd, buf, count, offset);
+  gboolean result = TRUE;
+  if (written != count)
+    {
+      if (written != -1)
+        {
+          msg_error("Short written",
+                    evt_tag_int("Number of bytes want to write", count),
+                    evt_tag_int("Number of bytes written", written),
+                    NULL);
+          errno = ENOSPC;
+        }
+      result = FALSE;
+    }
+  return result;
+}
