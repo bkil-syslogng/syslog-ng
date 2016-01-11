@@ -53,7 +53,7 @@ test_inet()
 void
 test_inet6()
 {
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
   GSockAddr *addr = g_sockaddr_inet6_new("::1", 5555);
   GSockAddr *read_addr = NULL;
 
@@ -125,7 +125,7 @@ test_inet_false()
 void
 test_inet6_false()
 {
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
   GSockAddr *addr = g_sockaddr_inet6_new("::1", 5555);
   GSockAddr *read_addr = NULL;
 

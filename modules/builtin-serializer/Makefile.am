@@ -1,4 +1,4 @@
-module_LTLIBRARIES				+= modules/builtin-serializer/libbuiltin-serializer.la
+module_LTLIBRARIES += modules/builtin-serializer/libbuiltin-serializer.la
 
 modules_builtin_serializer_libbuiltin_serializer_la_SOURCES	=	\
 	modules/builtin-serializer/builtin-serializer-plugin.c \
@@ -23,8 +23,8 @@ modules_builtin_serializer_libbuiltin_serializer_la_LIBADD	=	\
 	$(MODULE_DEPS_LIBS)
 modules_builtin_serializer_libbuiltin_serializer_la_LDFLAGS	=	\
 	$(MODULE_LDFLAGS)
-modules_builtin_serializer_libbuiltin_serializer_la_DEPENDENCIES=	\
-	$(MODULE_DEPS_LIBS)
+#modules_builtin_serializer_libbuiltin_serializer_la_DEPENDENCIES=	\
+#	$(MODULE_DEPS_LIBS)
 
 modules/builtin-serializer modules/builtin-serializer/ mod-builtin-serializer: modules/builtin-serializer/libbuiltin-serializer.la
 .PHONY: modules/builtin-serializer/ mod-builtin-serializer

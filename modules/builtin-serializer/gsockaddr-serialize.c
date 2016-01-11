@@ -12,7 +12,7 @@ __serialize_ipv4(GSockAddr* addr, SerializeArchive* sa)
 static void
 __serialize_ipv6(GSockAddr* addr, SerializeArchive* sa)
 {
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
   struct in6_addr* in6a;
   in6a = g_sockaddr_inet6_get_address(addr);
   serialize_write_blob(sa, (gchar*) in6a, sizeof(*in6a));
@@ -34,13 +34,13 @@ g_sockaddr_serialize(SerializeArchive *sa, GSockAddr *addr)
     {
     case AF_INET:
       {
-      __serialize_ipv4(addr, sa);
+        __serialize_ipv4(addr, sa);
         break;
       }
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
     case AF_INET6:
       {
-      __serialize_ipv6(addr, sa);
+        __serialize_ipv6(addr, sa);
         break;
       }
 #endif
@@ -68,7 +68,7 @@ static gboolean
 __deserialize_ipv6(SerializeArchive *sa, GSockAddr **addr)
 {
   gboolean result = FALSE;
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
   struct sockaddr_in6 sin6;
 
   sin6.sin6_family = AF_INET6;
@@ -102,7 +102,7 @@ g_sockaddr_deserialize(SerializeArchive *sa, GSockAddr **addr)
         result = __deserialize_ipv4(sa, addr);
         break;
       }
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
     case AF_INET6:
       {
         result = __deserialize_ipv6(sa, addr);

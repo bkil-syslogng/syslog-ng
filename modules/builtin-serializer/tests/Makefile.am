@@ -1,7 +1,6 @@
 modules_builtin_serializer_tests_TESTS      = modules/builtin-serializer/tests/test_builtin_serializer \
                                               modules/builtin-serializer/tests/test_gsockaddr_serialize \
-                                              modules/builtin-serializer/tests/test_timestamp_serialize \
-                                              modules/builtin-serializer/tests/test_nvtable_serialize
+                                              modules/builtin-serializer/tests/test_timestamp_serialize
 check_PROGRAMS          += ${modules_builtin_serializer_tests_TESTS}
 
 modules_builtin_serializer_tests_test_builtin_serializer_CFLAGS = $(TEST_CFLAGS) -I$(top_srcdir)/modules/builtin-serializer
