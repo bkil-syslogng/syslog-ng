@@ -1,0 +1,77 @@
+/*
+ * Copyright (C) 2006-2011 BalaBit IT Ltd.
+ *
+ * All rights reserved.
+ */
+
+%code top {
+#include "diskq-parser.h"
+
+}
+
+
+%code {
+
+#include "cfg-parser.h"
+#include "syslog-names.h"
+#include "messages.h"
+#include "diskq.h"
+#include "diskq-grammar.h"
+
+#include <string.h>
+
+DiskQDestPlugin *last_plugin;
+
+}
+
+%name-prefix "diskq_"
+
+/* this parameter is needed in order to instruct bison to use a complete
+ * argument list for yylex/yyerror */
+
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {LogDriverPlugin **instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_DISK_BUFFER
+%token KW_MEM_BUF_LENGTH
+%token KW_DISK_BUF_SIZE
+%token KW_RELIABLE
+%token KW_MEM_BUF_SIZE
+%token KW_QOUT_SIZE
+
+
+%%
+
+start
+	: LL_CONTEXT_INNER_DEST dest_diskq { YYACCEPT; }
+	;
+
+dest_diskq
+        : KW_DISK_BUFFER
+          {
+            last_plugin = diskq_dest_plugin_new();
+            *instance = &last_plugin->super;
+          }
+          '(' dest_diskq_options ')' { diskq_check_plugin_settings(last_plugin); }
+        ;
+
+dest_diskq_options
+        : dest_diskq_option dest_diskq_options
+        |
+        ;
+
+dest_diskq_option
+        : KW_RELIABLE '(' yesno ')'            { diskq_reliable_set(last_plugin, $3); }
+        | KW_MEM_BUF_SIZE '(' LL_NUMBER ')'    { diskq_mem_buf_size_set(last_plugin, $3); }
+        | KW_MEM_BUF_LENGTH '(' LL_NUMBER ')'  { diskq_mem_buf_length_set(last_plugin, $3); }
+        | KW_DISK_BUF_SIZE '(' LL_NUMBER ')'   { diskq_disk_buf_size_set(last_plugin, $3); }
+        | KW_QOUT_SIZE '(' LL_NUMBER ')'       { diskq_log_qout_size_set(last_plugin, $3); }
+        ;
+
+/* INCLUDE_RULES */
+
+%%
