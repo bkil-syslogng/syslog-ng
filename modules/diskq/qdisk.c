@@ -895,7 +895,12 @@ qdisk_deinit(QDisk *self)
       close(self->fd);
       self->fd = -1;
     }
-  log_msg_serializer_free(self->serializer);
+
+  if (self->serializer)
+    {
+      log_msg_serializer_free(self->serializer);
+      self->serializer = NULL;
+    }
 }
 
 gssize qdisk_read_from_backlog(QDisk *self, gpointer buffer, gsize bytes_to_read)
