@@ -18,6 +18,6 @@ modules/java/(native|proxies|src)
 tests
 modules/java/(tools|[^/]*$)
 modules/java-modules/(dummy|elastic|hdfs|http|kafka|[^/]*$)
-modules/(afamqp|affile|afmongodb|afprog|afsmtp|afsocket|afsql|afstomp|afstreams|afuser|basicfuncs|cef|confgen|cryptofuncs|csvparser|date|dbparser|geoip|graphite|json|kvformat|linux-kmsg-format|native|pacctformat|pseudofile|python|redis|riemann|syslogformat|systemd-journal|system-source|[^/]*$)
+modules/(afamqp|affile|afmongodb|afprog|afsmtp|afsocket|afsql|afstomp|afstreams|afuser|basicfuncs|builtin-serializer|cef|confgen|cryptofuncs|csvparser|date|dbparser|geoip|graphite|json|kvformat|linux-kmsg-format|native|pacctformat|pseudofile|python|redis|riemann|syslogformat|systemd-journal|system-source|[^/]*$)
 scl
 
