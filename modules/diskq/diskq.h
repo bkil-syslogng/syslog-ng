@@ -11,16 +11,23 @@
 #include "driver.h"
 #include "logmsg-serializer.h"
 
+typedef struct _QDiskOptions
+{
+  gint64 disk_buf_size;
+  gint qout_size;
+  gboolean read_only;
+  gboolean reliable;
+  gint mem_buf_size;
+  gint mem_buf_length;
+  LogMsgSerializer *serializer;
+  gchar *dir;
+} QDiskOptions;
+
+
 typedef struct _DiskQDestPlugin
 {
   LogDriverPlugin super;
-  gint mem_buf_length;
-  gint64 disk_buf_size;
-  gboolean reliable;
-  gint mem_buf_size;
-  gint qout_size;
-  LogMsgSerializer *serializer;
-  gchar *dir;
+  QDiskOptions options;
 } DiskQDestPlugin;
 
 DiskQDestPlugin *diskq_dest_plugin_new(void);

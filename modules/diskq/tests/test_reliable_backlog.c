@@ -19,6 +19,8 @@ static gint num_of_ack;
 
 static gint mark_message_serialized_size;
 
+QDiskOptions options;
+
 #define NUMBER_MESSAGES_IN_QUEUE(n) (n * 3)
 
 MsgFormatOptions parse_options;
@@ -31,6 +33,19 @@ __construct_serializer()
   return serializer;
 }
 
+void
+__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
+{
+  memset(options, 0, sizeof(QDiskOptions));
+  options->serializer = __construct_serializer();
+  options->disk_buf_size = size;
+  options->mem_buf_length = mem_size;
+  options->mem_buf_size = mem_size;
+  options->qout_size = 0;
+  options->reliable = TRUE;
+}
+
+
 static void
 __dummy_ack(LogMessage *lm,  AckType ack_type)
 {
@@ -41,7 +56,9 @@ static LogQueueDiskReliable *
 __init_diskq_for_test(gint64 size, gint64 membuf_size)
 {
   LogQueueDiskReliable *dq;
-  LogQueue *q = log_queue_disk_reliable_new(size, membuf_size, __construct_serializer());
+
+  __construct_options(&options, size, membuf_size);
+  LogQueue *q = log_queue_disk_reliable_new(&options);
   struct stat st;
   num_of_ack = 0;
   gchar *filename = FILENAME;

@@ -25,6 +25,7 @@
 #define PATH_QDISK "./"
 
 MsgFormatOptions parse_options;
+
 static LogMsgSerializer *
 __construct_serializer()
 {
@@ -35,13 +36,26 @@ __construct_serializer()
 }
 
 void
+__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
+{
+  options->serializer = __construct_serializer();
+  options->disk_buf_size = size;
+  options->mem_buf_length = mem_size;
+  options->mem_buf_size = mem_size;
+}
+
+void
 testcase_zero_diskbuf_and_normal_acks()
 {
   LogQueue *q;
   gint i;
   GString *filename;
+  QDiskOptions options = {0};
 
-  q = log_queue_disk_reliable_new(10000000, 100000, __construct_serializer());
+  __construct_options(&options, 10000000, 100000);
+  options.reliable = TRUE; 
+
+  q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
 
   filename = g_string_sized_new(32);
@@ -68,8 +82,12 @@ testcase_zero_diskbuf_alternating_send_acks()
   LogQueue *q;
   gint i;
   GString *filename;
+  QDiskOptions options = {0};
 
-  q = log_queue_disk_reliable_new(10000000, 100000, __construct_serializer());
+  __construct_options(&options, 10000000, 100000);
+  options.reliable = TRUE;
+
+  q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
 
   filename = g_string_sized_new(32);
@@ -97,8 +115,12 @@ testcase_ack_and_rewind_messages()
   LogQueue *q;
   gint i;
   GString *filename;
+  QDiskOptions options = {0};
 
-  q = log_queue_disk_reliable_new(10000000, 100000, __construct_serializer());
+  __construct_options(&options, 10000000, 100000);
+  options.reliable = TRUE;
+
+  q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
 
   filename = g_string_sized_new(32);
@@ -228,7 +250,11 @@ testcase_with_threads()
   log_queue_set_max_threads(FEEDERS);
   for (i = 0; i < TEST_RUNS; i++)
     {
-      q = log_queue_disk_reliable_new(10000000, 100000, __construct_serializer());
+      QDiskOptions options = {0};
+
+      __construct_options(&options, 10000000, 100000);
+      options.reliable = TRUE;
+      q = log_queue_disk_reliable_new(&options);
       filename = g_string_sized_new(32);
       g_string_sprintf(filename,"test-%04d.qf",i);
       unlink(filename->str);

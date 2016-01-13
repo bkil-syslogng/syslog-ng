@@ -26,7 +26,7 @@ diskq_log_qout_size_set(DiskQDestPlugin *self, gint qout_size)
                   NULL);
       qout_size = 64;
     }
-  self->qout_size = qout_size;
+  self->options.qout_size = qout_size;
 }
 
 void
@@ -45,40 +45,40 @@ diskq_disk_buf_size_set(DiskQDestPlugin *self, gint64 disk_buf_size)
                   NULL);
       disk_buf_size = MIN_DISK_BUF_SIZE;
     }
-  self->disk_buf_size = disk_buf_size;
+  self->options.disk_buf_size = disk_buf_size;
 }
 
 void
 diskq_reliable_set(DiskQDestPlugin *self, gboolean reliable)
 {
-  self->reliable = reliable;
+  self->options.reliable = reliable;
 }
 
 void
 diskq_mem_buf_size_set(DiskQDestPlugin *self, gint mem_buf_size)
 {
-  self->mem_buf_size = mem_buf_size;
+  self->options.mem_buf_size = mem_buf_size;
 }
 
 void
 diskq_mem_buf_length_set(DiskQDestPlugin *self, gint mem_buf_length)
 {
-  self->mem_buf_length = mem_buf_length;
+  self->options.mem_buf_length = mem_buf_length;
 }
 
 void
 diskq_check_plugin_settings(DiskQDestPlugin *self)
 {
-  if (self->reliable)
+  if (self->options.reliable)
     {
-      if (self->mem_buf_length > 0)
+      if (self->options.mem_buf_length > 0)
         {
           msg_warning("WARNING: Reliable queue: the mem-buf-length parameter is omitted", NULL);
         }
     }
   else
     {
-      if (self->mem_buf_size > 0)
+      if (self->options.mem_buf_size > 0)
         {
           msg_warning("WARNING: Non-reliable queue: the mem-buf-size parameter is omitted", NULL);
         }
@@ -88,7 +88,7 @@ diskq_check_plugin_settings(DiskQDestPlugin *self)
 void
 diskq_set_serializer(DiskQDestPlugin *self, LogMsgSerializer *serializer)
 {
-  self->serializer = serializer;
+  self->options.serializer = serializer;
 }
 
 /*
@@ -111,19 +111,19 @@ diskq_dest_plugin_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer
 
   if (queue)
     {
-      if (queue->type != log_queue_disk_type || self->reliable != log_queue_disk_is_reliable(queue))
+      if (queue->type != log_queue_disk_type || self->options.reliable != log_queue_disk_is_reliable(queue))
         {
           log_queue_unref(queue);
           queue = NULL;
         }
     }
 
-  if (!self->serializer)
+  if (!self->options.serializer)
     {
-      self->serializer = log_msg_serializer_factory(cfg, "builtin", &error);
+      self->options.serializer = log_msg_serializer_factory(cfg, "builtin", &error);
     }
 
-  if (!self->serializer)
+  if (!self->options.serializer)
     {
       msg_error("Can't load the builtin serializer plugin",
                     evt_tag_str("error", error->message),
@@ -133,10 +133,10 @@ diskq_dest_plugin_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer
 
   if (!queue)
     {
-      if (self->reliable)
-        queue = log_queue_disk_reliable_new(self->disk_buf_size, self->mem_buf_size, self->serializer, self->dir);
+      if (self->options.reliable)
+        queue = log_queue_disk_reliable_new(&self->options);
       else
-        queue = log_queue_disk_non_reliable_new(self->disk_buf_size, self->qout_size, self->mem_buf_length, self->serializer, self->dir);
+        queue = log_queue_disk_non_reliable_new(&self->options);
       log_queue_set_throttle(queue, dd->throttle);
       queue->persist_name = g_strdup(persist_name);
     }
@@ -198,18 +198,18 @@ diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
   LogDestDriver *dd = (LogDestDriver *) d;
   GlobalConfig *cfg = log_pipe_get_config(&d->super);
 
-  if (self->disk_buf_size == -1)
+  if (self->options.disk_buf_size == -1)
     {
       msg_error("The required 'disk_buf_size()' parameter of diskq module has not been set.", NULL);
       return FALSE;
     }
 
-  if (self->disk_buf_size < MIN_DISK_BUF_SIZE && self->disk_buf_size != 0)
+  if (self->options.disk_buf_size < MIN_DISK_BUF_SIZE && self->options.disk_buf_size != 0)
     {
       msg_warning("The value of 'disk_buf_size()' is too low, setting to the smallest acceptable value",
                   evt_tag_int("min_space", MIN_DISK_BUF_SIZE),
                   NULL);
-      self->disk_buf_size = MIN_DISK_BUF_SIZE;
+      self->options.disk_buf_size = MIN_DISK_BUF_SIZE;
     }
 
   if (dd->acquire_queue_data || dd->release_queue_data)
@@ -221,12 +221,12 @@ diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
         return FALSE;
       }
 
-  if (self->mem_buf_length < 0)
-    self->mem_buf_length = dd->log_fifo_size;
-  if (self->mem_buf_length < 0)
-    self->mem_buf_length = cfg->log_fifo_size;
-  if (self->qout_size < 0)
-    self->qout_size = 64;
+  if (self->options.mem_buf_length < 0)
+    self->options.mem_buf_length = dd->log_fifo_size;
+  if (self->options.mem_buf_length < 0)
+    self->options.mem_buf_length = cfg->log_fifo_size;
+  if (self->options.qout_size < 0)
+    self->options.qout_size = 64;
 
   dd->acquire_queue_data = self;
   dd->acquire_queue = diskq_dest_plugin_acquire_queue;
@@ -238,11 +238,11 @@ diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
 void
 diskq_set_dir(DiskQDestPlugin *self, const gchar *dir)
 {
-  if (self->dir)
+  if (self->options.dir)
     {
-      g_free(self->dir);
+      g_free(self->options.dir);
     }
-  self->dir = g_strdup(dir);
+  self->options.dir = g_strdup(dir);
 }
 
 void
@@ -252,19 +252,26 @@ diskq_dest_plugin_free(LogDriverPlugin *s)
   diskq_set_dir(self, NULL);
 }
 
+static void
+__set_default_options(QDiskOptions *self)
+{
+  self->disk_buf_size = -1;
+  self->mem_buf_length = -1;
+  self->reliable = FALSE;
+  self->mem_buf_size = -1;
+  self->qout_size = -1;
+  self->dir = get_installation_path_for(PATH_LOCALSTATEDIR);
+}
+
 DiskQDestPlugin *
 diskq_dest_plugin_new(void)
 {
   DiskQDestPlugin *self = g_new0(DiskQDestPlugin, 1);
 
   log_driver_plugin_init_instance(&self->super);
+  __set_default_options(&self->options);
   self->super.attach = diskq_dest_plugin_attach;
   self->super.free_fn = diskq_dest_plugin_free;
-  self->disk_buf_size = -1;
-  self->mem_buf_length = -1;
-  self->reliable = FALSE;
-  self->mem_buf_size = -1;
-  self->qout_size = -1;
   return self;
 }
 

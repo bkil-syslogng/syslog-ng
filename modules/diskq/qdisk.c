@@ -28,7 +28,7 @@
 /*pessimistic default for reliable disk queue 10000 x 16 kbyte*/
 #define PESSIMISTIC_MEM_BUF_SIZE 10000 * 16 *1024
 
-#define PATH_QDISK              SYSLOG_NG_PATH_LOCALSTATEDIR
+#define PATH_QDISK              PATH_LOCALSTATEDIR
 
 typedef union _QDiskFileHeader
 {
@@ -63,17 +63,12 @@ struct _QDisk
   gchar *filename;
   gchar *file_id;
   gint fd;
-  gint64 size;   /* in bytes */
   gint64 read_qout_ofs; /* the size in bytes between read_head and qout_ofs */
-  gboolean read_only;
-  gboolean reliable;
-  gint mem_buf_size;
   gint64 prev_read_head;
   gint64 prev_length;
   gint64 file_size;
-  LogMsgSerializer *serializer;
-  gchar *dir;
   QDiskFileHeader *hdr;
+  QDiskOptions *options;
 };
 
 static gboolean
@@ -95,7 +90,7 @@ __correct_position_if_eof(QDisk *self, gint64 *position)
 LogMsgSerializer *
 qdisk_get_serializer(QDisk *self)
 {
-  return self->serializer;
+  return self->options->serializer;
 }
 
 static gchar *
@@ -106,7 +101,7 @@ qdisk_get_next_filename(QDisk *self)
   gchar tmpfname[256];
   gchar qdir[256];
 
-  g_snprintf(qdir, sizeof(qdir), "%s", self->dir);
+  g_snprintf(qdir, sizeof(qdir), "%s", self->options->dir);
 
   /* NOTE: this'd be a security problem if we were not in our private directory. But we are. */
   while (!success && i < 100000)
@@ -114,7 +109,7 @@ qdisk_get_next_filename(QDisk *self)
       struct stat st;
 
       gchar *format = "%s/syslog-ng-%05d.qf";
-      if (self->reliable)
+      if (self->options->reliable)
         format = "%s/syslog-ng-%05d.rqf";
       g_snprintf(tmpfname, sizeof(tmpfname), format, qdir, i);
       success = (stat(tmpfname, &st) < 0);
@@ -144,13 +139,13 @@ __is_backlog_head_prevent_write_head(QDisk *self)
 static inline gboolean
 __is_write_head_less_than_max_size(QDisk *self)
 {
-  return self->hdr->write_head < self->size;
+  return self->hdr->write_head < self->options->disk_buf_size;
 }
 
 static inline gboolean
 __is_qdisk_ovewrited(QDisk *self)
 {
-  return self->hdr->write_head > self->size;
+  return self->hdr->write_head > self->options->disk_buf_size;
 }
 
 
@@ -183,13 +178,6 @@ qdisk_truncate_file(QDisk *self, gint64 new_size)
 {
   gboolean success = TRUE;
 
-#ifdef _WIN32
-  if (!self->read_only)
-    {
-      munmap((void *)self->hdr, sizeof(QDiskFileHeader));
-    }
-#endif
-
   if (ftruncate(self->fd, (glong)new_size) < 0)
     {
       success = FALSE;
@@ -200,14 +188,6 @@ qdisk_truncate_file(QDisk *self, gint64 new_size)
                 evt_tag_int("fd",self->fd),
                 NULL);
     }
-
-#ifdef _WIN32
-  if (!self->read_only)
-    {
-      self->hdr = mmap(0, sizeof(QDiskFileHeader),  (PROT_READ | PROT_WRITE), MAP_SHARED, self->fd, 0);
-      madvise(self->hdr, sizeof(QDiskFileHeader), MADV_RANDOM);
-    }
-#endif
 
   return success;
 }
@@ -221,7 +201,7 @@ qdisk_push_tail(QDisk *self, GString *record)
    * there's enough space between write and read.
    *
    * If write follows read we need to check two things:
-   *   - either we are below the maximum limit (GINT64_FROM_BE(self->hdr->write_head) < self->size)
+   *   - either we are below the maximum limit (GINT64_FROM_BE(self->hdr->write_head) < self->options->disk_buf_size)
    *   - or we can wrap around (GINT64_FROM_BE(self->hdr->read_head) != QDISK_RESERVED_SPACE)
    * If neither of the above is true, the buffer is full.
    */
@@ -278,7 +258,7 @@ qdisk_push_tail(QDisk *self, GString *record)
         }
       self->file_size = self->hdr->write_head;
 
-      if (self->hdr->write_head > self->size && self->hdr->backlog_head  != QDISK_RESERVED_SPACE)
+      if (self->hdr->write_head > self->options->disk_buf_size && self->hdr->backlog_head  != QDISK_RESERVED_SPACE)
         {
           /* we were appending to the file, we are over the limit, and space
            * is available before the read head. truncate and wrap.
@@ -355,19 +335,19 @@ qdisk_pop_head(QDisk *self, GString *record)
         }
 
       self->hdr->length--;
-      if (!self->reliable)
+      if (!self->options->reliable)
         {
           self->hdr->backlog_head = self->hdr->read_head;
         }
 
-      if (self->hdr->length == 0 && !self->reliable)
+      if (self->hdr->length == 0 && !self->options->reliable)
         {
           msg_debug("Queue file became empty, truncating file",
                     evt_tag_str("filename", self->filename),
                     NULL);
           self->hdr->read_head = QDISK_RESERVED_SPACE;
           self->hdr->write_head = QDISK_RESERVED_SPACE;
-          if (!self->reliable)
+          if (!self->options->reliable)
             {
               self->hdr->backlog_head = self->hdr->read_head;
             }
@@ -409,7 +389,7 @@ qdisk_load_queue(QDisk *self, GQueue *q, gint64 q_ofs, gint32 q_len, gint32 q_co
           LogMessage *msg;
 
           msg = log_msg_new_empty();
-          if (log_msg_deserialize(self->serializer, msg, sa))
+          if (log_msg_deserialize(self->options->serializer, msg, sa))
             {
               g_queue_push_tail(q, msg);
               /* we restore the queue without ACKs */
@@ -474,12 +454,12 @@ qdisk_load_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
       return FALSE;
     }
 
-  if (!self->reliable)
+  if (!self->options->reliable)
     {
       if (!(qout_ofs > 0 && qout_ofs < self->hdr->write_head))
         {
            if (!qdisk_load_queue(self, qout, qout_ofs, qout_len, qout_count))
-             return !self->read_only;
+             return !self->options->read_only;
         }
       else
         {
@@ -493,7 +473,7 @@ qdisk_load_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
       if (!(qbacklog_ofs > 0 && qbacklog_ofs < self->hdr->write_head))
         {
           if(!qdisk_load_queue(self, qbacklog, qbacklog_ofs, qbacklog_len, qbacklog_count))
-            return !self->read_only;
+            return !self->options->read_only;
         }
       else
         {
@@ -507,7 +487,7 @@ qdisk_load_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
       if (!(qoverflow_ofs > 0 && qoverflow_ofs < self->hdr->write_head))
         {
           if(!qdisk_load_queue(self, qoverflow, qoverflow_ofs, qoverflow_len, qoverflow_count))
-            return !self->read_only;
+            return !self->options->read_only;
         }
       else
         {
@@ -519,7 +499,7 @@ qdisk_load_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
         }
     }
 
-  if (!self->read_only)
+  if (!self->options->read_only)
     {
       end_ofs = qout_ofs;
       if (qbacklog_ofs && qbacklog_ofs < end_ofs)
@@ -530,7 +510,7 @@ qdisk_load_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
         qdisk_truncate_file(self, end_ofs);
     }
 
-  if (!self->reliable)
+  if (!self->options->reliable)
     {
       self->file_size = qout_ofs;
 
@@ -583,7 +563,7 @@ qdisk_save_queue(QDisk *self, GQueue *q, gint64 *q_ofs, gint32 *q_len)
        * disk anyway. */
 
       POINTER_TO_LOG_PATH_OPTIONS(g_queue_pop_head(q), &path_options);
-      log_msg_serialize(self->serializer, msg, sa); 
+      log_msg_serialize(self->options->serializer, msg, sa); 
       log_msg_ack(msg, &path_options, AT_PROCESSED);
       log_msg_unref(msg);
     }
@@ -617,7 +597,7 @@ qdisk_save_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
   gint32 qoverflow_len = 0;
   gint32 qoverflow_count = 0;
 
-  if (!self->reliable)
+  if (!self->options->reliable)
     {
       qout_count = qout->length / 2;
       qbacklog_count = qbacklog->length / 2;
@@ -643,7 +623,7 @@ qdisk_save_state(QDisk *self, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow)
   self->hdr->qoverflow_len = qoverflow_len;
   self->hdr->qoverflow_count = qoverflow_count;
 
-  if (!self->reliable)
+  if (!self->options->reliable)
     msg_info("Disk-buffer state saved",
              evt_tag_str("filename", self->filename),
              evt_tag_int("qout_length", qout_count),
@@ -674,10 +654,10 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
    */
   g_assert(!qdisk_initialized(self));
 
-  if (self->size <= 0)
+  if (self->options->disk_buf_size <= 0)
     return TRUE;
 
-  if (self->read_only && !filename)
+  if (self->options->read_only && !filename)
     return FALSE;
 
   if (!filename)
@@ -697,7 +677,7 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
 
   self->filename = g_strdup(filename);
   /* assumes self is zero initialized */
-  openflags = self->read_only ? (O_RDONLY | O_LARGEFILE) : (O_RDWR | O_LARGEFILE | (new_file ? O_CREAT : 0));
+  openflags = self->options->read_only ? (O_RDONLY | O_LARGEFILE) : (O_RDWR | O_LARGEFILE | (new_file ? O_CREAT : 0));
 #ifdef _WIN32
   openflags |= O_BINARY;
 #endif
@@ -731,7 +711,7 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
         }
     }
 #endif
-  p = mmap(0, sizeof(QDiskFileHeader),  self->read_only ? (PROT_READ) : (PROT_READ | PROT_WRITE), MAP_SHARED, self->fd, 0);
+  p = mmap(0, sizeof(QDiskFileHeader),  self->options->read_only ? (PROT_READ) : (PROT_READ | PROT_WRITE), MAP_SHARED, self->fd, 0);
 
   if (p == MAP_FAILED)
     {
@@ -746,7 +726,7 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
        madvise(p, sizeof(QDiskFileHeader), MADV_RANDOM);
      }
 
-  if (self->read_only)
+  if (self->options->read_only)
     {
       self->hdr = g_malloc(sizeof(QDiskFileHeader));
       memcpy(self->hdr, p, sizeof(QDiskFileHeader));
@@ -846,29 +826,20 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
 }
 
 void
-qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer, const gchar *dir)
+qdisk_init(QDisk *self, QDiskOptions *options)
 {
   self->fd = -1;
-  self->size = size;
-  self->read_only = read_only;
-  self->reliable = reliable;
-  self->mem_buf_size = mem_buf_size;
-  if (!reliable)
+  self->options = options;
+  if (!self->options->reliable)
     self->file_id = "SLQF";
   else
     {
       self->file_id = "SLRQ";
-      if (self->mem_buf_size < 0)
+      if (self->options->mem_buf_size < 0)
         {
-          self->mem_buf_size = PESSIMISTIC_MEM_BUF_SIZE;
+          self->options->mem_buf_size = PESSIMISTIC_MEM_BUF_SIZE;
         }
     }
-  if (dir == NULL)
-    {
-      dir = get_installation_path_for(PATH_QDISK);
-    }
-  self->dir = g_strdup(dir);
-  self->serializer = serializer;
 }
 
 void
@@ -880,15 +851,9 @@ qdisk_deinit(QDisk *self)
       self->filename = NULL;
     }
 
-  if (self->dir)
-    {
-      g_free(self->dir);
-      self->dir = NULL;
-    }
-
   if (self->hdr)
     {
-      if (self->read_only)
+      if (self->options->read_only)
         g_free(self->hdr);
       else
         munmap((void *)self->hdr, sizeof(QDiskFileHeader));
@@ -901,11 +866,7 @@ qdisk_deinit(QDisk *self)
       self->fd = -1;
     }
 
-  if (self->serializer)
-    {
-      log_msg_serializer_free(self->serializer);
-      self->serializer = NULL;
-    }
+  self->options = NULL;
 }
 
 gssize qdisk_read_from_backlog(QDisk *self, gpointer buffer, gsize bytes_to_read)
@@ -994,7 +955,7 @@ qdisk_set_length(QDisk *self, gint64 new_value)
 gint64
 qdisk_get_size(QDisk *self)
 {
-  return self->size;
+  return self->options->disk_buf_size;
 }
 
 const gchar *
@@ -1054,13 +1015,13 @@ qdisk_get_backlog_count(QDisk *self)
 gint
 qdisk_get_memory_size(QDisk *self)
 {
-  return self->mem_buf_size;
+  return self->options->mem_buf_size;
 }
 
 gboolean
 qdisk_is_read_only(QDisk *self)
 {
-  return self->read_only;
+  return self->options->read_only;
 }
 
 void
