@@ -69,11 +69,11 @@ open_queue(char *filename, LogQueue **lq, gboolean *reliable)
 
   if (*reliable)
     {
-      *lq = log_queue_disk_reliable_read_only_new(128, 1024 *1024, serializer);
+      *lq = log_queue_disk_reliable_read_only_new(128, 1024 *1024, serializer, NULL);
     }
   else
     {
-      *lq = log_queue_disk_non_reliable_read_only_new(1, 128, 128, serializer);
+      *lq = log_queue_disk_non_reliable_read_only_new(1, 128, 128, serializer, NULL);
     }
 
   if (!log_queue_disk_load_queue(*lq, filename))

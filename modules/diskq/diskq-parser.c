@@ -17,6 +17,7 @@ static CfgLexerKeyword diskq_keywords[] = {
   { "reliable",          KW_RELIABLE },
   { "mem_buf_size",      KW_MEM_BUF_SIZE },
   { "qout_size",         KW_QOUT_SIZE },
+  { "dir",               KW_DIR },
   { NULL }
 };
 

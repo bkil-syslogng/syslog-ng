@@ -28,7 +28,7 @@ gboolean qdisk_is_space_avail(QDisk *self, gint at_least);
 gboolean qdisk_push_tail(QDisk *self, GString *record);
 gboolean qdisk_pop_head(QDisk *self, GString *record);
 gboolean qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow);
-void qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer);
+void qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer, const gchar *dir);
 void qdisk_deinit(QDisk *self);
 void qdisk_reset_file_if_possible(QDisk *self);
 gboolean qdisk_initialized(QDisk *self);

@@ -30,8 +30,6 @@
 
 #define PATH_QDISK              SYSLOG_NG_PATH_LOCALSTATEDIR
 
-const gchar *qdisk_dir = NULL;
-
 typedef union _QDiskFileHeader
 {
   struct
@@ -74,6 +72,7 @@ struct _QDisk
   gint64 prev_length;
   gint64 file_size;
   LogMsgSerializer *serializer;
+  gchar *dir;
   QDiskFileHeader *hdr;
 };
 
@@ -107,7 +106,7 @@ qdisk_get_next_filename(QDisk *self)
   gchar tmpfname[256];
   gchar qdir[256];
 
-  g_snprintf(qdir, sizeof(qdir), "%s", qdisk_dir);
+  g_snprintf(qdir, sizeof(qdir), "%s", self->dir);
 
   /* NOTE: this'd be a security problem if we were not in our private directory. But we are. */
   while (!success && i < 100000)
@@ -847,7 +846,7 @@ qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, 
 }
 
 void
-qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer)
+qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer, const gchar *dir)
 {
   self->fd = -1;
   self->size = size;
@@ -864,11 +863,11 @@ qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint
           self->mem_buf_size = PESSIMISTIC_MEM_BUF_SIZE;
         }
     }
-
-  if ( qdisk_dir == NULL )
+  if (dir == NULL)
     {
-      qdisk_dir = get_installation_path_for(PATH_QDISK);
+      dir = get_installation_path_for(PATH_QDISK);
     }
+  self->dir = g_strdup(dir);
   self->serializer = serializer;
 }
 
@@ -879,6 +878,12 @@ qdisk_deinit(QDisk *self)
     {
       g_free(self->filename);
       self->filename = NULL;
+    }
+
+  if (self->dir)
+    {
+      g_free(self->dir);
+      self->dir = NULL;
     }
 
   if (self->hdr)

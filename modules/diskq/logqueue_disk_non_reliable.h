@@ -10,8 +10,8 @@
 
 #include "logqueue_disk.h"
 
-LogQueue *log_queue_disk_non_reliable_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer);
-LogQueue *log_queue_disk_non_reliable_read_only_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer);
+LogQueue *log_queue_disk_non_reliable_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer, const gchar *dir);
+LogQueue *log_queue_disk_non_reliable_read_only_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer, const gchar *dir);
 
 
 #endif /* LOG_QUEUE_DISK_NON_RELIABLE_H_ */

@@ -20,6 +20,7 @@ typedef struct _DiskQDestPlugin
   gint mem_buf_size;
   gint qout_size;
   LogMsgSerializer *serializer;
+  gchar *dir;
 } DiskQDestPlugin;
 
 DiskQDestPlugin *diskq_dest_plugin_new(void);
@@ -31,5 +32,6 @@ void diskq_mem_buf_size_set(DiskQDestPlugin *self, gint mem_buf_size);
 void diskq_mem_buf_length_set(DiskQDestPlugin *self, gint mem_buf_length);
 void diskq_check_plugin_settings(DiskQDestPlugin *self);
 void diskq_set_serializer(DiskQDestPlugin *self, LogMsgSerializer *serializer);
+void diskq_set_dir(DiskQDestPlugin *self, const gchar *dir);
 
 #endif
