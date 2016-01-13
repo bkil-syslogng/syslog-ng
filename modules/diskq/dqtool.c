@@ -37,18 +37,19 @@ static GOptionEntry info_options[] =
 };
 
 static gboolean
-open_queue(char *filename, LogQueue **lq, gboolean *reliable)
+open_queue(char *filename, LogQueue **lq, QDiskOptions *options)
 {
   GError *error = NULL;
-  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
+  options->serializer = log_msg_serializer_factory(configuration, "builtin", &error);
 
-  if (!serializer)
+  if (!options->serializer)
     {
       fprintf(stderr, "Can't load builtin serializer module: %s\n", error->message);
       return FALSE;
     }
 
-  *reliable = FALSE;
+  options->read_only = TRUE;
+  options->reliable = FALSE;
   FILE *f = fopen(filename, "rb");
   if (f)
     {
@@ -58,22 +59,26 @@ open_queue(char *filename, LogQueue **lq, gboolean *reliable)
       fclose(f);
       idbuf[4] = '\0';
       if (!strcmp(idbuf, "SLRQ"))
-        *reliable = TRUE;
+        options->reliable = TRUE;
     }
   else
     {
       fprintf(stderr, "File not found: %s\n", filename);
-      log_msg_serializer_free(serializer);
       return FALSE;
     }
 
-  if (*reliable)
+  if (options->reliable)
     {
-      *lq = log_queue_disk_reliable_read_only_new(128, 1024 *1024, serializer, NULL);
+      options->disk_buf_size = 128;
+      options->mem_buf_size = 1024 * 1024;
+      *lq = log_queue_disk_reliable_new(options);
     }
   else
     {
-      *lq = log_queue_disk_non_reliable_read_only_new(1, 128, 128, serializer, NULL);
+      options->disk_buf_size = 1;
+      options->mem_buf_size = 128;
+      options->qout_size = 128;
+      *lq = log_queue_disk_non_reliable_new(options);
     }
 
   if (!log_queue_disk_load_queue(*lq, filename))
@@ -92,6 +97,7 @@ dqtool_cat(int argc, char *argv[])
   LogMessage *log_msg = NULL;
   GError *error = NULL;
   LogTemplate *template = NULL;
+  QDiskOptions options = {0};
   gint i;
 
   if (template_string)
@@ -118,9 +124,8 @@ dqtool_cat(int argc, char *argv[])
     {
       LogPathOptions local_options = LOG_PATH_OPTIONS_INIT;
       LogQueue *lq;
-      gboolean reliable;
 
-      if (!open_queue(argv[i], &lq, &reliable))
+      if (!open_queue(argv[i], &lq, &options))
         continue;
 
       while ((log_msg = log_queue_pop_head(lq, &local_options)) != NULL)
@@ -147,9 +152,9 @@ dqtool_info(int argc, char *argv[])
   for (i = optind; i < argc; i++)
     {
       LogQueue *lq;
-      gboolean reliable;
+      QDiskOptions options = {0};
 
-      if (!open_queue(argv[i], &lq, &reliable))
+      if (!open_queue(argv[i], &lq, &options))
         continue;
       log_queue_unref(lq);
     }

@@ -22,6 +22,16 @@ __construct_serializer()
   return serializer;
 }
 
+void
+__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
+{
+  options->serializer = __construct_serializer();
+  options->disk_buf_size = size;
+  options->mem_buf_length = mem_size;
+  options->mem_buf_size = mem_size;
+  options->qout_size = 0;
+}
+
 static void msg_post_function(LogMessage *msg)
 {
   log_msg_unref(msg);
@@ -33,10 +43,19 @@ test_diskq_become_full(gboolean reliable)
   LogQueue *q;
   acked_messages = 0;
   fed_messages = 0;
+  QDiskOptions options = {0};
+
+  options.reliable = reliable;
   if (reliable)
-    q = log_queue_disk_reliable_new(1000, 1000, __construct_serializer());
+    {
+      __construct_options(&options, 1000, 1000);
+      q = log_queue_disk_reliable_new(&options);
+    }
   else
-    q = log_queue_disk_non_reliable_new(1000, 0, 0, __construct_serializer());
+    {
+      __construct_options(&options, 1000, 0);
+      q = log_queue_disk_non_reliable_new(&options);
+    }
 
   log_queue_set_use_backlog(q, TRUE);
 

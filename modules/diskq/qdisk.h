@@ -10,6 +10,7 @@
 
 #include "syslog-ng.h"
 #include "logmsg-serializer.h"
+#include "diskq.h"
 
 #define QDISK_RESERVED_SPACE 4096
 #define LOG_PATH_OPTIONS_TO_POINTER(lpo) GUINT_TO_POINTER(0x80000000 | (lpo)->ack_needed)
@@ -28,7 +29,7 @@ gboolean qdisk_is_space_avail(QDisk *self, gint at_least);
 gboolean qdisk_push_tail(QDisk *self, GString *record);
 gboolean qdisk_pop_head(QDisk *self, GString *record);
 gboolean qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow);
-void qdisk_init(QDisk *self, gint64 size, gboolean read_only, gboolean reliable, gint mem_buf_size, LogMsgSerializer *serializer, const gchar *dir);
+void qdisk_init(QDisk *self, QDiskOptions *options);
 void qdisk_deinit(QDisk *self);
 void qdisk_reset_file_if_possible(QDisk *self);
 gboolean qdisk_initialized(QDisk *self);
