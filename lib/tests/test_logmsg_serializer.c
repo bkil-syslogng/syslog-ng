@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2015 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2015 Viktor Juhasz
+ * Copyright (c) 2002-2015 Balabit
+ * Copyright (c) 2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
