@@ -398,7 +398,6 @@ case "$ostype" in
 		CFLAGS="${CFLAGS} -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_OSF_SOURCE -D_POSIX_C_SOURCE"
 		;;
 esac
-
 if test "$enable_dynamic_linking" = "auto" -a "$enable_mixed_linking" = "auto"; then
 	enable_dynamic_linking="yes"
 	enable_mixed_linking="no"
@@ -1103,8 +1102,14 @@ if test "x$enable_python" != "xno"; then
   fi
 
   PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, python_found="yes", python_found="no")
-  if test "x$enable_python" = "xyes" -a "x$python_found" = "xno"; then
-    AC_MSG_ERROR([Could not find the requested Python development libraries])
+  if test "x$enable_python" = "xyes"; then
+    if test "x$python_found" = "xyes"; then
+     if test "x$ostype" != "xHP_UX" -a "x$ostype" != "xOSF1"; then
+      CFLAGS="${CFLAGS} -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200112L"
+     fi
+    else
+      AC_MSG_ERROR([Could not find the requested Python development libraries])
+    fi
   fi
   enable_python="$python_found" 
 else
