@@ -353,11 +353,11 @@ __set_virtual_functions (LogQueueDisk *self)
 }
 
 LogQueue *
-log_queue_disk_non_reliable_read_only_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer)
+log_queue_disk_non_reliable_read_only_new(gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer, const gchar *dir)
 {
   LogQueueDiskNR *self = g_new0(LogQueueDiskNR, 1);
   log_queue_disk_init_instance (&self->super);
-  qdisk_init (self->super.qdisk, qdisk_size, TRUE, FALSE, 0, serializer);
+  qdisk_init (self->super.qdisk, qdisk_size, TRUE, FALSE, 0, serializer, dir);
   self->qbacklog = g_queue_new ();
   self->qout = g_queue_new ();
   self->qoverflow = g_queue_new ();
@@ -368,11 +368,11 @@ log_queue_disk_non_reliable_read_only_new(gint64 qdisk_size, gint qout_size, gin
 }
 
 LogQueue *
-log_queue_disk_non_reliable_new (gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer)
+log_queue_disk_non_reliable_new (gint64 qdisk_size, gint qout_size, gint qoverflow_size, LogMsgSerializer *serializer, const gchar *dir)
 {
   LogQueueDiskNR *self = g_new0(LogQueueDiskNR, 1);
   log_queue_disk_init_instance (&self->super);
-  qdisk_init (self->super.qdisk, qdisk_size, FALSE, FALSE, 0, serializer);
+  qdisk_init (self->super.qdisk, qdisk_size, FALSE, FALSE, 0, serializer, dir);
   self->qbacklog = g_queue_new ();
   self->qout = g_queue_new ();
   self->qoverflow = g_queue_new ();

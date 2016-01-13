@@ -134,9 +134,9 @@ diskq_dest_plugin_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer
   if (!queue)
     {
       if (self->reliable)
-        queue = log_queue_disk_reliable_new(self->disk_buf_size, self->mem_buf_size, self->serializer);
+        queue = log_queue_disk_reliable_new(self->disk_buf_size, self->mem_buf_size, self->serializer, self->dir);
       else
-        queue = log_queue_disk_non_reliable_new(self->disk_buf_size, self->qout_size, self->mem_buf_length, self->serializer);
+        queue = log_queue_disk_non_reliable_new(self->disk_buf_size, self->qout_size, self->mem_buf_length, self->serializer, self->dir);
       log_queue_set_throttle(queue, dd->throttle);
       queue->persist_name = g_strdup(persist_name);
     }
@@ -235,6 +235,23 @@ diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
   return TRUE;
 }
 
+void
+diskq_set_dir(DiskQDestPlugin *self, const gchar *dir)
+{
+  if (self->dir)
+    {
+      g_free(self->dir);
+    }
+  self->dir = g_strdup(dir);
+}
+
+void
+diskq_dest_plugin_free(LogDriverPlugin *s)
+{
+  DiskQDestPlugin *self = (DiskQDestPlugin *)s;
+  diskq_set_dir(self, NULL);
+}
+
 DiskQDestPlugin *
 diskq_dest_plugin_new(void)
 {
@@ -242,6 +259,7 @@ diskq_dest_plugin_new(void)
 
   log_driver_plugin_init_instance(&self->super);
   self->super.attach = diskq_dest_plugin_attach;
+  self->super.free_fn = diskq_dest_plugin_free;
   self->disk_buf_size = -1;
   self->mem_buf_length = -1;
   self->reliable = FALSE;

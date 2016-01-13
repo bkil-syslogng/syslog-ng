@@ -42,6 +42,7 @@ DiskQDestPlugin *last_plugin;
 %token KW_RELIABLE
 %token KW_MEM_BUF_SIZE
 %token KW_QOUT_SIZE
+%token KW_DIR
 
 
 %%
@@ -70,6 +71,7 @@ dest_diskq_option
         | KW_MEM_BUF_LENGTH '(' LL_NUMBER ')'  { diskq_mem_buf_length_set(last_plugin, $3); }
         | KW_DISK_BUF_SIZE '(' LL_NUMBER ')'   { diskq_disk_buf_size_set(last_plugin, $3); }
         | KW_QOUT_SIZE '(' LL_NUMBER ')'       { diskq_log_qout_size_set(last_plugin, $3); }
+        | KW_DIR '(' string ')'                { diskq_set_dir(last_plugin, $3); free($3); }
         ;
 
 /* INCLUDE_RULES */
