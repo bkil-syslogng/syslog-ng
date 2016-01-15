@@ -1,8 +1,27 @@
 /*
- * Copyright (C) 2006-2011 BalaBit IT Ltd.
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- * All rights reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
+
 #include "syslog-ng.h"
 #include "logqueue.h"
 #include "template/templates.h"
@@ -10,9 +29,9 @@
 #include "tags.h"
 #include "messages.h"
 #include "logpipe.h"
-#include "logqueue_disk.h"
-#include "logqueue_disk_reliable.h"
-#include "logqueue_disk_non_reliable.h"
+#include "logqueue-disk.h"
+#include "logqueue-disk-reliable.h"
+#include "logqueue-disk-non-reliable.h"
 #include "logmsg-serializer.h"
 
 #include <stdio.h>
@@ -37,7 +56,7 @@ static GOptionEntry info_options[] =
 };
 
 static gboolean
-open_queue(char *filename, LogQueue **lq, QDiskOptions *options)
+open_queue(char *filename, LogQueue **lq, DiskQueueOptions *options)
 {
   GError *error = NULL;
   options->serializer = log_msg_serializer_factory(configuration, "builtin", &error);
@@ -97,7 +116,7 @@ dqtool_cat(int argc, char *argv[])
   LogMessage *log_msg = NULL;
   GError *error = NULL;
   LogTemplate *template = NULL;
-  QDiskOptions options = {0};
+  DiskQueueOptions options = {0};
   gint i;
 
   if (template_string)
@@ -152,7 +171,7 @@ dqtool_info(int argc, char *argv[])
   for (i = optind; i < argc; i++)
     {
       LogQueue *lq;
-      QDiskOptions options = {0};
+      DiskQueueOptions options = {0};
 
       if (!open_queue(argv[i], &lq, &options))
         continue;

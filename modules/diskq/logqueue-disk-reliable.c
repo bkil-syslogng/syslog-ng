@@ -1,31 +1,41 @@
 /*
- * logqueue_disk_reliable.c
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- *  Created on: Sep 14, 2014
- *      Author: jviktor
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
 
 #include "syslog-ng.h"
 #include "qdisk.h"
 #include "logpipe.h"
-#include "logqueue_disk_reliable.h"
+#include "logqueue-disk-reliable.h"
 #include "messages.h"
 
-typedef struct _LogQueueDiskReliable
-{
-  LogQueueDisk super;
-  GQueue *qreliable;
-  GQueue *qbacklog;
-} LogQueueDiskReliable;
-
 static gboolean
-__start(LogQueueDisk *s, const gchar *filename)
+_start(LogQueueDisk *s, const gchar *filename)
 {
   return qdisk_start(s->qdisk, filename, NULL, NULL, NULL);
 }
 
 static gboolean
-__skip_message(LogQueueDisk *self)
+_skip_message(LogQueueDisk *self)
 {
   GString *serialized;
   SerializeArchive *sa;
@@ -48,7 +58,7 @@ __skip_message(LogQueueDisk *self)
 }
 
 static void
-__empty_queue(GQueue *self)
+_empty_queue(GQueue *self)
 {
   while (self && self->length > 0)
     {
@@ -64,13 +74,13 @@ __empty_queue(GQueue *self)
 }
 
 static gint64
-__get_length(LogQueueDisk *self)
+_get_length(LogQueueDisk *self)
 {
   return qdisk_get_length(self->qdisk);
 }
 
 static void
-__ack_backlog(LogQueueDisk *s, guint num_msg_to_ack)
+_ack_backlog(LogQueueDisk *s, guint num_msg_to_ack)
 {
   LogQueueDiskReliable *self = (LogQueueDiskReliable *) s;
   LogMessage *msg;
@@ -111,7 +121,7 @@ exit_reliable:
 }
 
 static gint
-__find_pos_in_qbacklog(LogQueueDiskReliable *self, gint64 new_pos)
+_find_pos_in_qbacklog(LogQueueDiskReliable *self, gint64 new_pos)
 {
   gint result = -1;
   int i = 0;
@@ -131,7 +141,7 @@ __find_pos_in_qbacklog(LogQueueDiskReliable *self, gint64 new_pos)
 }
 
 static void
-__move_message_from_qbacklog_to_qreliable(LogQueueDiskReliable *self)
+_move_message_from_qbacklog_to_qreliable(LogQueueDiskReliable *self)
 {
   gpointer ptr_opt = g_queue_pop_tail(self->qbacklog);
   gpointer ptr_msg = g_queue_pop_tail(self->qbacklog);
@@ -143,22 +153,22 @@ __move_message_from_qbacklog_to_qreliable(LogQueueDiskReliable *self)
 }
 
 static void
-__rewind_from_qbacklog(LogQueueDiskReliable *self, gint64 new_pos)
+_rewind_from_qbacklog(LogQueueDiskReliable *self, gint64 new_pos)
 {
   gint i;
   g_assert((self->qbacklog->length % 3) == 0);
 
-  gint rewind_backlog_queue = __find_pos_in_qbacklog(self, new_pos);
+  gint rewind_backlog_queue = _find_pos_in_qbacklog(self, new_pos);
 
   for (i = 0; i <= rewind_backlog_queue; i++)
     {
-      __move_message_from_qbacklog_to_qreliable(self);
+      _move_message_from_qbacklog_to_qreliable(self);
     }
 }
 
 
 static void
-__rewind_backlog(LogQueueDisk *s, guint rewind_count)
+_rewind_backlog(LogQueueDisk *s, guint rewind_count)
 {
   guint i;
 
@@ -174,7 +184,7 @@ __rewind_backlog(LogQueueDisk *s, guint rewind_count)
       new_read_head = qdisk_skip_record(self->super.qdisk, new_read_head);
     }
 
-  __rewind_from_qbacklog(self, new_read_head);
+  _rewind_from_qbacklog(self, new_read_head);
 
   qdisk_set_backlog_count (self->super.qdisk, number_of_messages_stay_in_backlog);
   qdisk_set_reader_head (self->super.qdisk, new_read_head);
@@ -184,7 +194,7 @@ __rewind_backlog(LogQueueDisk *s, guint rewind_count)
 }
 
 static LogMessage *
-__pop_head(LogQueueDisk *s, LogPathOptions *path_options)
+_pop_head(LogQueueDisk *s, LogPathOptions *path_options)
 {
   LogQueueDiskReliable *self = (LogQueueDiskReliable *) s;
   LogMessage *msg = NULL;
@@ -196,7 +206,7 @@ __pop_head(LogQueueDisk *s, LogPathOptions *path_options)
         {
           msg = g_queue_pop_head (self->qreliable);
           POINTER_TO_LOG_PATH_OPTIONS (g_queue_pop_head (self->qreliable), path_options);
-          __skip_message (s);
+          _skip_message (s);
           if (self->super.super.use_backlog)
             {
               log_msg_ref (msg);
@@ -240,7 +250,7 @@ __pop_head(LogQueueDisk *s, LogPathOptions *path_options)
 }
 
 static gboolean
-__push_tail(LogQueueDisk *s, LogMessage *msg, LogPathOptions *local_options, const LogPathOptions *path_options)
+_push_tail(LogQueueDisk *s, LogMessage *msg, LogPathOptions *local_options, const LogPathOptions *path_options)
 {
   LogQueueDiskReliable *self = (LogQueueDiskReliable *) s;
 
@@ -250,7 +260,7 @@ __push_tail(LogQueueDisk *s, LogMessage *msg, LogPathOptions *local_options, con
       /* we were not able to store the msg, warn */
       msg_error("Destination reliable queue full, dropping message",
                 evt_tag_str("filename", qdisk_get_filename (self->super.qdisk)),
-                evt_tag_int("queue_len", __get_length(s)),
+                evt_tag_int("queue_len", _get_length(s)),
                 evt_tag_int("mem_buf_size", qdisk_get_memory_size (self->super.qdisk)),
                 evt_tag_int("disk_buf_size", qdisk_get_size (self->super.qdisk)),
                 evt_tag_str("persist_name", self->super.super.persist_name), NULL);
@@ -287,11 +297,11 @@ __push_tail(LogQueueDisk *s, LogMessage *msg, LogPathOptions *local_options, con
 }
 
 static void
-__free_queue(LogQueueDisk *s)
+_free_queue(LogQueueDisk *s)
 {
   LogQueueDiskReliable *self = (LogQueueDiskReliable *) s;
-  __empty_queue(self->qreliable);
-  __empty_queue(self->qbacklog);
+  _empty_queue(self->qreliable);
+  _empty_queue(self->qbacklog);
   g_queue_free(self->qreliable);
   self->qreliable = NULL;
   g_queue_free(self->qbacklog);
@@ -299,15 +309,15 @@ __free_queue(LogQueueDisk *s)
 }
 
 static gboolean
-__load_queue(LogQueueDisk *s, const gchar *filename)
+_load_queue(LogQueueDisk *s, const gchar *filename)
 {
   LogQueueDiskReliable *self = (LogQueueDiskReliable *) s;
-  __empty_queue(self->qreliable);
+  _empty_queue(self->qreliable);
   return qdisk_start(s->qdisk, filename, NULL, NULL, NULL);
 }
 
 static gboolean
-__save_queue (LogQueueDisk *s, gboolean *persistent)
+_save_queue (LogQueueDisk *s, gboolean *persistent)
 {
   *persistent = TRUE;
   qdisk_deinit (s->qdisk);
@@ -316,21 +326,21 @@ __save_queue (LogQueueDisk *s, gboolean *persistent)
 
 
 static void
-__set_virtual_functions(LogQueueDisk *self)
+_set_virtual_functions(LogQueueDisk *self)
 {
-  self->get_length = __get_length;
-  self->ack_backlog = __ack_backlog;
-  self->rewind_backlog = __rewind_backlog;
-  self->pop_head = __pop_head;
-  self->push_tail = __push_tail;
-  self->free_fn = __free_queue;
-  self->load_queue = __load_queue;
-  self->start = __start;
-  self->save_queue = __save_queue;
+  self->get_length = _get_length;
+  self->ack_backlog = _ack_backlog;
+  self->rewind_backlog = _rewind_backlog;
+  self->pop_head = _pop_head;
+  self->push_tail = _push_tail;
+  self->free_fn = _free_queue;
+  self->load_queue = _load_queue;
+  self->start = _start;
+  self->save_queue = _save_queue;
 }
 
 LogQueue *
-log_queue_disk_reliable_new(QDiskOptions *options)
+log_queue_disk_reliable_new(DiskQueueOptions *options)
 {
   g_assert(options->reliable == TRUE);
   LogQueueDiskReliable *self = g_new0(LogQueueDiskReliable, 1);
@@ -338,6 +348,6 @@ log_queue_disk_reliable_new(QDiskOptions *options)
   qdisk_init(self->super.qdisk, options);
   self->qreliable = g_queue_new();
   self->qbacklog = g_queue_new();
-  __set_virtual_functions(&self->super);
+  _set_virtual_functions(&self->super);
   return &self->super.super;
 }

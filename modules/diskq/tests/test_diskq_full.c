@@ -1,11 +1,12 @@
 #include "messages.h"
-#include "logqueue_disk.h"
-#include "logqueue_disk_reliable.h"
-#include "logqueue_disk_non_reliable.h"
+#include "logqueue-disk.h"
+#include "logqueue-disk-reliable.h"
+#include "logqueue-disk-non-reliable.h"
 #include "apphook.h"
 #include "plugin.h"
 #include "testutils.h"
 #include "queue_utils_lib.h"
+#include "test_diskq_tools.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,24 +14,7 @@
 #define DISKQ_FILENAME "test_become_full.qf"
 
 MsgFormatOptions parse_options;
-static LogMsgSerializer *
-__construct_serializer()
-{
-  GError *error = NULL;
-  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
-  assert_not_null(serializer, "Can't load builtin serializer");
-  return serializer;
-}
 
-void
-__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
-{
-  options->serializer = __construct_serializer();
-  options->disk_buf_size = size;
-  options->mem_buf_length = mem_size;
-  options->mem_buf_size = mem_size;
-  options->qout_size = 0;
-}
 
 static void msg_post_function(LogMessage *msg)
 {
@@ -43,17 +27,17 @@ test_diskq_become_full(gboolean reliable)
   LogQueue *q;
   acked_messages = 0;
   fed_messages = 0;
-  QDiskOptions options = {0};
+  DiskQueueOptions options = {0};
 
   options.reliable = reliable;
   if (reliable)
     {
-      __construct_options(&options, 1000, 1000);
+      _construct_options(&options, 1000, 1000, reliable);
       q = log_queue_disk_reliable_new(&options);
     }
   else
     {
-      __construct_options(&options, 1000, 0);
+      _construct_options(&options, 1000, 0, reliable);
       q = log_queue_disk_non_reliable_new(&options);
     }
 
@@ -71,6 +55,7 @@ test_diskq_become_full(gboolean reliable)
   assert_gint(q->dropped_messages->value, 1000, "Bad dropped message number (reliable: %s)", reliable ? "TRUE" : "FALSE");
 
   log_queue_unref(q);
+  disk_queue_options_destroy(&options);
   unlink(DISKQ_FILENAME);
 }
 

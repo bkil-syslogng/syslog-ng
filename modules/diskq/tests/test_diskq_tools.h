@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2016 Balabit
- * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2002-2016 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2009-2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,21 +22,34 @@
  *
  */
 
-#ifndef DISKQ_H
-#define DISKQ_H
+#ifndef TEST_DISKQ_TOOLS_H_
+#define TEST_DISKQ_TOOLS_H_
 
-#include "config.h"
-#include "logqueue.h"
-#include "driver.h"
+#include "syslog-ng.h"
 #include "logmsg-serializer.h"
 #include "diskq-options.h"
+#include "testutils.h"
 
-typedef struct _DiskQDestPlugin
+static inline LogMsgSerializer *
+_construct_serializer()
 {
-  LogDriverPlugin super;
-  DiskQueueOptions options;
-} DiskQDestPlugin;
+  GError *error = NULL;
+  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
+  assert_not_null(serializer, "Can't load builting serializer");
+  return serializer;
+}
 
-DiskQDestPlugin *diskq_dest_plugin_new(void);
+static inline void
+_construct_options(DiskQueueOptions *options, guint64 size, gint mem_size, gboolean reliable)
+{
+  memset(options, 0, sizeof(DiskQueueOptions));
+  options->serializer = _construct_serializer();
+  options->disk_buf_size = size;
+  options->mem_buf_length = mem_size;
+  options->mem_buf_size = mem_size;
+  options->qout_size = 0;
+  options->reliable = reliable;
+}
 
-#endif
+
+#endif /* TEST_DISKQ_TOOLS_H_ */

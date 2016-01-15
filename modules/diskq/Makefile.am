@@ -8,17 +8,19 @@ modules_diskq_libdisk_buffer_la_SOURCES = \
   modules/diskq/diskq.c \
   modules/diskq/diskq.h \
   modules/diskq/diskq-grammar.y \
+  modules/diskq/diskq-options.h \
+  modules/diskq/diskq-options.c \
   modules/diskq/diskq-parser.c \
   modules/diskq/diskq-parser.h \
   modules/diskq/diskq-plugin.c \
+  modules/diskq/logqueue-disk.c \
+  modules/diskq/logqueue-disk.h \
+  modules/diskq/logqueue-disk-non-reliable.c \
+  modules/diskq/logqueue-disk-non-reliable.h \
+  modules/diskq/logqueue-disk-reliable.c \
+  modules/diskq/logqueue-disk-reliable.h \
   modules/diskq/qdisk.h \
-  modules/diskq/qdisk.c \
-  modules/diskq/logqueue_disk.c \
-  modules/diskq/logqueue_disk.h \
-  modules/diskq/logqueue_disk_reliable.c \
-  modules/diskq/logqueue_disk_reliable.h \
-  modules/diskq/logqueue_disk_non_reliable.c \
-  modules/diskq/logqueue_disk_non_reliable.h
+  modules/diskq/qdisk.c
 
 modules_diskq_libdisk_buffer_la_CFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/modules/diskq -I$(top_builddir)/modules/diskq -I$(top_srcdir)/lib -I../../lib
 modules_diskq_libdisk_buffer_la_LIBADD = $(MODULE_DEPS_LIBS)

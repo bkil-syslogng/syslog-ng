@@ -1,7 +1,7 @@
 #include "logqueue.h"
 #include "logqueue-fifo.h"
-#include "logqueue_disk.h"
-#include "logqueue_disk_reliable.h"
+#include "logqueue-disk.h"
+#include "logqueue-disk-reliable.h"
 #include "diskq.h"
 #include "logpipe.h"
 #include "apphook.h"
@@ -11,6 +11,7 @@
 #include "mainloop-io-worker.h"
 #include "tls-support.h"
 #include "queue_utils_lib.h"
+#include "test_diskq_tools.h"
 #include "testutils.h"
 
 #include <stdlib.h>
@@ -26,34 +27,15 @@
 
 MsgFormatOptions parse_options;
 
-static LogMsgSerializer *
-__construct_serializer()
-{
-  GError *error = NULL;
-  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
-  assert_not_null(serializer, "Can't load builtin serializer");
-  return serializer;
-}
-
-void
-__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
-{
-  options->serializer = __construct_serializer();
-  options->disk_buf_size = size;
-  options->mem_buf_length = mem_size;
-  options->mem_buf_size = mem_size;
-}
-
-void
+static void
 testcase_zero_diskbuf_and_normal_acks()
 {
   LogQueue *q;
   gint i;
   GString *filename;
-  QDiskOptions options = {0};
+  DiskQueueOptions options = {0};
 
-  __construct_options(&options, 10000000, 100000);
-  options.reliable = TRUE; 
+  _construct_options(&options, 10000000, 100000, TRUE);
 
   q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
@@ -74,18 +56,18 @@ testcase_zero_diskbuf_and_normal_acks()
   log_queue_unref(q);
   unlink(filename->str);
   g_string_free(filename,TRUE);
+  disk_queue_options_destroy(&options);
 }
 
-void
+static void
 testcase_zero_diskbuf_alternating_send_acks()
 {
   LogQueue *q;
   gint i;
   GString *filename;
-  QDiskOptions options = {0};
+  DiskQueueOptions options = {0};
 
-  __construct_options(&options, 10000000, 100000);
-  options.reliable = TRUE;
+  _construct_options(&options, 10000000, 100000, TRUE);
 
   q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
@@ -107,18 +89,18 @@ testcase_zero_diskbuf_alternating_send_acks()
   log_queue_unref(q);
   unlink(filename->str);
   g_string_free(filename,TRUE);
+  disk_queue_options_destroy(&options);
 }
 
-void
+static void
 testcase_ack_and_rewind_messages()
 {
   LogQueue *q;
   gint i;
   GString *filename;
-  QDiskOptions options = {0};
+  DiskQueueOptions options = {0};
 
-  __construct_options(&options, 10000000, 100000);
-  options.reliable = TRUE;
+  _construct_options(&options, 10000000, 100000, TRUE);
 
   q = log_queue_disk_reliable_new(&options);
   log_queue_set_use_backlog(q, TRUE);
@@ -144,6 +126,7 @@ testcase_ack_and_rewind_messages()
   log_queue_unref(q);
   unlink(filename->str);
   g_string_free(filename,TRUE);
+  disk_queue_options_destroy(&options);
 }
 
 #define FEEDERS 1
@@ -154,7 +137,7 @@ testcase_ack_and_rewind_messages()
 GStaticMutex tlock;
 glong sum_time;
 
-gpointer
+static gpointer
 threaded_feed(gpointer args)
 {
   LogQueue *q = (LogQueue *)args;
@@ -173,7 +156,7 @@ threaded_feed(gpointer args)
   main_loop_worker_thread_start(NULL);
 
   sa = g_sockaddr_inet_new("10.10.10.10", 1010);
-  tmpl = log_msg_new(msg_str, msg_len, g_sockaddr_ref(sa), &parse_options);
+  tmpl = log_msg_new(msg_str, msg_len, sa, &parse_options);
   g_get_current_time(&start);
   for (i = 0; i < MESSAGES_PER_FEEDER; i++)
     {
@@ -192,12 +175,13 @@ threaded_feed(gpointer args)
   g_static_mutex_lock(&tlock);
   sum_time += diff;
   g_static_mutex_unlock(&tlock);
-  log_msg_unref(tmpl);
   main_loop_worker_thread_stop();
+  log_msg_unref(tmpl);
+  g_sockaddr_unref(sa);
   return NULL;
 }
 
-gpointer
+static gpointer
 threaded_consume(gpointer st)
 {
   LogQueue *q = (LogQueue *) st;
@@ -239,7 +223,7 @@ threaded_consume(gpointer st)
 }
 
 
-void
+static void
 testcase_with_threads()
 {
   LogQueue *q;
@@ -250,10 +234,10 @@ testcase_with_threads()
   log_queue_set_max_threads(FEEDERS);
   for (i = 0; i < TEST_RUNS; i++)
     {
-      QDiskOptions options = {0};
+      DiskQueueOptions options = {0};
 
-      __construct_options(&options, 10000000, 100000);
-      options.reliable = TRUE;
+      _construct_options(&options, 10000000, 100000, TRUE);
+
       q = log_queue_disk_reliable_new(&options);
       filename = g_string_sized_new(32);
       g_string_sprintf(filename,"test-%04d.qf",i);
@@ -276,6 +260,8 @@ testcase_with_threads()
       log_queue_unref(q);
       unlink(filename->str);
       g_string_free(filename,TRUE);
+      disk_queue_options_destroy(&options);
+      
     }
   fprintf(stderr, "Feed speed: %.2lf\n", (double) TEST_RUNS * MESSAGES_SUM * 1000000 / sum_time);
 }

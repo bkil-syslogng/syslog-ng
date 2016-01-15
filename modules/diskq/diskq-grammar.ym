@@ -1,7 +1,25 @@
 /*
- * Copyright (C) 2006-2011 BalaBit IT Ltd.
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- * All rights reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
 
 %code top {
@@ -16,11 +34,13 @@
 #include "syslog-names.h"
 #include "messages.h"
 #include "diskq.h"
+#include "diskq-options.h"
 #include "diskq-grammar.h"
 
 #include <string.h>
 
 DiskQDestPlugin *last_plugin;
+DiskQueueOptions *last_options;
 
 }
 
@@ -56,8 +76,9 @@ dest_diskq
           {
             last_plugin = diskq_dest_plugin_new();
             *instance = &last_plugin->super;
+            last_options = &last_plugin->options;
           }
-          '(' dest_diskq_options ')' { diskq_check_plugin_settings(last_plugin); }
+          '(' dest_diskq_options ')' { disk_queue_options_check_plugin_settings(last_options); }
         ;
 
 dest_diskq_options
@@ -66,12 +87,12 @@ dest_diskq_options
         ;
 
 dest_diskq_option
-        : KW_RELIABLE '(' yesno ')'            { diskq_reliable_set(last_plugin, $3); }
-        | KW_MEM_BUF_SIZE '(' LL_NUMBER ')'    { diskq_mem_buf_size_set(last_plugin, $3); }
-        | KW_MEM_BUF_LENGTH '(' LL_NUMBER ')'  { diskq_mem_buf_length_set(last_plugin, $3); }
-        | KW_DISK_BUF_SIZE '(' LL_NUMBER ')'   { diskq_disk_buf_size_set(last_plugin, $3); }
-        | KW_QOUT_SIZE '(' LL_NUMBER ')'       { diskq_log_qout_size_set(last_plugin, $3); }
-        | KW_DIR '(' string ')'                { diskq_set_dir(last_plugin, $3); free($3); }
+        : KW_RELIABLE '(' yesno ')'            { disk_queue_options_reliable_set(last_options, $3); }
+        | KW_MEM_BUF_SIZE '(' LL_NUMBER ')'    { disk_queue_options_mem_buf_size_set(last_options, $3); }
+        | KW_MEM_BUF_LENGTH '(' LL_NUMBER ')'  { disk_queue_options_mem_buf_length_set(last_options, $3); }
+        | KW_DISK_BUF_SIZE '(' LL_NUMBER ')'   { disk_queue_options_disk_buf_size_set(last_options, $3); }
+        | KW_QOUT_SIZE '(' LL_NUMBER ')'       { disk_queue_options_qout_size_set(last_options, $3); }
+        | KW_DIR '(' string ')'                { disk_queue_options_set_dir(last_options, $3); free($3); }
         ;
 
 /* INCLUDE_RULES */

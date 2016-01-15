@@ -1,7 +1,8 @@
 #include "queue_utils_lib.h"
+#include "test_diskq_tools.h"
 #include "testutils.h"
 #include "qdisk.c"
-#include "logqueue_disk_reliable.c"
+#include "logqueue-disk-reliable.h"
 #include "apphook.h"
 #include "plugin.h"
 
@@ -19,45 +20,24 @@ static gint num_of_ack;
 
 static gint mark_message_serialized_size;
 
-QDiskOptions options;
+DiskQueueOptions options;
 
 #define NUMBER_MESSAGES_IN_QUEUE(n) (n * 3)
 
 MsgFormatOptions parse_options;
-static LogMsgSerializer *
-__construct_serializer()
-{
-  GError *error = NULL;
-  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
-  assert_not_null(serializer, "Can't load builting serializer");
-  return serializer;
-}
-
-void
-__construct_options(QDiskOptions *options, guint64 size, gint mem_size)
-{
-  memset(options, 0, sizeof(QDiskOptions));
-  options->serializer = __construct_serializer();
-  options->disk_buf_size = size;
-  options->mem_buf_length = mem_size;
-  options->mem_buf_size = mem_size;
-  options->qout_size = 0;
-  options->reliable = TRUE;
-}
-
 
 static void
-__dummy_ack(LogMessage *lm,  AckType ack_type)
+_dummy_ack(LogMessage *lm,  AckType ack_type)
 {
   num_of_ack++;
 }
 
 static LogQueueDiskReliable *
-__init_diskq_for_test(gint64 size, gint64 membuf_size)
+_init_diskq_for_test(gint64 size, gint64 membuf_size)
 {
   LogQueueDiskReliable *dq;
 
-  __construct_options(&options, size, membuf_size);
+  _construct_options(&options, size, membuf_size, TRUE);
   LogQueue *q = log_queue_disk_reliable_new(&options);
   struct stat st;
   num_of_ack = 0;
@@ -74,10 +54,11 @@ __init_diskq_for_test(gint64 size, gint64 membuf_size)
 }
 
 static void
-__common_cleanup(LogQueueDiskReliable *dq)
+_common_cleanup(LogQueueDiskReliable *dq)
 {
   log_queue_unref(&dq->super.super);
   unlink(FILENAME);
+  disk_queue_options_destroy(&options);
 }
 
 static gint
@@ -91,7 +72,7 @@ get_serialized_message_size(LogMessage *msg)
   serialized = g_string_sized_new(64);
   sa = serialize_string_archive_new(serialized);
 
-  serializer = __construct_serializer();
+  serializer = _construct_serializer();
   assert_true(log_msg_serialize(serializer, msg, sa), NULL);
 
   result = serialized->len;
@@ -112,7 +93,7 @@ set_mark_message_serialized_size()
 }
 
 static void
-__prepare_eof_test(LogQueueDiskReliable *dq, LogMessage **msg1, LogMessage **msg2)
+_prepare_eof_test(LogQueueDiskReliable *dq, LogMessage **msg1, LogMessage **msg2)
 {
   LogPathOptions local_options = LOG_PATH_OPTIONS_INIT;
   gint64 start_pos = TEST_DISKQ_SIZE;
@@ -120,10 +101,10 @@ __prepare_eof_test(LogQueueDiskReliable *dq, LogMessage **msg1, LogMessage **msg
   *msg1 = log_msg_new_mark();
   *msg2 = log_msg_new_mark();
 
-  (*msg1)->ack_func = __dummy_ack;
+  (*msg1)->ack_func = _dummy_ack;
   log_msg_add_ack(*msg1, &local_options);
 
-  (*msg2)->ack_func = __dummy_ack;
+  (*msg2)->ack_func = _dummy_ack;
   log_msg_add_ack(*msg2, &local_options);
 
   dq->super.qdisk->hdr->write_head = start_pos;
@@ -167,7 +148,7 @@ test_rewind_over_eof(LogQueueDiskReliable *dq)
   LogMessage *read_message3;
 
   LogPathOptions local_options = LOG_PATH_OPTIONS_INIT;
-  msg3->ack_func = __dummy_ack;
+  msg3->ack_func = _dummy_ack;
 
   log_queue_push_tail(&dq->super.super, msg3, &local_options);
   gint64 previous_read_head = dq->super.qdisk->hdr->read_head;
@@ -211,13 +192,13 @@ test_ack_over_eof(LogQueueDiskReliable *dq, LogMessage *msg1, LogMessage *msg2)
 static void
 test_over_EOF()
 {
-  LogQueueDiskReliable *dq = __init_diskq_for_test(TEST_DISKQ_SIZE, TEST_DISKQ_SIZE);
+  LogQueueDiskReliable *dq = _init_diskq_for_test(TEST_DISKQ_SIZE, TEST_DISKQ_SIZE);
   LogMessage *msg1;
   LogMessage *msg2;
 
   LogPathOptions read_options = LOG_PATH_OPTIONS_INIT;
 
-  __prepare_eof_test(dq, &msg1, &msg2);
+  _prepare_eof_test(dq, &msg1, &msg2);
 
   test_read_over_eof(dq, msg1, msg2);
 
@@ -228,7 +209,7 @@ test_over_EOF()
   log_msg_drop(msg1, &read_options);
   log_msg_drop(msg2, &read_options);
   assert_gint(num_of_ack, 2, ASSERTION_ERROR("Messages aren't acked"));
-  __common_cleanup(dq);
+  _common_cleanup(dq);
 }
 
 /*
@@ -238,7 +219,7 @@ test_over_EOF()
  * but messages in qbacklog are the end of the backlog
  */
 void
-__prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
+_prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
 {
   gint i;
 
@@ -247,7 +228,7 @@ __prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
       LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
       LogMessage *mark_message;
       mark_message = log_msg_new_mark();
-      mark_message->ack_func = __dummy_ack;
+      mark_message->ack_func = _dummy_ack;
       log_queue_push_tail(&dq->super.super, mark_message, &path_options);
     }
 
@@ -277,7 +258,7 @@ __prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
       LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
       LogMessage *mark_message;
       mark_message = log_msg_new_mark();
-      mark_message->ack_func = __dummy_ack;
+      mark_message->ack_func = _dummy_ack;
       log_queue_push_tail(&dq->super.super, mark_message, &path_options);
       mark_message = log_queue_pop_head(&dq->super.super, &path_options);
       assert_gint(dq->qreliable->length, 0,
@@ -310,15 +291,15 @@ void
 test_rewind_backlog_partially_used_qbacklog(LogQueueDiskReliable *dq, gint64 old_read_pos)
 {
   /*
-     * Rewind more 2 messages
-     * - the reader the should be moved to the good position
-     * - the qreliable should contain 1 items
-     * - the qbackbacklog should contain 2 items
-     */
-    log_queue_rewind_backlog(&dq->super.super, 2);
-    assert_gint64(dq->super.qdisk->hdr->read_head, old_read_pos - mark_message_serialized_size, ASSERTION_ERROR("Bad reader position"));
-    assert_gint(dq->qreliable->length, NUMBER_MESSAGES_IN_QUEUE(1), ASSERTION_ERROR("Incorrect number of items in the qreliable"));
-    assert_gint(dq->qbacklog->length, NUMBER_MESSAGES_IN_QUEUE(2), ASSERTION_ERROR("Incorrect number of items in the qbacklog"));
+   * Rewind more 2 messages
+   * - the reader the should be moved to the good position
+   * - the qreliable should contain 1 items
+   * - the qbackbacklog should contain 2 items
+   */
+  log_queue_rewind_backlog(&dq->super.super, 2);
+  assert_gint64(dq->super.qdisk->hdr->read_head, old_read_pos - mark_message_serialized_size, ASSERTION_ERROR("Bad reader position"));
+  assert_gint(dq->qreliable->length, NUMBER_MESSAGES_IN_QUEUE(1), ASSERTION_ERROR("Incorrect number of items in the qreliable"));
+  assert_gint(dq->qbacklog->length, NUMBER_MESSAGES_IN_QUEUE(2), ASSERTION_ERROR("Incorrect number of items in the qbacklog"));
 }
 
 void
@@ -349,10 +330,10 @@ test_rewind_backlog_use_whole_qbacklog(LogQueueDiskReliable *dq)
 void
 test_rewind_backlog()
 {
-  LogQueueDiskReliable *dq = __init_diskq_for_test(QDISK_RESERVED_SPACE + mark_message_serialized_size * 10, mark_message_serialized_size * 5);
+  LogQueueDiskReliable *dq = _init_diskq_for_test(QDISK_RESERVED_SPACE + mark_message_serialized_size * 10, mark_message_serialized_size * 5);
   gint64 old_read_pos;
 
-  __prepare_rewind_backlog_test(dq, &old_read_pos);
+  _prepare_rewind_backlog_test(dq, &old_read_pos);
 
   test_rewind_backlog_without_using_qbacklog(dq, old_read_pos);
 
@@ -360,7 +341,7 @@ test_rewind_backlog()
 
   test_rewind_backlog_use_whole_qbacklog(dq);
 
-    __common_cleanup(dq);
+  _common_cleanup(dq);
 }
 
 gint

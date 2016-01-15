@@ -1,9 +1,28 @@
 /*
- * Copyright (C) 2006-2011 BalaBit IT Ltd.
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- * All rights reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
-#include "logqueue_disk.h"
+
+#include "logqueue-disk.h"
 #include "logpipe.h"
 #include "messages.h"
 #include "serialize.h"
@@ -24,8 +43,8 @@
 
 const QueueType log_queue_disk_type = "DISK";
 
-gint64
-log_queue_disk_get_length(LogQueue *s)
+static gint64
+_get_length(LogQueue *s)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
   gint64 qdisk_length = 0;
@@ -38,7 +57,7 @@ log_queue_disk_get_length(LogQueue *s)
 }
 
 static void
-log_queue_disk_push_tail(LogQueue *s, LogMessage *msg, const LogPathOptions *path_options)
+_push_tail(LogQueue *s, LogMessage *msg, const LogPathOptions *path_options)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
   LogPathOptions local_options = *path_options;
@@ -62,8 +81,8 @@ log_queue_disk_push_tail(LogQueue *s, LogMessage *msg, const LogPathOptions *pat
   g_static_mutex_unlock(&self->super.lock);
 }
 
-void
-log_queue_disk_push_head(LogQueue *s, LogMessage *msg, const LogPathOptions *path_options)
+static void
+_push_head(LogQueue *s, LogMessage *msg, const LogPathOptions *path_options)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -75,8 +94,8 @@ log_queue_disk_push_head(LogQueue *s, LogMessage *msg, const LogPathOptions *pat
   g_static_mutex_unlock(&self->super.lock);
 }
 
-LogMessage *
-log_queue_disk_pop_head(LogQueue *s, LogPathOptions *path_options)
+static LogMessage *
+_pop_head(LogQueue *s, LogPathOptions *path_options)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
   LogMessage *msg = NULL;
@@ -95,8 +114,8 @@ log_queue_disk_pop_head(LogQueue *s, LogPathOptions *path_options)
   return msg;
 }
 
-void
-log_queue_disk_ack_backlog(LogQueue *s, gint num_msg_to_ack)
+static void
+_ack_backlog(LogQueue *s, gint num_msg_to_ack)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -110,8 +129,8 @@ log_queue_disk_ack_backlog(LogQueue *s, gint num_msg_to_ack)
   g_static_mutex_unlock(&self->super.lock);
 }
 
-void
-log_queue_disk_rewind_backlog(LogQueue *s, guint rewind_count)
+static void
+_rewind_backlog(LogQueue *s, guint rewind_count)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -126,7 +145,7 @@ log_queue_disk_rewind_backlog(LogQueue *s, guint rewind_count)
 }
 
 void
-log_queue_disk_rewind_backlog_all(LogQueue *s)
+_backlog_all(LogQueue *s)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -186,7 +205,7 @@ log_queue_disk_get_filename(LogQueue *s)
 }
 
 static void
-log_queue_disk_free(LogQueue *s)
+_free(LogQueue *s)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -198,8 +217,8 @@ log_queue_disk_free(LogQueue *s)
   g_free(self);
 }
 
-gboolean
-__pop_disk(LogQueueDisk *self, LogMessage **msg)
+static gboolean
+_pop_disk(LogQueueDisk *self, LogMessage **msg)
 {
   GString *serialized;
   SerializeArchive *sa;
@@ -235,8 +254,8 @@ __pop_disk(LogQueueDisk *self, LogMessage **msg)
   return TRUE;
 }
 
-LogMessage *
-__read_message(LogQueueDisk *self, LogPathOptions *path_options)
+static LogMessage *
+_read_message(LogQueueDisk *self, LogPathOptions *path_options)
 {
   LogMessage *msg = NULL;
   do
@@ -245,7 +264,7 @@ __read_message(LogQueueDisk *self, LogPathOptions *path_options)
         {
           break;
         }
-      if (!__pop_disk (self, &msg))
+      if (!_pop_disk (self, &msg))
         {
           msg_error("Error reading from disk-queue file, dropping disk queue",
                     evt_tag_str ("filename", qdisk_get_filename (self->qdisk)), NULL);
@@ -260,8 +279,8 @@ __read_message(LogQueueDisk *self, LogPathOptions *path_options)
   return msg;
 }
 
-gboolean
-__write_message(LogQueueDisk *self, LogMessage *msg)
+static gboolean
+_write_message(LogQueueDisk *self, LogMessage *msg)
 {
   GString *serialized;
   SerializeArchive *sa;
@@ -279,7 +298,7 @@ __write_message(LogQueueDisk *self, LogMessage *msg)
 }
 
 static void
-__restart_diskq(LogQueueDisk *self, gboolean corrupted)
+_restart_diskq(LogQueueDisk *self, gboolean corrupted)
 {
   gchar *filename = g_strdup(qdisk_get_filename(self->qdisk));
   gchar *new_file = NULL;
@@ -297,16 +316,16 @@ __restart_diskq(LogQueueDisk *self, gboolean corrupted)
   g_free(filename);
 }
 
-void
-__restart(LogQueueDisk *self)
+static void
+_restart(LogQueueDisk *self)
 {
-  __restart_diskq(self, FALSE);
+  _restart_diskq(self, FALSE);
 }
 
-void
-__restart_corrupted(LogQueueDisk *self)
+static void
+_restart_corrupted(LogQueueDisk *self)
 {
-  __restart_diskq(self, TRUE);
+  _restart_diskq(self, TRUE);
 }
 
 
@@ -316,17 +335,17 @@ log_queue_disk_init_instance(LogQueueDisk *self)
   log_queue_init_instance(&self->super,NULL);
   self->qdisk = qdisk_new();
 
-  self->super.get_length = log_queue_disk_get_length;
-  self->super.push_tail = log_queue_disk_push_tail;
-  self->super.push_head = log_queue_disk_push_head;
-  self->super.pop_head = log_queue_disk_pop_head;
-  self->super.ack_backlog = log_queue_disk_ack_backlog;
-  self->super.rewind_backlog = log_queue_disk_rewind_backlog;
-  self->super.rewind_backlog_all = log_queue_disk_rewind_backlog_all;
-  self->super.free_fn = log_queue_disk_free;
+  self->super.get_length = _get_length;
+  self->super.push_tail = _push_tail;
+  self->super.push_head = _push_head;
+  self->super.pop_head = _pop_head;
+  self->super.ack_backlog = _ack_backlog;
+  self->super.rewind_backlog = _rewind_backlog;
+  self->super.rewind_backlog_all = _backlog_all;
+  self->super.free_fn = _free;
 
-  self->read_message = __read_message;
-  self->write_message = __write_message;
-  self->restart = __restart;
-  self->restart_corrupted = __restart_corrupted;
+  self->read_message = _read_message;
+  self->write_message = _write_message;
+  self->restart = _restart;
+  self->restart_corrupted = _restart_corrupted;
 }

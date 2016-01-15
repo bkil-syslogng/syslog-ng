@@ -1,16 +1,32 @@
 /*
- * qdisk.h
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- *  Created on: Sep 13, 2014
- *      Author: jviktor
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
 
 #ifndef QDISK_H_
 #define QDISK_H_
 
 #include "syslog-ng.h"
-#include "logmsg-serializer.h"
-#include "diskq.h"
+#include "diskq-options.h"
 
 #define QDISK_RESERVED_SPACE 4096
 #define LOG_PATH_OPTIONS_TO_POINTER(lpo) GUINT_TO_POINTER(0x80000000 | (lpo)->ack_needed)
@@ -29,7 +45,7 @@ gboolean qdisk_is_space_avail(QDisk *self, gint at_least);
 gboolean qdisk_push_tail(QDisk *self, GString *record);
 gboolean qdisk_pop_head(QDisk *self, GString *record);
 gboolean qdisk_start(QDisk *self, const gchar *filename, GQueue *qout, GQueue *qbacklog, GQueue *qoverflow);
-void qdisk_init(QDisk *self, QDiskOptions *options);
+void qdisk_init(QDisk *self, DiskQueueOptions *options);
 void qdisk_deinit(QDisk *self);
 void qdisk_reset_file_if_possible(QDisk *self);
 gboolean qdisk_initialized(QDisk *self);
@@ -56,5 +72,7 @@ const gchar *qdisk_get_filename(QDisk *self);
 gssize qdisk_read_from_backlog(QDisk *self, gpointer buffer, gsize bytes_to_read);
 gssize qdisk_read(QDisk *self, gpointer buffer, gsize bytes_to_read, gint64 position);
 guint64 qdisk_skip_record(QDisk *self, guint64 position);
+
 LogMsgSerializer *qdisk_get_serializer(QDisk *self);
+
 #endif /* QDISK_H_ */

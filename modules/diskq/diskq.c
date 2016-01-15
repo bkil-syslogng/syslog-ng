@@ -1,103 +1,38 @@
 /*
- * Copyright (C) 2006-2011 BalaBit IT Ltd.
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
- * All rights reserved.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
  */
+
 #include "driver.h"
 #include "messages.h"
 
 #include "diskq.h"
-#include "logqueue_disk.h"
-#include "logqueue_disk_reliable.h"
-#include "logqueue_disk_non_reliable.h"
+#include "logqueue-disk.h"
+#include "logqueue-disk-reliable.h"
+#include "logqueue-disk-non-reliable.h"
 #include "persist-state.h"
 
-#define MIN_DISK_BUF_SIZE 1024*1024
-
-void
-diskq_log_qout_size_set(DiskQDestPlugin *self, gint qout_size)
-{
-  if (qout_size < 64)
-    {
-      msg_warning("WARNING: The configured qout size is smaller than the minimum allowed",
-                  evt_tag_int("configured size", qout_size),
-                  evt_tag_int("minimum allowed size", 64),
-                  evt_tag_int("new size", 64),
-                  NULL);
-      qout_size = 64;
-    }
-  self->options.qout_size = qout_size;
-}
-
-void
-diskq_disk_buf_size_set(DiskQDestPlugin *self, gint64 disk_buf_size)
-{
-  if (disk_buf_size == 0)
-    {
-      msg_warning("WARNING: The configured disk buffer size is zero. No disk queue file will be created.", NULL);
-    }
-  else if (disk_buf_size < MIN_DISK_BUF_SIZE)
-    {
-      msg_warning("WARNING: The configured disk buffer size is smaller than the minimum allowed",
-                  evt_tag_int("configured size", disk_buf_size),
-                  evt_tag_int("minimum allowed size", MIN_DISK_BUF_SIZE),
-                  evt_tag_int("new size", MIN_DISK_BUF_SIZE),
-                  NULL);
-      disk_buf_size = MIN_DISK_BUF_SIZE;
-    }
-  self->options.disk_buf_size = disk_buf_size;
-}
-
-void
-diskq_reliable_set(DiskQDestPlugin *self, gboolean reliable)
-{
-  self->options.reliable = reliable;
-}
-
-void
-diskq_mem_buf_size_set(DiskQDestPlugin *self, gint mem_buf_size)
-{
-  self->options.mem_buf_size = mem_buf_size;
-}
-
-void
-diskq_mem_buf_length_set(DiskQDestPlugin *self, gint mem_buf_length)
-{
-  self->options.mem_buf_length = mem_buf_length;
-}
-
-void
-diskq_check_plugin_settings(DiskQDestPlugin *self)
-{
-  if (self->options.reliable)
-    {
-      if (self->options.mem_buf_length > 0)
-        {
-          msg_warning("WARNING: Reliable queue: the mem-buf-length parameter is omitted", NULL);
-        }
-    }
-  else
-    {
-      if (self->options.mem_buf_size > 0)
-        {
-          msg_warning("WARNING: Non-reliable queue: the mem-buf-size parameter is omitted", NULL);
-        }
-    }
-}
-
-void
-diskq_set_serializer(DiskQDestPlugin *self, LogMsgSerializer *serializer)
-{
-  self->options.serializer = serializer;
-}
-
-/*
- * NOTE: we don't invoke the inherited acquire_queue() functionality,
- * so if there are multiple plugins registered to this same hook, this
- * will completely hide it away.
- */
-LogQueue *
-diskq_dest_plugin_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer user_data)
+static LogQueue *
+_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer user_data)
 {
   DiskQDestPlugin *self = (DiskQDestPlugin *) user_data;
   GlobalConfig *cfg = log_pipe_get_config(&dd->super.super);
@@ -175,7 +110,7 @@ diskq_dest_plugin_acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer
 }
 
 void
-diskq_dest_plugin_release_queue(LogDestDriver *dd, LogQueue *queue, gpointer user_data)
+_release_queue(LogDestDriver *dd, LogQueue *queue, gpointer user_data)
 {
   GlobalConfig *cfg = log_pipe_get_config(&dd->super.super);
   gboolean persistent;
@@ -192,7 +127,7 @@ diskq_dest_plugin_release_queue(LogDestDriver *dd, LogQueue *queue, gpointer use
 }
 
 static gboolean
-diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
+_attach(LogDriverPlugin *s, LogDriver *d)
 {
   DiskQDestPlugin *self = (DiskQDestPlugin *) s;
   LogDestDriver *dd = (LogDestDriver *) d;
@@ -229,39 +164,19 @@ diskq_dest_plugin_attach(LogDriverPlugin *s, LogDriver *d)
     self->options.qout_size = 64;
 
   dd->acquire_queue_data = self;
-  dd->acquire_queue = diskq_dest_plugin_acquire_queue;
+  dd->acquire_queue = _acquire_queue;
   dd->release_queue_data = self;
-  dd->release_queue = diskq_dest_plugin_release_queue;
+  dd->release_queue = _release_queue;
   return TRUE;
 }
 
-void
-diskq_set_dir(DiskQDestPlugin *self, const gchar *dir)
-{
-  if (self->options.dir)
-    {
-      g_free(self->options.dir);
-    }
-  self->options.dir = g_strdup(dir);
-}
-
-void
-diskq_dest_plugin_free(LogDriverPlugin *s)
+static void
+_free(LogDriverPlugin *s)
 {
   DiskQDestPlugin *self = (DiskQDestPlugin *)s;
-  diskq_set_dir(self, NULL);
+  disk_queue_options_destroy(&self->options);
 }
 
-static void
-__set_default_options(QDiskOptions *self)
-{
-  self->disk_buf_size = -1;
-  self->mem_buf_length = -1;
-  self->reliable = FALSE;
-  self->mem_buf_size = -1;
-  self->qout_size = -1;
-  self->dir = get_installation_path_for(PATH_LOCALSTATEDIR);
-}
 
 DiskQDestPlugin *
 diskq_dest_plugin_new(void)
@@ -269,9 +184,9 @@ diskq_dest_plugin_new(void)
   DiskQDestPlugin *self = g_new0(DiskQDestPlugin, 1);
 
   log_driver_plugin_init_instance(&self->super);
-  __set_default_options(&self->options);
-  self->super.attach = diskq_dest_plugin_attach;
-  self->super.free_fn = diskq_dest_plugin_free;
+  disk_queue_options_set_default_options(&self->options);
+  self->super.attach = _attach;
+  self->super.free_fn = _free;
   return self;
 }
 
