@@ -76,7 +76,10 @@ _push_tail(LogQueue *s, LogMessage *msg, const LogPathOptions *path_options)
     }
   stats_counter_inc (self->super.dropped_messages);
 
-  log_msg_drop(msg, path_options);
+  if (path_options->flow_control_requested)
+    log_msg_ack(msg, path_options, AT_SUSPENDED);
+  else
+    log_msg_drop(msg, path_options, AT_PROCESSED);
 
   g_static_mutex_unlock(&self->super.lock);
 }

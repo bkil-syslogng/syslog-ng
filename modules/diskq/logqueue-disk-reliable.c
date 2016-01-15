@@ -69,7 +69,7 @@ _empty_queue(GQueue *self)
       POINTER_TO_LOG_PATH_OPTIONS(g_queue_pop_head(self), &path_options);
 
       g_free(temppos);
-      log_msg_drop(msg, &path_options);
+      log_msg_drop(msg, &path_options, AT_PROCESSED);
     }
 }
 

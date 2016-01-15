@@ -29,7 +29,6 @@
 #include "logmsg-serializer.h"
 #include "stats/stats-registry.h"
 #include "reloc.h"
-#include "misc.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -87,6 +86,27 @@ struct _QDisk
   QDiskFileHeader *hdr;
   DiskQueueOptions *options;
 };
+
+static gboolean
+pwrite_strict(gint fd, const void *buf, size_t count, off_t offset)
+{
+  ssize_t written = pwrite(fd, buf, count, offset);
+  gboolean result = TRUE;
+  if (written != count)
+    {
+      if (written != -1)
+        {
+          msg_error("Short written",
+                    evt_tag_int("Number of bytes want to write", count),
+                    evt_tag_int("Number of bytes written", written),
+                    NULL);
+          errno = ENOSPC;
+        }
+      result = FALSE;
+    }
+  return result;
+}
+
 
 static gboolean
 _is_position_eof(QDisk *self, gint64 position)

@@ -168,7 +168,7 @@ test_rewind_over_eof(LogQueueDiskReliable *dq)
   assert_gint(dq->super.qdisk->hdr->read_head, dq->super.qdisk->hdr->write_head, ASSERTION_ERROR("Read head in bad position"));
   assert_true(msg3 == read_message3, ASSERTION_ERROR("Message 3 isn't read from qreliable"));
 
-  log_msg_drop(msg3, &local_options);
+  log_msg_drop(msg3, &local_options, AT_PROCESSED);
 }
 
 static void
@@ -206,8 +206,8 @@ test_over_EOF()
 
   test_ack_over_eof(dq, msg1, msg2);
 
-  log_msg_drop(msg1, &read_options);
-  log_msg_drop(msg2, &read_options);
+  log_msg_drop(msg1, &read_options, AT_PROCESSED);
+  log_msg_drop(msg2, &read_options, AT_PROCESSED);
   assert_gint(num_of_ack, 2, ASSERTION_ERROR("Messages aren't acked"));
   _common_cleanup(dq);
 }

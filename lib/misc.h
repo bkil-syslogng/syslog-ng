@@ -31,7 +31,4 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-
-gboolean pwrite_strict(gint fd, const void *buf, size_t count, off_t offset);
-
 #endif
