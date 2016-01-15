@@ -49,7 +49,12 @@ _dyn_entry_cmp(const void *a, const void *b)
   NVHandle handle_a = NV_TABLE_DYNVALUE_HANDLE(entry_a);
   NVHandle handle_b = NV_TABLE_DYNVALUE_HANDLE(entry_b);
 
-  return (handle_a - handle_b);
+  if (handle_a == handle_b)
+    {
+      return 0;
+    }
+
+  return (handle_a < handle_b) ? -1 : 1;
 }
 
 void
@@ -187,7 +192,7 @@ _update_sd_entries(NVHandle handle, const gchar *name, const gchar *value, gssiz
       dot = strrchr(name,'.');
       if (dot - name - logmsg_sd_prefix_len < 0)
         {
-          /*Standalone SDATA */
+          /* Standalone SDATA */
           flag = ((strlen(name) - logmsg_sd_prefix_len) << 8) + LM_VF_SDATA;
         }
       else

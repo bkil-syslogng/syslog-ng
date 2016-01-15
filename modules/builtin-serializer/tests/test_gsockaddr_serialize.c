@@ -33,7 +33,7 @@ GlobalConfig *cfg;
 MsgFormatOptions parse_options;
 
 
-void
+static void
 test_empty()
 {
   GString *stream = g_string_new("");
@@ -51,7 +51,7 @@ test_empty()
   g_string_free(stream, TRUE);
 }
 
-void
+static void
 test_inet()
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
@@ -74,10 +74,10 @@ test_inet()
   g_sockaddr_unref(read_addr);
 }
 
-void
+static void
 test_inet6()
 {
-#if ENABLE_IPV6
+#if SYSLOG_NG_ENABLE_IPV6
   GSockAddr *addr = g_sockaddr_inet6_new("::1", 5555);
   GSockAddr *read_addr = NULL;
 
@@ -99,7 +99,7 @@ test_inet6()
 #endif
 }
 
-void
+static void
 test_unix()
 {
   GSockAddr *addr = g_sockaddr_unix_new("testpath");
@@ -118,7 +118,7 @@ test_unix()
   g_sockaddr_unref(read_addr);
 }
 
-void
+static void
 test_inet_false()
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
@@ -131,7 +131,7 @@ test_inet_false()
   assert_true(g_sockaddr_serialize(sa, addr), "FAILED TO SERIALIZE");
 
   g_string_truncate(stream, 0);
-  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD BE FAILED HERE");
+  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD HAVE FAILED HERE");
 
   serialize_archive_free(sa);
   sa = serialize_string_archive_new(stream);
@@ -146,7 +146,7 @@ test_inet_false()
   g_sockaddr_unref(read_addr);
 }
 
-void
+static void
 test_inet6_false()
 {
 #if ENABLE_IPV6
@@ -162,7 +162,7 @@ test_inet6_false()
   assert_true(g_sockaddr_serialize(sa, addr), "FAILED TO SERIALIZE");
 
   g_string_truncate(stream, 0);
-  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD BE FAILED HERE");
+  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD HAVE FAILED HERE");
 
   serialize_archive_free(sa);
   sa = serialize_string_archive_new(stream);
@@ -177,7 +177,7 @@ test_inet6_false()
 #endif
 }
 
-void
+static void
 test_bad_family()
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
@@ -192,7 +192,7 @@ test_bad_family()
   assert_true(g_sockaddr_serialize(sa, addr), "FAILED TO SERIALIZE");
 
   g_string_overwrite(stream, 0, (const gchar *)&bad_family);
-  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD BE FAILED HERE");
+  assert_false(g_sockaddr_deserialize(sa, &read_addr), "SHOULD HAVE FAILED HERE");
 
   serialize_archive_free(sa);
   g_string_free(stream, TRUE);

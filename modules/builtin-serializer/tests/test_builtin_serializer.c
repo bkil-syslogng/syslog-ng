@@ -38,7 +38,7 @@ GlobalConfig *cfg;
 
 MsgFormatOptions parse_options;
 
-void
+static void
 test_serializer()
 {
   LogMessage *msg = NULL;
