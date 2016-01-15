@@ -569,6 +569,7 @@ zone_info_parser(unsigned char **input, gboolean is64bitData, gint *version)
   gint32 *gmt_offsets = NULL;
   gint64 isgmtcnt, isdstcnt, leapcnt, timecnt, typecnt, charcnt;
   gboolean insertInitial = FALSE;
+  *version = 0;
 
   buf = *input;
   *input += 4;
@@ -600,8 +601,6 @@ zone_info_parser(unsigned char **input, gboolean is64bitData, gint *version)
     {
       if (buf[0] != 0)
         *version = buf[0] - '0';
-      else
-        *version = 0;
     }
 
   /* Read reserved bytes */
