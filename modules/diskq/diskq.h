@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,21 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef DISKQ_H
+#define DISKQ_H
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "config.h"
+#include "logqueue.h"
+#include "driver.h"
+#include "logmsg-serializer.h"
+#include "diskq-options.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+typedef struct _DiskQDestPlugin
+{
+  LogDriverPlugin super;
+  DiskQueueOptions options;
+} DiskQDestPlugin;
+
+DiskQDestPlugin *diskq_dest_plugin_new(void);
 
 #endif

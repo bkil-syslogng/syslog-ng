@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2016 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2009-2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,34 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef TEST_DISKQ_TOOLS_H_
+#define TEST_DISKQ_TOOLS_H_
 
 #include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "logmsg-serializer.h"
+#include "diskq-options.h"
+#include "testutils.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+static inline LogMsgSerializer *
+_construct_serializer()
+{
+  GError *error = NULL;
+  LogMsgSerializer *serializer = log_msg_serializer_factory(configuration, "builtin", &error);
+  assert_not_null(serializer, "Can't load builting serializer");
+  return serializer;
+}
 
-#endif
+static inline void
+_construct_options(DiskQueueOptions *options, guint64 size, gint mem_size, gboolean reliable)
+{
+  memset(options, 0, sizeof(DiskQueueOptions));
+  options->serializer = _construct_serializer();
+  options->disk_buf_size = size;
+  options->mem_buf_length = mem_size;
+  options->mem_buf_size = mem_size;
+  options->qout_size = 0;
+  options->reliable = reliable;
+}
+
+
+#endif /* TEST_DISKQ_TOOLS_H_ */

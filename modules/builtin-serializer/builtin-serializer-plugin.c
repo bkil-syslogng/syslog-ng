@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2015 Balabit
+ * Copyright (c) 2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,34 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#include "cfg-parser.h"
+#include "plugin.h"
+#include "plugin-types.h"
+#include "builtin-serializer.h"
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
 
-#endif
+static Plugin basic_serializer_plugins[] = {
+  {
+  .type = LL_CONTEXT_SERIALIZER,
+  .name = "builtin",
+  .construct = builtin_serializer_constructor,
+  }
+};
+
+gboolean
+builtin_serializer_module_init(GlobalConfig *cfg, CfgArgs *args)
+{
+  plugin_register(cfg, basic_serializer_plugins, G_N_ELEMENTS(basic_serializer_plugins));
+  return TRUE;
+}
+
+const ModuleInfo module_info =
+{
+  .canonical_name = "builtin-serializer",
+  .version = SYSLOG_NG_VERSION,
+  .description = "The builtin-serializer module provide the builtin log message serializer plugin",
+  .core_revision = SYSLOG_NG_SOURCE_REVISION,
+  .plugins = basic_serializer_plugins,
+  .plugins_len = G_N_ELEMENTS(basic_serializer_plugins),
+};

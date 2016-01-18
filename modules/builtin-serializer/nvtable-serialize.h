@@ -1,6 +1,8 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2002-2015 Balabit
  * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2012-2015 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2012-2013 Viktor Tusa
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +24,27 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef _NVTABLE_SERIALIZE_H
+#define _NVTABLE_SERIALIZE_H
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "nvtable.h"
+#include "serialize.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+NVTable *nv_table_deserialize(SerializeArchive *sa);
+gboolean nv_table_serialize(SerializeArchive *sa, NVTable *self);
+void nv_table_update_handles(NVTable *self, NVRegistry *logmsg_registry,
+                         NVHandle *handles_to_update, guint8 num_handles_to_update);
+
+static inline gboolean
+serialize_read_nvhandle(SerializeArchive *sa, NVHandle* handle)
+{
+  return serialize_read_uint32(sa, handle);
+}
+
+static inline gboolean
+serialize_write_nvhandle(SerializeArchive *sa, NVHandle handle)
+{
+  return serialize_write_uint32(sa, handle);
+}
 
 #endif

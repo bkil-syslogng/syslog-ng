@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,15 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef DISKQ_PARSER_H_INCLUDED
+#define DISKQ_PARSER_H_INCLUDED
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "cfg-parser.h"
+#include "cfg-lexer.h"
+#include "diskq.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+extern CfgParser diskq_parser;
+
+CFG_PARSER_DECLARE_LEXER_BINDING(diskq_, LogDriverPlugin **)
 
 #endif

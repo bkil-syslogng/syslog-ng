@@ -4,3 +4,9 @@
    fun:hashlittle
    fun:lh_char_hash
 }
+{
+  diskq_write_nvtable
+  Memcheck:Param
+  pwrite64(buf)
+  obj:/lib/x86_64-linux-gnu/libpthread-2.19.so
+}

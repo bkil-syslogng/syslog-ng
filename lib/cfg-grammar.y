@@ -158,6 +158,7 @@ extern struct _StatsOptions *last_stats_options;
 %token LL_CONTEXT_INNER_SRC           16
 %token LL_CONTEXT_CLIENT_PROTO        17
 %token LL_CONTEXT_SERVER_PROTO        18
+%token LL_CONTEXT_SERIALIZER          19
 
 /* statements */
 %token KW_SOURCE                      10000

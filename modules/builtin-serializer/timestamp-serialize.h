@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2015 Balabit
+ * Copyright (c) 2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,15 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef TIMESTAMP_SERIALIZE_H
+#define TIMESTAMP_SERIALIZE_H
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "logmsg.h"
+#include "serialize.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+gboolean timestamp_serialize(SerializeArchive *sa, LogStamp *timestamps);
+
+gboolean timestamp_deserialize(SerializeArchive *sa, LogStamp *timestamps);
+
 
 #endif

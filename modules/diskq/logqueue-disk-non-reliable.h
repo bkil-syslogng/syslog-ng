@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,21 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#ifndef LOG_QUEUE_DISK_NON_RELIABLE_H_
+#define LOG_QUEUE_DISK_NON_RELIABLE_H_
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#include "logqueue-disk.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
+typedef struct _LogQueueDiskNonReliable
+{
+  LogQueueDisk super;
+  GQueue *qout;
+  GQueue *qoverflow;
+  GQueue *qbacklog;
+  gint qoverflow_size;
+  gint qout_size;
+} LogQueueDiskNonReliable;
 
-#endif
+LogQueue *log_queue_disk_non_reliable_new(DiskQueueOptions *options);
+
+#endif /* LOG_QUEUE_DISK_NON_RELIABLE_H_ */

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2015 Balabit
+ * Copyright (c) 2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,32 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#include "logmsg-serializer.h"
+#include "plugin.h"
+#include "plugin-types.h"
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+#define LOGMSG_SERIALIZER_ERROR log_template_error_quark()
 
-#include <sys/types.h>
-#include <sys/socket.h>
+GQuark log_template_error_quark(void);
 
-#endif
+enum LogMsgSerializerError
+{
+  LOGMSG_SERIALIZER_NOT_FOUND
+};
+
+
+LogMsgSerializer *
+log_msg_serializer_factory(GlobalConfig *cfg, const gchar *name, GError **error)
+{
+  LogMsgSerializer *self = NULL;
+  Plugin *p = plugin_find(cfg, LL_CONTEXT_SERIALIZER, name);
+  if (!p)
+    {
+      g_set_error(error, LOGMSG_SERIALIZER_ERROR, LOGMSG_SERIALIZER_NOT_FOUND, "Unknown serializer name \"%s\"", name);
+    }
+  else
+    {
+      self = plugin_construct(p, cfg, LL_CONTEXT_SERIALIZER, name);
+    }
+  return self;
+}

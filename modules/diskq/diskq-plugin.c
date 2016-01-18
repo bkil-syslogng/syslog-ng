@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2002-2016 Balabit
+ * Copyright (c) 2016 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,36 @@
  *
  */
 
-#ifndef MISC_H_INCLUDED
-#define MISC_H_INCLUDED
+#include "cfg-parser.h"
+#include "plugin.h"
+#include "plugin-types.h"
 
-#include "syslog-ng.h"
-#include "gsockaddr.h"
+extern CfgParser diskq_parser;
 
-#include <sys/types.h>
-#include <sys/socket.h>
+static Plugin diskq_plugins[] =
+{
+  {
+    .type = LL_CONTEXT_INNER_DEST,
+    .name = "disk_buffer",
+    .parser = &diskq_parser,
+  },
+};
 
+#ifndef STATIC
+const ModuleInfo module_info =
+{
+  .canonical_name = "disk_buffer",
+  .version = SYSLOG_NG_VERSION,
+  .description = "This module provides disk buffer based queuing mechanism",
+  .core_revision = SYSLOG_NG_SOURCE_REVISION,
+  .plugins = diskq_plugins,
+  .plugins_len = G_N_ELEMENTS(diskq_plugins),
+};
 #endif
+
+gboolean
+disk_buffer_module_init(GlobalConfig *cfg, CfgArgs *args)
+{
+  plugin_register(cfg, diskq_plugins, G_N_ELEMENTS(diskq_plugins));
+  return TRUE;
+}
