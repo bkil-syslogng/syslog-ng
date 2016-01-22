@@ -311,9 +311,7 @@ _value_pairs_always_exclude_properties(RiemannDestDriver *self)
   gint i;
 
   if (!self->fields.attributes)
-    {
       return;
-    }
 
   for (i = 0; properties[i]; i++)
     value_pairs_add_glob_pattern(self->fields.attributes, properties[i], FALSE);
@@ -400,9 +398,11 @@ riemann_dd_field_add_msg_tag(const LogMessage *msg,
   return TRUE;
 }
 
+/* TODO escape '\0' when passing down the value */
 static gboolean
 riemann_dd_field_add_attribute_vp(const gchar *name,
                                   TypeHint type, const gchar *value,
+                                  gsize value_len,
                                   gpointer user_data)
 {
   riemann_event_t *event = (riemann_event_t *)user_data;

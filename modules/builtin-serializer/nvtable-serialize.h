@@ -1,6 +1,8 @@
 /*
- * Copyright (c) 2002-2010 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 1998-2010 Balázs Scheidler
+ * Copyright (c) 2002-2012 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 1998-2012 Balázs Scheidler
+ * Copyright (c) 2012-2013 Viktor Juhasz
+ * Copyright (c) 2012-2013 Viktor Tusa
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,32 +24,27 @@
  *
  */
 
-#include "syslog-ng.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#ifndef _NVTABLE_SERIALIZE_H
+#define _NVTABLE_SERIALIZE_H
 
-int 
-main(int argc, char *argv[])
+#include "nvtable.h"
+#include "serialize.h"
+
+NVTable *nv_table_deserialize(SerializeArchive *sa);
+gboolean nv_table_serialize(SerializeArchive *sa, NVTable *self);
+void nv_table_update_handles(NVTable *self, NVRegistry *logmsg_registry,
+                         NVHandle *handles_to_update, guint8 num_handles_to_update);
+
+static inline gboolean
+serialize_read_nvhandle(SerializeArchive *sa, NVHandle* handle)
 {
-#ifdef ENV_LD_LIBRARY_PATH
-  {
-    gchar *cur_ldlibpath;
-    gchar ldlibpath[512];
-#if _AIX
-    const gchar *ldlibpath_name = "LIBPATH";
-#else    
-    const gchar *ldlibpath_name = "LD_LIBRARY_PATH";
-#endif
-
-    cur_ldlibpath = getenv(ldlibpath_name);
-    snprintf(ldlibpath, sizeof(ldlibpath), "%s=%s%s%s", ldlibpath_name, ENV_LD_LIBRARY_PATH, cur_ldlibpath ? ":" : "", cur_ldlibpath ? cur_ldlibpath : "");
-    putenv(ldlibpath);
-  }
-#endif
-  execv(PATH_SYSLOGNG, argv);
-  fprintf(stderr, "Unable to execute main syslog-ng binary from env-wrapper, path=%s, error=%s\n", PATH_SYSLOGNG, strerror(errno));
-  return 127;
+  return serialize_read_uint32(sa, handle);
 }
+
+static inline gboolean
+serialize_write_nvhandle(SerializeArchive *sa, NVHandle handle)
+{
+  return serialize_write_uint32(sa, handle);
+}
+
+#endif
