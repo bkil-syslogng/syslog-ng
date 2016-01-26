@@ -31,7 +31,15 @@ int afmongodb_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 static CfgLexerKeyword afmongodb_keywords[] = {
   { "mongodb",			KW_MONGODB },
   { "uri",                      KW_URI },
+  { "servers",                  KW_SERVERS },
+  { "database",			KW_DATABASE },
   { "collection",		KW_COLLECTION },
+  { "username",			KW_USERNAME },
+  { "password",			KW_PASSWORD },
+  { "safe_mode",		KW_SAFE_MODE },
+  { "host",                     KW_HOST, KWS_OBSOLETE, "Use the servers() option instead of host() and port()" },
+  { "port",                     KW_PORT, KWS_OBSOLETE, "Use the servers() option instead of host() and port()" },
+  { "path",                     KW_PATH },
   { NULL }
 };
 
