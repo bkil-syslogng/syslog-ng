@@ -25,6 +25,7 @@ test_ldflags		= -no-install
 
 PREOPEN_SYSLOGFORMAT	= -dlpreopen ${top_builddir}/modules/syslogformat/libsyslogformat.la
 PREOPEN_BASICFUNCS	= -dlpreopen ${top_builddir}/modules/basicfuncs/libbasicfuncs.la
+PREOPEN_BUILTIN_SERIALIZER = -dlpreopen ${top_builddir}/modules/builtin-serializer/libbuiltin-serializer.la
 PREOPEN_CORE		= $(PREOPEN_SYSLOGFORMAT) $(PREOPEN_BASICFUNCS)
 
 syslog_ng_tools		= ${top_srcdir}/lib
