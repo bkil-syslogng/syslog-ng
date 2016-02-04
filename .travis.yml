@@ -16,6 +16,7 @@ before_script:
   - unset PYTHON_CFLAGS # HACK
   - ./configure CFLAGS=-Werror --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-gcov --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
   - make -j || make V=1 --keep-going # to make error messages more readable on error
+  - make check
 script:
   - if [ "$CC" = "gcc" ]; then make distcheck V=1; else make func-test V=1; fi
 compiler:
