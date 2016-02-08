@@ -39,6 +39,7 @@
 #include <time.h>
 
 #define SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS 60000
+#define MONGO_CONN_LOCAL MONGOC_DEFAULT_PORT
 
 typedef struct
 {
@@ -70,7 +71,8 @@ typedef struct
   ValuePairs *vp;
 
   /* Writer-only stuff */
-  const gchar *db;
+  GList *recovery_cache;
+  gchar *db;
   mongoc_uri_t *uri_obj;
   mongoc_client_t *client;
   mongoc_collection_t *coll_obj;
