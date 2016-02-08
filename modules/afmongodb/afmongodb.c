@@ -747,6 +747,9 @@ afmongodb_dd_init(LogPipe *s)
                                 self->port);
     }
 
+  if (!self->uri)
+    self->uri =  g_strdup("mongodb://localhost/syslog");
+
   self->uri_obj = mongoc_uri_new (self->uri);
   if (!self->uri_obj)
     {
