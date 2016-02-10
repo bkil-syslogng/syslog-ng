@@ -34,8 +34,8 @@
 struct timeval start_time_val;
 
 GString *current_testcase_description = NULL;
-gchar *current_testcase_function = NULL;
-gchar *current_testcase_file = NULL;
+const gchar *current_testcase_function = NULL;
+const gchar *current_testcase_file = NULL;
 GList *internal_messages = NULL;
 
 static void
