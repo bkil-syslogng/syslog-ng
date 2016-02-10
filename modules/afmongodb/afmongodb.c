@@ -54,7 +54,7 @@ typedef struct
   /* Shared between main/writer; only read by the writer, never
      written */
   gchar *coll;
-  gchar *uri;
+  GString *uri_str;
 
   GList *servers;
   gchar *address;
@@ -73,6 +73,7 @@ typedef struct
   /* Writer-only stuff */
   GList *recovery_cache;
   gchar *db;
+  const gchar *const_db;
   mongoc_uri_t *uri_obj;
   mongoc_client_t *client;
   mongoc_collection_t *coll_obj;
@@ -240,8 +241,8 @@ afmongodb_dd_set_uri(LogDriver *d, const gchar *uri)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  g_free(self->uri);
-  self->uri = g_strdup(uri);
+  g_string_free(self->uri_str, TRUE);
+  self->uri_str = g_string_new(uri);
 }
 
 void
@@ -281,7 +282,7 @@ afmongodb_dd_format_stats_instance(LogThrDestDriver *d)
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name), "mongodb,%s,%s", self->uri, self->coll);
+  g_snprintf(persist_name, sizeof(persist_name), "mongodb,%s,%s", self->uri_str->str, self->coll);
   return persist_name;
 }
 
@@ -291,7 +292,7 @@ afmongodb_dd_format_persist_name(LogThrDestDriver *d)
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name), "afmongodb(%s,%s)", self->uri, self->coll);
+  g_snprintf(persist_name, sizeof(persist_name), "afmongodb(%s,%s)", self->uri_str->str, self->coll);
   return persist_name;
 }
 
@@ -305,56 +306,74 @@ afmongodb_dd_disconnect(LogThrDestDriver *s)
 }
 
 static void
-afmongodb_dd_append_servers(bson_string_t *uri_str,
+afmongodb_dd_append_servers(GString *uri_str,
                             const GList *recovery_cache)
 {
   const GList *iterator = recovery_cache;
   do
     {
       const MongoDBHostPort *hp = (const MongoDBHostPort *) iterator->data;
-      bson_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
+      g_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
       iterator = iterator->next;
       if (iterator)
-        bson_string_append_printf (uri_str, ",");
+        g_string_append_printf (uri_str, ",");
     }
   while (iterator);
 }
 
 static gboolean
+afmongodb_dd_create_uri(MongoDBDestDriver *self)
+{
+  if (self->uri_str)
+    msg_debug("create_uri", evt_tag_str ("uri_str", self->uri_str->str), NULL);
+  msg_debug("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
+  if ((!self->uri_str) && (!self->is_legacy))
+    {
+      self->uri_str = g_string_new("mongodb://localhost/syslog");
+    }
+  else if ((!self->uri_str) ^ (!self->is_legacy))
+    {
+      msg_error ("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
+                 evt_tag_str ("driver", self->super.super.super.id), NULL);
+      return FALSE;
+    }
+  else {
+    self->uri_str = g_string_new("mongodb://");
+    if (!self->uri_str)
+      return FALSE;
+
+    if (self->user || self->password)
+      {
+        g_string_append_printf (self->uri_str, "%s:%s", self->user, self->password);
+      }
+
+    if (!self->recovery_cache)
+      {
+        msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id), NULL);
+        return FALSE;
+      }
+
+    afmongodb_dd_append_servers(self->uri_str, self->recovery_cache);
+
+    g_string_append_printf (self->uri_str, "/%s", self->const_db);
+
+    g_string_append_printf (self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
+                            SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+  }
+
+  msg_debug(self->uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
+            NULL);
+
+  return TRUE;
+}
+
+static gboolean
 afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
 {
-  bson_string_t *uri_str;
-
   if (reconnect && self->client)
     return TRUE;
 
-  uri_str = bson_string_new ("mongodb://");
-  if (NULL == uri_str)
-    return FALSE;
-
-  if (self->user || self->password)
-    {
-      bson_string_append_printf (uri_str, "%s:%s", self->user, self->password);
-    }
-
-  if (!self->recovery_cache)
-    {
-      msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id), NULL);
-      return FALSE;
-    }
-
-  afmongodb_dd_append_servers(uri_str, self->recovery_cache);
-
-  bson_string_append_printf (uri_str, "/%s", self->db);
-
-  bson_string_append_printf (uri_str, "?slaveOk=true&sockettimeoutms=%d",
-                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
-
-  msg_debug(uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
-            NULL);
-
-  self->client = mongoc_client_new (uri_str->str);
-  bson_string_free (uri_str, TRUE);
+  self->client = mongoc_client_new_from_uri (self->uri_obj);
 
   if (!self->client)
     {
@@ -363,7 +382,7 @@ afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
       return FALSE;
     }
 
-  self->coll_obj = mongoc_client_get_collection (self->client, self->db,
+  self->coll_obj = mongoc_client_get_collection (self->client, self->const_db,
                                                  self->coll);
   if (!self->coll_obj)
     {
@@ -757,32 +776,34 @@ afmongodb_dd_init(LogPipe *s)
                                 self->port);
     }
 
-  if (!self->uri)
-    self->uri =  g_strdup("mongodb://localhost/syslog");
+  if (!afmongodb_dd_create_uri(self))
+    {
+      return FALSE;
+    }
 
-  self->uri_obj = mongoc_uri_new (self->uri);
+  self->uri_obj = mongoc_uri_new(self->uri_str->str);
   if (!self->uri_obj)
     {
       msg_error("Error parsing MongoDB URI",
-                evt_tag_str ("uri", self->uri),
+                evt_tag_str ("uri", self->uri_str->str),
                 evt_tag_str ("driver", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
 
-  self->db = mongoc_uri_get_database (self->uri_obj);
-  if (!self->db || !strlen(self->db))
+  self->const_db = mongoc_uri_get_database(self->uri_obj);
+  if (!self->const_db || !strlen(self->const_db))
     {
       msg_error("Missing DB name from MongoDB URI",
-                evt_tag_str ("uri", self->uri),
+                evt_tag_str ("uri", self->uri_str->str),
                 evt_tag_str ("driver", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
 
   msg_verbose("Initializing MongoDB destination",
-              evt_tag_str ("uri", self->uri),
-              evt_tag_str ("db", self->db),
+              evt_tag_str ("uri", self->uri_str->str),
+              evt_tag_str ("db", self->const_db),
               evt_tag_str ("collection", self->coll),
               evt_tag_str ("driver", self->super.super.super.id),
               NULL);
@@ -806,7 +827,8 @@ afmongodb_dd_free(LogPipe *d)
 
   log_template_options_destroy(&self->template_options);
 
-  g_free(self->uri);
+  if (self->uri_str)
+    g_string_free(self->uri_str, TRUE);
   g_free(self->coll);
   g_free(self->db);
   g_free(self->user);
