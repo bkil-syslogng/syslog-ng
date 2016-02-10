@@ -88,7 +88,7 @@ afmongodb_dd_parse_addr (const char *str, char **host, gint *port)
     return FALSE;
   char *protoStr = bson_strdup_printf("mongodb://%s", str);
   mongoc_uri_t *uri = mongoc_uri_new (protoStr);
-  free(protoStr);
+  bson_free(protoStr);
   if (!uri)
     return FALSE;
 
