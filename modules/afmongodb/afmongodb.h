@@ -46,4 +46,6 @@ gboolean afmongodb_dd_check_address(LogDriver *d, gboolean local);
 
 LogTemplateOptions *afmongodb_dd_get_template_options(LogDriver *s);
 
+gboolean afmongodb_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 #endif
