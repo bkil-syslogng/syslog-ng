@@ -818,9 +818,11 @@ afmongodb_dd_free(LogPipe *d)
   g_list_free_full (self->recovery_cache,
                     (GDestroyNotify) & afmongodb_dd_free_host_port);
   self->recovery_cache = NULL;
-  mongoc_uri_destroy(self->uri_obj);
-  mongoc_collection_destroy (self->coll_obj);
-  mongoc_cleanup ();
+  if (self->uri_obj)
+    mongoc_uri_destroy(self->uri_obj);
+  if (self->coll_obj)
+    mongoc_collection_destroy(self->coll_obj);
+  mongoc_cleanup();
   log_threaded_dest_driver_free(d);
 }
 
