@@ -79,6 +79,8 @@ typedef struct
 
   GString *current_value;
   bson_t *bson;
+
+  gboolean is_legacy;
 } MongoDBDestDriver;
 
 static gboolean
@@ -135,6 +137,7 @@ afmongodb_dd_set_user(LogDriver *d, const gchar *user)
 
   g_free(self->user);
   self->user = g_strdup(user);
+  self->is_legacy = TRUE;
 }
 
 void
@@ -144,6 +147,7 @@ afmongodb_dd_set_password(LogDriver *d, const gchar *password)
 
   g_free(self->password);
   self->password = g_strdup(password);
+  self->is_legacy = TRUE;
 }
 
 void
@@ -155,6 +159,7 @@ afmongodb_dd_set_host(LogDriver *d, const gchar *host)
 
   g_free(self->address);
   self->address = g_strdup(host);
+  self->is_legacy = TRUE;
 }
 
 void
@@ -165,6 +170,7 @@ afmongodb_dd_set_port(LogDriver *d, gint port)
   msg_warning_once("WARNING: Using port() option is deprecated in mongodb driver, please use servers() instead", NULL);
 
   self->port = port;
+  self->is_legacy = TRUE;
 }
 
 void
@@ -174,6 +180,7 @@ afmongodb_dd_set_servers(LogDriver *d, GList *servers)
 
   string_list_free(self->servers);
   self->servers = servers;
+  self->is_legacy = TRUE;
 }
 
 void
@@ -184,6 +191,7 @@ afmongodb_dd_set_path(LogDriver *d, const gchar *path)
   g_free(self->address);
   self->address = g_strdup(path);
   self->port = MONGO_CONN_LOCAL;
+  self->is_legacy = TRUE;
 }
 
 LogTemplateOptions *
@@ -224,6 +232,7 @@ afmongodb_dd_set_database(LogDriver *d, const gchar *database)
 
   g_free(self->db);
   self->db = g_strdup(database);
+  self->is_legacy = TRUE;
 }
 
 void
@@ -259,6 +268,7 @@ afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state)
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
   self->safe_mode = state;
+  self->is_legacy = TRUE;
 }
 
 /*
@@ -848,9 +858,9 @@ afmongodb_dd_new(GlobalConfig *cfg)
   self->super.stats_source = SCS_MONGODB;
   self->super.messages.retry_over = afmongodb_worker_retry_over_message;
 
-  afmongodb_dd_set_database((LogDriver *)self, "syslog");
+  self->db = g_strdup("syslog");
   afmongodb_dd_set_collection((LogDriver *)self, "messages");
-  afmongodb_dd_set_safe_mode((LogDriver *)self, TRUE);
+  self->safe_mode = TRUE;
 
   log_template_options_defaults(&self->template_options);
   afmongodb_dd_set_value_pairs(&self->super.super.super, value_pairs_new_default(cfg));
