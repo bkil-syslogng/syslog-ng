@@ -30,6 +30,8 @@
 #include "memtrace.h"
 #include "apphook.h"
 #include "gprocess.h"
+#include "host-id.h"
+#include "run-id.h"
 
 extern gboolean debug_flag; // mainloop.h
 extern gboolean verbose_flag; // mainloop.h
@@ -71,6 +73,8 @@ _setup(int argc, char **argv)
   app_startup();
   main_loop_init();
 
+  app_post_daemonized();
+  app_post_config_loaded();
 
 }
 
@@ -100,7 +104,6 @@ _run_test(const char *input, const char *output)
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
   msg_trace("after cfg_load_config()", NULL);
-  stop_grabbing_messages();
 
   if (!ok)
     {
@@ -109,8 +112,20 @@ _run_test(const char *input, const char *output)
       return 1;
     }
 
-  cfg_free(current_configuration);
+  const gchar *persist_filename = "";
+  current_configuration->state = persist_state_new(persist_filename);
+/*
+  msg_trace("before run_id_init()", NULL);
+  run_id_init(current_configuration->state);
+  msg_trace("before run_host_init()", NULL);
+  host_id_init(current_configuration->state);
+  msg_trace("before cfg_init()", NULL);
+  */
 
+  ok = cfg_init(current_configuration);
+  stop_grabbing_messages();
+
+  msg_trace("after cfg_init()", NULL);
 
   GList *l;
 
@@ -122,6 +137,16 @@ _run_test(const char *input, const char *output)
         msg_debug("recorded message", evt_tag_str("msg_text", msg_text), NULL);
         printf("recorded %s\n", msg_text);
       }
+  msg_trace("before cfg_free()", NULL);
+
+  cfg_free(current_configuration);
+
+  if (!ok)
+    {
+      msg_error("Failed to initialize configuration", NULL);
+      return 1;
+    }
+
   msg_debug("TODO: check whether output matches", evt_tag_str("output", output), NULL);
 
   return 0;
