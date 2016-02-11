@@ -101,7 +101,7 @@ _setup(int argc, char **argv)
   debug_flag = TRUE;
   verbose_flag = TRUE;
   trace_flag = TRUE;
-  log_stderr = TRUE;
+  log_stderr = FALSE;
 
   g_process_set_mode(G_PM_FOREGROUND);
   g_process_set_name(__FILE__);
@@ -125,7 +125,6 @@ _run_test(const char *input, const char *output)
 
   plugin_load_candidate_modules(test_cfg);
   gchar *preprocess_into = NULL;
-  start_grabbing_messages();
 
   GString *config_string = g_string_sized_new(0);
   g_string_append_printf(
@@ -154,7 +153,10 @@ _run_test(const char *input, const char *output)
   const gchar *persist_filename = "";
   test_cfg->state = persist_state_new(persist_filename);
 
+  start_grabbing_messages();
   ok = cfg_init(test_cfg);
+  stop_grabbing_messages();
+
   msg_trace("after cfg_init()", NULL);
 
   sleep(1);
@@ -165,7 +167,6 @@ _run_test(const char *input, const char *output)
   service_management_clear_status();
 //  iv_main();
 
-  stop_grabbing_messages();
 
   msg_trace("before internal_messages", NULL);
 
@@ -180,6 +181,8 @@ _run_test(const char *input, const char *output)
         printf("recorded %s\n", msg_text);
       }
 
+  msg_trace("before cfg_deinit()", NULL);
+  cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
   if (test_cfg->persist)
