@@ -190,19 +190,6 @@ _run_test(const gchar *mongo_config, const gchar *expected_uri,
   service_management_clear_status();
 //  iv_main();
 
-  msg_trace("before internal_messages", NULL);
-
-  GList *l;
-
-    for (l = internal_messages; l; l = l->next)
-      {
-        LogMessage *msg = (LogMessage *) l->data;
-        const gchar *msg_text = log_msg_get_value(msg, LM_V_MESSAGE, NULL);
-
-        msg_debug("recorded message", evt_tag_str("msg_text", msg_text), NULL);
-        printf("recorded %s\n", msg_text);
-      }
-
   msg_trace("before cfg_deinit()", NULL);
   cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
