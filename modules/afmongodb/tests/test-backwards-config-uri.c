@@ -44,6 +44,11 @@ extern gboolean log_stderr; // mainloop.h
 extern GList *internal_messages; // testutils.h
 
 int _test_ret_num = 0;
+#define TEST_FAILED (_test_ret_num = 1)
+
+#define EXPECT_MSG(pattern, error_message) (\
+    assert_grabbed_messages_contain_non_fatal(pattern, error_message, NULL) ?\
+        TRUE : (TEST_FAILED,FALSE))
 
 static void
 _main_loop_deinit(void)
@@ -111,6 +116,21 @@ _setup(int argc, char **argv)
   _main_loop_init();
 
   app_post_daemonized();
+}
+
+#define URI_MSG_FMT ("Initializing MongoDB destination; " \
+    "uri='%s', db='%s', collection='%s', driver='d_mongo#0'")
+
+static gboolean
+_expect_uri(const gchar *uri, const gchar *db, const gchar *col)
+{
+  GString *pattern = g_string_sized_new(0);
+  g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
+  gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern->str, "mismatch", NULL);
+  g_string_free(pattern, TRUE);
+  if (!ok)
+    TEST_FAILED;
+  return ok;
 }
 
 static int
