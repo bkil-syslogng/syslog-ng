@@ -117,6 +117,12 @@ static int
 _run_test(const char *input, const char *output)
 {
   GlobalConfig *test_cfg = cfg_new(0x0308);
+  if (!test_cfg)
+    {
+      msg_error("Can't create new configuration", NULL);
+      return 1;
+    }
+
   plugin_load_candidate_modules(test_cfg);
   gchar *preprocess_into = NULL;
   start_grabbing_messages();
@@ -175,6 +181,13 @@ _run_test(const char *input, const char *output)
       }
   msg_trace("before cfg_free()", NULL);
 
+  msg_debug("before persist_config_free()",
+            evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
+  if (test_cfg->persist)
+    {
+      persist_config_free(test_cfg->persist);
+      test_cfg->persist = NULL;
+    }
   cfg_free(test_cfg);
 
   if (!ok)
