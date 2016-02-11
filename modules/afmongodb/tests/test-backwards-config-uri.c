@@ -110,13 +110,6 @@ _run_test(const char *input, const char *output)
 
   const gchar *persist_filename = "";
   current_configuration->state = persist_state_new(persist_filename);
-/*
-  msg_trace("before run_id_init()", NULL);
-  run_id_init(current_configuration->state);
-  msg_trace("before run_host_init()", NULL);
-  host_id_init(current_configuration->state);
-  msg_trace("before cfg_init()", NULL);
-  */
 
   ok = cfg_init(current_configuration);
   msg_trace("after cfg_init()", NULL);
