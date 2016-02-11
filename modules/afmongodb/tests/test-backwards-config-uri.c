@@ -43,7 +43,7 @@ extern gboolean trace_flag; // mainloop.h
 extern gboolean log_stderr; // mainloop.h
 extern GList *internal_messages; // testutils.h
 
-int _test_ret_num = 0;
+static int _test_ret_num = 0;
 #define TEST_FAILED (_test_ret_num = 1)
 
 #define EXPECT_MSG(pattern, error_message) (\
@@ -134,14 +134,14 @@ _expect_uri(const gchar *uri, const gchar *db, const gchar *col)
 }
 
 static gboolean
-_run_test(const gchar *mongo_config, const gchar *expected_uri,
-          const gchar *db, const gchar *coll)
+_run_test(const gchar *mongo_config)
 {
+  reset_grabbed_messages();
+
   GlobalConfig *test_cfg = cfg_new(0x0308);
   if (!test_cfg)
     {
       msg_error("Can't create new configuration", NULL);
-      TEST_FAILED;
       return FALSE;
     }
 
@@ -169,8 +169,7 @@ _run_test(const gchar *mongo_config, const gchar *expected_uri,
     {
       msg_error("Syntax error in configuration", NULL);
       cfg_free(test_cfg);
-      TEST_FAILED;
-      return FALSE;
+      return ok;
     }
 
   const gchar *persist_filename = "";
@@ -182,6 +181,9 @@ _run_test(const gchar *mongo_config, const gchar *expected_uri,
 
   msg_trace("after cfg_init()", NULL);
 
+  if (!ok)
+    msg_error("Failed to initialize configuration", NULL);
+
   sleep(1);
   msg_trace("before app_post_config_loaded()", NULL);
   app_post_config_loaded();
@@ -191,7 +193,7 @@ _run_test(const gchar *mongo_config, const gchar *expected_uri,
 //  iv_main();
 
   msg_trace("before cfg_deinit()", NULL);
-  cfg_deinit(test_cfg);
+  gboolean ok2 = cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
   if (test_cfg->persist)
@@ -202,15 +204,12 @@ _run_test(const gchar *mongo_config, const gchar *expected_uri,
   msg_trace("before cfg_free()", NULL);
   cfg_free(test_cfg);
 
-  if (!ok)
+  if (!ok2)
     {
-      msg_error("Failed to initialize configuration", NULL);
-      _expect_uri(expected_uri, db, coll);
-      TEST_FAILED;
-      return FALSE;
+      msg_error("Failed to deinitialize configuration", NULL);
     }
 
-  return _expect_uri(expected_uri, db, coll);
+  return ok && ok2;
 }
 
 static gboolean
@@ -218,7 +217,24 @@ _expect(const gchar *mongo_config, const gchar *expected_uri, const gchar *db, c
 {
   testcase_begin("%s(%s,%s,%s,%s)", __FUNCTION__, mongo_config, expected_uri, db, coll);
 
-  gboolean ok = _run_test(mongo_config, expected_uri, db, coll);
+  gboolean ok = _run_test(mongo_config);
+  ok &= _expect_uri(expected_uri, db, coll);
+  if (!ok)
+    TEST_FAILED;
+
+  testcase_end();
+  return ok;
+}
+
+static gboolean
+_error(const gchar *mongo_config, const gchar *error)
+{
+  testcase_begin("%s(%s,%s)", __FUNCTION__, mongo_config, error);
+
+  gboolean ok = !_run_test(mongo_config);
+  ok &= EXPECT_MSG(error, "mismatch");
+  if (!ok)
+    TEST_FAILED;
 
   testcase_end();
   return ok;
@@ -233,9 +249,16 @@ main(int argc, char **argv)
           "mongodb://127.0.0.1:27017/syslog",
           "syslog", "messages");
 
+  _error("uri('mongodb://127.0.0.1:27017/syslog')",
+         "Initializing MongoDB destination; uri='mongodb://127.0.0.1:27017/syslog', db='syslog', collection='messages', driver='d_mongo#0'");
+
   _expect("",
           "mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
           "syslog", "messages");
+/*
+  _error("uri('syslog-ng')",
+         "Error parsing MongoDB URI; uri='syslog-ng', driver='d_mongo#0'");
+*/
   _teardown();
   return 1;
 }
