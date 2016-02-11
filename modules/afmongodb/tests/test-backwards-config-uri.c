@@ -75,11 +75,6 @@ _setup(int argc, char **argv)
   main_loop_init();
 
   app_post_daemonized();
-  app_post_config_loaded();
-
-  service_management_indicate_readiness();
-  service_management_clear_status();
-//  iv_main();
 }
 
 static int
@@ -124,7 +119,16 @@ _run_test(const char *input, const char *output)
   */
 
   ok = cfg_init(current_configuration);
+  msg_trace("after cfg_init()", NULL);
+
   sleep(1);
+  msg_trace("before app_post_config_loaded()", NULL);
+  app_post_config_loaded();
+
+  service_management_indicate_readiness();
+  service_management_clear_status();
+//  iv_main();
+
   stop_grabbing_messages();
 
   msg_trace("before internal_messages", NULL);
