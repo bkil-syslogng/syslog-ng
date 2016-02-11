@@ -34,6 +34,8 @@
 #include "run-id.h"
 #include "service-management.h"
 #include <unistd.h> // DEBUG
+#include "mainloop-call.h"
+#include "mainloop-io-worker.h"
 
 extern gboolean debug_flag; // mainloop.h
 extern gboolean verbose_flag; // mainloop.h
@@ -44,16 +46,49 @@ extern GList *internal_messages; // testutils.h
 int _test_ret_num = 0;
 
 static void
+_main_loop_deinit(void)
+{
+  main_loop_call_deinit();
+  main_loop_io_worker_deinit();
+  main_loop_worker_deinit();
+}
+
+static void
 _teardown(void)
 {
   service_management_publish_status("Shutting down...");
 
-  main_loop_deinit();
+  _main_loop_deinit();
 
   app_shutdown();
   z_mem_trace_dump();
   g_process_startup_failed(_test_ret_num, TRUE);
 }
+
+static void
+_main_loop_init_events(void)
+{
+}
+
+static void
+_setup_signals(void)
+{
+}
+
+static void
+_main_loop_init(void)
+{
+  service_management_publish_status("Starting up...");
+
+  main_thread_handle = get_thread_id();
+  main_loop_worker_init();
+  main_loop_io_worker_init();
+  main_loop_call_init();
+
+  _main_loop_init_events();
+  _setup_signals();
+}
+
 
 static void
 _setup(int argc, char **argv)
@@ -73,7 +108,7 @@ _setup(int argc, char **argv)
 
   g_process_start();
   app_startup();
-  main_loop_init();
+  _main_loop_init();
 
   app_post_daemonized();
 }
