@@ -179,7 +179,6 @@ _run_test(const char *input, const char *output)
         msg_debug("recorded message", evt_tag_str("msg_text", msg_text), NULL);
         printf("recorded %s\n", msg_text);
       }
-  msg_trace("before cfg_free()", NULL);
 
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
@@ -188,6 +187,7 @@ _run_test(const char *input, const char *output)
       persist_config_free(test_cfg->persist);
       test_cfg->persist = NULL;
     }
+  msg_trace("before cfg_free()", NULL);
   cfg_free(test_cfg);
 
   if (!ok)
