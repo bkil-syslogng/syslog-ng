@@ -30,7 +30,10 @@
 #include "apphook.h"
 #include "gprocess.h"
 
-extern gboolean syntax_only; // mainloop.h
+extern gboolean debug_flag; // mainloop.h
+extern gboolean verbose_flag; // mainloop.h
+extern gboolean trace_flag; // mainloop.h
+extern gboolean log_stderr; // mainloop.h
 extern GList *internal_messages; // testutils.h
 
 int _test_ret_num = 0;
@@ -42,7 +45,7 @@ _setup(int argc, char **argv)
   g_process_set_argv_space(argc, (gchar **) argv);
   main_loop_global_init();
 
-  syntax_only = TRUE;
+  syntax_only = FALSE;
   debug_flag = TRUE;
   verbose_flag = TRUE;
   trace_flag = TRUE;
@@ -99,7 +102,8 @@ _run_test(const char *input, const char *output)
 
   if (!ok)
     {
-      msg_error("syntax error", NULL);
+      msg_error("Syntax error in configuration", NULL);
+      cfg_free(current_configuration);
       return 1;
     }
 
@@ -139,5 +143,5 @@ main(int argc, char **argv)
 //  _expect("uri('szia')", "szia");
 
   _teardown();
-  return 0;
+  return 1;
 }
