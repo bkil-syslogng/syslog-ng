@@ -109,7 +109,6 @@ _run_test(const char *input, const char *output)
 
   cfg_free(current_configuration);
 
-  msg_debug("TODO: check whether output matches", evt_tag_str("output", output), NULL);
 
   GList *l;
 
@@ -121,6 +120,7 @@ _run_test(const char *input, const char *output)
         msg_debug("recorded message", evt_tag_str("msg_text", msg_text), NULL);
         printf("recorded %s\n", msg_text);
       }
+  msg_debug("TODO: check whether output matches", evt_tag_str("output", output), NULL);
 
   return 0;
 }
