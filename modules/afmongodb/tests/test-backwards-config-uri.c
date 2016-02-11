@@ -32,6 +32,7 @@
 #include "gprocess.h"
 #include "host-id.h"
 #include "run-id.h"
+#include "service-management.h"
 #include <unistd.h> // DEBUG
 
 extern gboolean debug_flag; // mainloop.h
