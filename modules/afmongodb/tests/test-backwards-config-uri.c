@@ -40,6 +40,18 @@ extern GList *internal_messages; // testutils.h
 int _test_ret_num = 0;
 
 static void
+_teardown(void)
+{
+  g_process_startup_failed(_test_ret_num, TRUE);
+
+  main_loop_deinit();
+
+  app_shutdown();
+  z_mem_trace_dump();
+  g_process_finish();
+}
+
+static void
 _setup(int argc, char **argv)
 {
   z_mem_trace_init("syslog-ng.trace");
@@ -58,18 +70,8 @@ _setup(int argc, char **argv)
   g_process_start();
   app_startup();
   main_loop_init();
-}
 
-static void
-_teardown(void)
-{
-  g_process_startup_failed(_test_ret_num, TRUE);
 
-  main_loop_deinit();
-
-  app_shutdown();
-  z_mem_trace_dump();
-  g_process_finish();
 }
 
 static int
