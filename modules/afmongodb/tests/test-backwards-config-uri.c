@@ -22,6 +22,7 @@
  *
  */
 
+#include "mainloop.h"
 #include "testutils.h"
 #include "cfg-lexer.h"
 #include "cfg-grammar.h"
