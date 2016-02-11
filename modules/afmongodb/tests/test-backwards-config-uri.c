@@ -32,6 +32,7 @@
 #include "gprocess.h"
 #include "host-id.h"
 #include "run-id.h"
+#include <unistd.h> // DEBUG
 
 extern gboolean debug_flag; // mainloop.h
 extern gboolean verbose_flag; // mainloop.h
@@ -123,6 +124,7 @@ _run_test(const char *input, const char *output)
   */
 
   ok = cfg_init(current_configuration);
+  sleep(1);
   stop_grabbing_messages();
 
   msg_trace("after cfg_init()", NULL);
