@@ -241,7 +241,8 @@ afmongodb_dd_set_uri(LogDriver *d, const gchar *uri)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  g_string_free(self->uri_str, TRUE);
+  if (self->uri_str)
+    g_string_free(self->uri_str, TRUE);
   self->uri_str = g_string_new(uri);
 }
 
@@ -646,8 +647,6 @@ afmongodb_worker_thread_init(LogThrDestDriver *d)
 
   afmongodb_dd_connect(self, FALSE);
 
-  self->current_value = g_string_sized_new(256);
-
   self->bson = bson_sized_new(4096);
 }
 
@@ -655,8 +654,6 @@ static void
 afmongodb_worker_thread_deinit(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
-
-  g_string_free (self->current_value, TRUE);
 
   bson_free (self->bson);
 }
