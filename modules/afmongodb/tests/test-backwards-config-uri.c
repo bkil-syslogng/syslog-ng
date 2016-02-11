@@ -85,17 +85,15 @@ _setup(int argc, char **argv)
 static int
 _run_test(const char *input, const char *output)
 {
+  start_grabbing_messages();
   GString *config_string = g_string_sized_new(0);
   g_string_append_printf(
       config_string,
-      "source s_internal { internal(); };"
-
       "destination d_mongo {"
       " mongodb(%s);"
       "};"
 
       "log {"
-      " source(s_internal);"
       " destination(d_mongo);"
       "};",
       input);
@@ -103,7 +101,6 @@ _run_test(const char *input, const char *output)
   GlobalConfig *current_configuration = cfg_new(0x0308);
   plugin_load_candidate_modules(current_configuration);
   gchar *preprocess_into = NULL;
-  start_grabbing_messages();
   gboolean ok = cfg_load_config(current_configuration, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
@@ -130,7 +127,7 @@ _run_test(const char *input, const char *output)
   sleep(1);
   stop_grabbing_messages();
 
-  msg_trace("after cfg_init()", NULL);
+  msg_trace("before internal_messages", NULL);
 
   GList *l;
 
@@ -173,8 +170,8 @@ main(int argc, char **argv)
   _setup(argc, argv);
 
   _expect("uri('szia')", "szia");
-  _expect("uri('szia2')", "szia2");
   _expect("", "mongodb://localhost:27012");
+  _expect("uri('szia2')", "szia2");
 
   _teardown();
   return 1;
