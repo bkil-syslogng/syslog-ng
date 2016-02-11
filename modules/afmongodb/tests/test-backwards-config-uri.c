@@ -45,13 +45,13 @@ int _test_ret_num = 0;
 static void
 _teardown(void)
 {
-  g_process_startup_failed(_test_ret_num, TRUE);
+  service_management_publish_status("Shutting down...");
 
   main_loop_deinit();
 
   app_shutdown();
   z_mem_trace_dump();
-  g_process_finish();
+  g_process_startup_failed(_test_ret_num, TRUE);
 }
 
 static void
@@ -77,6 +77,9 @@ _setup(int argc, char **argv)
   app_post_daemonized();
   app_post_config_loaded();
 
+  service_management_indicate_readiness();
+  service_management_clear_status();
+//  iv_main();
 }
 
 static int
