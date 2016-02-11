@@ -78,14 +78,13 @@ _run_test(const char *input, const char *output)
   g_string_append_printf(
       config_string,
       "source s_internal { internal(); };"
-      "source s_file { file(''); };"
 
       "destination d_mongo {"
       " mongodb(%s);"
       "};"
 
       "log {"
-      " source(s_file);"
+      " source(s_internal);"
       " destination(d_mongo);"
       "};",
       input);
@@ -97,7 +96,7 @@ _run_test(const char *input, const char *output)
   gboolean ok = cfg_load_config(current_configuration, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
-  msg_debug("hi mom", NULL);
+  msg_trace("after cfg_load_config()", NULL);
   stop_grabbing_messages();
 
   if (!ok)
@@ -119,6 +118,7 @@ _run_test(const char *input, const char *output)
         const gchar *msg_text = log_msg_get_value(msg, LM_V_MESSAGE, NULL);
 
         msg_debug("recorded message", evt_tag_str("msg_text", msg_text), NULL);
+        printf("recorded %s\n", msg_text);
       }
 
   return 0;
@@ -139,8 +139,9 @@ main(int argc, char **argv)
 {
   _setup(argc, argv);
 
+  _expect("uri('szia')", "szia");
+  _expect("uri('szia2')", "szia2");
   _expect("", "mongodb://localhost:27012");
-//  _expect("uri('szia')", "szia");
 
   _teardown();
   return 1;
