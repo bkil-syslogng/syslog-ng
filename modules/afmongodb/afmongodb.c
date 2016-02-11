@@ -330,14 +330,16 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
   msg_debug("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
   if ((!self->uri_str) && (!self->is_legacy))
     {
-      self->uri_str = g_string_new("mongodb://localhost/syslog");
+      self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
     }
-  else if ((!self->uri_str) ^ (!self->is_legacy))
+  else if (self->uri_str && self->is_legacy)
     {
       msg_error ("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
                  evt_tag_str ("driver", self->super.super.super.id), NULL);
       return FALSE;
     }
+  else if (self->uri_str)
+    return TRUE;
   else {
     self->uri_str = g_string_new("mongodb://");
     if (!self->uri_str)
@@ -743,7 +745,7 @@ afmongodb_dd_init(LogPipe *s)
           gchar *port = g_strdup_printf ("%d", MONGOC_DEFAULT_PORT);
           gchar *localhost = g_strconcat ("127.0.0.1", port, NULL);
           g_free(port);
-          afmongodb_dd_set_servers((LogDriver *)self, g_list_append (NULL, localhost));
+          self->servers = g_list_append (NULL, localhost);
           afmongodb_dd_append_host (&self->recovery_cache, "127.0.0.1", MONGOC_DEFAULT_PORT);
         }
 
