@@ -133,14 +133,16 @@ _expect_uri(const gchar *uri, const gchar *db, const gchar *col)
   return ok;
 }
 
-static int
-_run_test(const char *input, const char *output)
+static gboolean
+_run_test(const gchar *mongo_config, const gchar *expected_uri,
+          const gchar *db, const gchar *coll)
 {
   GlobalConfig *test_cfg = cfg_new(0x0308);
   if (!test_cfg)
     {
       msg_error("Can't create new configuration", NULL);
-      return 1;
+      TEST_FAILED;
+      return FALSE;
     }
 
   plugin_load_candidate_modules(test_cfg);
@@ -156,7 +158,7 @@ _run_test(const char *input, const char *output)
       "log {"
       " destination(d_mongo);"
       "};",
-      input);
+      mongo_config);
 
   gboolean ok = cfg_load_config(test_cfg, config_string->str,
                                 syntax_only, preprocess_into);
@@ -167,7 +169,8 @@ _run_test(const char *input, const char *output)
     {
       msg_error("Syntax error in configuration", NULL);
       cfg_free(test_cfg);
-      return 1;
+      TEST_FAILED;
+      return FALSE;
     }
 
   const gchar *persist_filename = "";
@@ -186,7 +189,6 @@ _run_test(const char *input, const char *output)
   service_management_indicate_readiness();
   service_management_clear_status();
 //  iv_main();
-
 
   msg_trace("before internal_messages", NULL);
 
@@ -216,22 +218,23 @@ _run_test(const char *input, const char *output)
   if (!ok)
     {
       msg_error("Failed to initialize configuration", NULL);
-      return 1;
+      _expect_uri(expected_uri, db, coll);
+      TEST_FAILED;
+      return FALSE;
     }
 
-  msg_debug("TODO: check whether output matches", evt_tag_str("output", output), NULL);
-
-  return 0;
+  return _expect_uri(expected_uri, db, coll);
 }
 
-static void
-_expect(const char *input, const char *output)
+static gboolean
+_expect(const gchar *mongo_config, const gchar *expected_uri, const gchar *db, const gchar *coll)
 {
-  testcase_begin("_expect(%s,%s)", input, output);
+  testcase_begin("%s(%s,%s,%s,%s)", __FUNCTION__, mongo_config, expected_uri, db, coll);
 
-  _test_ret_num = _run_test(input, output);
+  gboolean ok = _run_test(mongo_config, expected_uri, db, coll);
 
   testcase_end();
+  return ok;
 }
 
 int
@@ -239,10 +242,13 @@ main(int argc, char **argv)
 {
   _setup(argc, argv);
 
-  _expect("uri('szia')", "szia");
-  _expect("", "mongodb://localhost:27012");
-  _expect("uri('szia2')", "szia2");
+  _expect("uri('mongodb://127.0.0.1:27017/syslog')",
+          "mongodb://127.0.0.1:27017/syslog",
+          "syslog", "messages");
 
+  _expect("",
+          "mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
+          "syslog", "messages");
   _teardown();
   return 1;
 }
