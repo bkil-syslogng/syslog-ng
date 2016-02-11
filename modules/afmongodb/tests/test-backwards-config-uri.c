@@ -116,7 +116,11 @@ _setup(int argc, char **argv)
 static int
 _run_test(const char *input, const char *output)
 {
+  GlobalConfig *test_cfg = cfg_new(0x0308);
+  plugin_load_candidate_modules(test_cfg);
+  gchar *preprocess_into = NULL;
   start_grabbing_messages();
+
   GString *config_string = g_string_sized_new(0);
   g_string_append_printf(
       config_string,
@@ -129,10 +133,7 @@ _run_test(const char *input, const char *output)
       "};",
       input);
 
-  GlobalConfig *current_configuration = cfg_new(0x0308);
-  plugin_load_candidate_modules(current_configuration);
-  gchar *preprocess_into = NULL;
-  gboolean ok = cfg_load_config(current_configuration, config_string->str,
+  gboolean ok = cfg_load_config(test_cfg, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
   msg_trace("after cfg_load_config()", NULL);
@@ -140,14 +141,14 @@ _run_test(const char *input, const char *output)
   if (!ok)
     {
       msg_error("Syntax error in configuration", NULL);
-      cfg_free(current_configuration);
+      cfg_free(test_cfg);
       return 1;
     }
 
   const gchar *persist_filename = "";
-  current_configuration->state = persist_state_new(persist_filename);
+  test_cfg->state = persist_state_new(persist_filename);
 
-  ok = cfg_init(current_configuration);
+  ok = cfg_init(test_cfg);
   msg_trace("after cfg_init()", NULL);
 
   sleep(1);
@@ -174,7 +175,7 @@ _run_test(const char *input, const char *output)
       }
   msg_trace("before cfg_free()", NULL);
 
-  cfg_free(current_configuration);
+  cfg_free(test_cfg);
 
   if (!ok)
     {
