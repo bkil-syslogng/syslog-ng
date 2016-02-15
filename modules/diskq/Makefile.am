@@ -27,7 +27,8 @@ modules_diskq_libdisk_buffer_la_LIBADD = $(MODULE_DEPS_LIBS)
 modules_diskq_libdisk_buffer_la_LDFLAGS = $(MODULE_LDFLAGS)
 
 modules_diskq_dqtool_SOURCES = modules/diskq/dqtool.c
-modules_diskq_dqtool_LDADD = $(top_builddir)/modules/diskq/libdisk-buffer.la $(top_builddir)/lib/libsyslog-ng.la @BASE_LIBS@ @OPENSSL_LIBS@ @GLIB_LIBS@
+modules_diskq_dqtool_LINK		=  @SYSLOGNG_LINK@
+modules_diskq_dqtool_LDADD = $(top_builddir)/modules/diskq/libdisk-buffer.la $(TOOL_DEPS_LIBS)
 
 modules/diskq modules/diskq/ mod-disk-buffer: modules/diskq/libdisk-buffer.la
 

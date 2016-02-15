@@ -1122,7 +1122,7 @@ log_msg_merge_context(LogMessage *self, LogMessage **context, gsize context_len)
  * This function allocates, parses and returns a new LogMessage instance.
  **/
 LogMessage *
-log_msg_new(const gchar *msg, gint length,
+log_msg_new(const gchar *msg, gsize length,
             GSockAddr *saddr,
             MsgFormatOptions *parse_options)
 {
