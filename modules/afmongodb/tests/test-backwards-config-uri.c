@@ -36,6 +36,8 @@
 #include <unistd.h> // DEBUG
 #include "mainloop-call.h"
 #include "mainloop-io-worker.h"
+#include "lib/plugin.h"
+#include "resolved-configurable-paths.h"
 
 extern gboolean debug_flag; // mainloop.h
 extern gboolean verbose_flag; // mainloop.h
@@ -100,7 +102,7 @@ _setup(int argc, char **argv)
 {
   z_mem_trace_init("syslog-ng.trace");
   g_process_set_argv_space(argc, (gchar **) argv);
-  main_loop_global_init();
+  resolved_configurable_paths_init(&resolvedConfigurablePaths);
 
   syntax_only = FALSE;
   debug_flag = TRUE;
