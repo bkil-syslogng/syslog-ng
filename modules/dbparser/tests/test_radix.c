@@ -534,6 +534,24 @@ test_matches(void)
   test_search_matches(root, "bbb6 ::202.1.68.3.huhuhu",
                       "ipv6", "::202.1.68.3", NULL);
 
+  test_search_matches(root, "bbb 129.144.52.38: huhuhu",
+                      "ip", "129.144.52.38", NULL);
+
+  test_search_matches(root, "bbb6 ::0: huhuhu",
+                      "ipv6", "::0", NULL);
+
+  test_search_matches(root, "bbb6 ::: huhuhu",
+                      "ipv6", "::", NULL);
+
+  test_search_matches(root, "bbb6 0:0:0:0:0:0:0:0: huhuhu",
+                      "ipv6", "0:0:0:0:0:0:0:0", NULL);
+
+  test_search_matches(root, "bbb6 ::129.144.52.38: huhuhu",
+                      "ipv6", "::129.144.52.38", NULL);
+
+  test_search_matches(root, "bbb6 ::ffff:129.144.52.38: huhuhu",
+                      "ipv6", "::ffff:129.144.52.38", NULL);
+
   test_search_matches(root, "bbb6 2001:0DB8:0:CD30::.huhuhu",
                       "ipv6", "2001:0DB8:0:CD30::", NULL);
 
