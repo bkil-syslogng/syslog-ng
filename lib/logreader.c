@@ -302,12 +302,12 @@ _add_aux_nvpair(const gchar *name, const gchar *value, gsize value_len, gpointer
 }
 
 static gboolean
-log_reader_handle_line(LogReader *self, const guchar *line, gint length, LogTransportAuxData *aux)
+log_reader_handle_line(LogReader *self, const guchar *line, gsize length, LogTransportAuxData *aux)
 {
   LogMessage *m;
   
   msg_debug("Incoming log entry", 
-            evt_tag_printf("line", "%.*s", length, line),
+            evt_tag_printf("line", "%.*s", (int)length, line),
             NULL);
   /* use the current time to get the time zone offset */
   m = log_msg_new((gchar *) line, length,

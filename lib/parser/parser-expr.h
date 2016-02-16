@@ -49,9 +49,12 @@ void log_parser_free_method(LogPipe *self);
 static inline gboolean
 log_parser_process(LogParser *self, LogMessage **pmsg, const LogPathOptions *path_options, const gchar *input, gssize input_len)
 {
+  gsize len;
   if (input_len < 0)
-    input_len = strlen(input);
-  return self->process(self, pmsg, path_options, input, input_len);
+    len = strlen(input);
+  else
+    len = (gsize) input_len;
+  return self->process(self, pmsg, path_options, input, len);
 }
 
 #endif

@@ -29,4 +29,7 @@
 
 void native_parser_set_option(LogParser *s, gchar* key, gchar* value);
 
+__attribute__((visibility("hidden"))) LogParser*
+native_parser_new(GlobalConfig *cfg);
+
 #endif
