@@ -258,5 +258,5 @@ main(int argc, char **argv)
          "Error parsing MongoDB URI; uri='syslog-ng', driver='d_mongo#0'");
 */
   _teardown();
-  return 1;
+  return (int) _test_ret_num;
 }
