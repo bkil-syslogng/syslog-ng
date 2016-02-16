@@ -15,7 +15,7 @@ pkgconfigdir		= $(libdir)/pkgconfig
 pkgconfig_DATA		= syslog-ng.pc
 
 AM_CPPFLAGS		= -I$(top_srcdir)/lib -I$(top_srcdir)/modules -I$(top_builddir)/lib -I$(top_builddir)/modules
-TEST_CFLAGS		= -I$(top_srcdir)/libtest
+TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS) $(CFLAGS)
 
 TEST_LDADD		= $(top_builddir)/libtest/libsyslog-ng-test.a \
 			  $(top_builddir)/lib/libsyslog-ng.la \
