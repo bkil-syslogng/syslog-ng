@@ -117,7 +117,7 @@ _pop_head(LogQueue *s, LogPathOptions *path_options)
 }
 
 static void
-_ack_backlog(LogQueue *s, gint num_msg_to_ack)
+_ack_backlog(LogQueue *s, guint num_msg_to_ack)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 

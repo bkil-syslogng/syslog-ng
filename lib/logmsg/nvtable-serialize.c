@@ -336,7 +336,7 @@ error:
 static inline gboolean
 _read_payload(SerializeArchive *sa, NVTable *res)
 {
-  return serialize_read_blob(sa, NV_TABLE_ADDR(res, res->size - res->used), res->used);
+  return serialize_read_blob(sa, NV_TABLE_ADDR_DIFF(res, res->size, res->used), res->used);
 }
 
 NVTable *
@@ -424,7 +424,7 @@ _fill_meta_data(NVTable *self, NVTableMetaData *meta_data)
 static void
 _write_payload(SerializeArchive *sa, NVTable *self)
 {
-  serialize_write_blob(sa, NV_TABLE_ADDR(self, self->size - self->used), self->used);
+  serialize_write_blob(sa, NV_TABLE_ADDR_DIFF(self, self->size, self->used), self->used);
 }
 
 gboolean

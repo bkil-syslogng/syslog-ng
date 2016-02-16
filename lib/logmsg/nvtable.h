@@ -206,10 +206,18 @@ struct _NVTable
   };
 };
 
-#define NV_TABLE_BOUND(x)  (((x) + 0x3) & ~0x3)
+#define NV_TABLE_BOUND(x)  (((x) + 0x3u) & ~0x3u)
 #define NV_TABLE_ADDR(self, x) ((gchar *) ((self)) + ((gssize)(x)))
+#define NV_TABLE_ADDR_DIFF(self, x, y) nv_table_addr_diff(self, x, y)
 #define NV_TABLE_DYNVALUE_HANDLE(x) ((x).handle)
 #define NV_TABLE_DYNVALUE_OFS(x)    ((x).ofs)
+
+static inline gchar *
+nv_table_addr_diff(NVTable *self, guint32 x, guint32 y)
+{
+  g_assert(x >= y);
+  return (gchar *) (self + (gsize)(x - y));
+}
 
 /* 256MB, this is an artificial limit, but must be less than MAX_GUINT32 as
  * we want to compare a guint32 to this variable without overflow.  */
@@ -222,15 +230,15 @@ gboolean nv_table_foreach(NVTable *self, NVRegistry *registry, NVTableForeachFun
 gboolean nv_table_foreach_entry(NVTable *self, NVTableForeachEntryFunc func, gpointer user_data);
 
 void nv_table_clear(NVTable *self);
-NVTable *nv_table_new(gint num_static_values, gint num_dyn_values, gint init_length);
-NVTable *nv_table_init_borrowed(gpointer space, gsize space_len, gint num_static_entries);
+NVTable *nv_table_new(gsize num_static_entries, gsize num_dyn_values, gsize init_length);
+NVTable *nv_table_init_borrowed(gpointer space, gsize space_len, gsize num_static_entries);
 gboolean nv_table_realloc(NVTable *self, NVTable **new);
 NVTable *nv_table_clone(NVTable *self, gint additional_space);
 NVTable *nv_table_ref(NVTable *self);
 void nv_table_unref(NVTable *self);
 
 static inline gsize
-nv_table_get_alloc_size(gint num_static_entries, gint num_dyn_values, gint init_length)
+nv_table_get_alloc_size(gsize num_static_entries, gsize num_dyn_values, gsize init_length)
 {
   NVTable *self G_GNUC_UNUSED = NULL;
   gsize size;
@@ -339,7 +347,10 @@ nv_table_get_entry_at_ofs(NVTable *self, guint32 ofs)
 static inline guint32
 nv_table_get_dyn_value_offset_from_nventry(NVTable *self, NVEntry *entry)
 {
-  return (nv_table_get_top(self) - (gchar *) entry);
+  ptrdiff_t diff = nv_table_get_top(self) - (gchar *) entry;
+  g_assert(diff >= 0);
+  g_assert(diff <= G_MAXUINT32);
+  return (guint32) diff;
 }
 
 #endif
