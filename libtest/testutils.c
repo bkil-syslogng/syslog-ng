@@ -39,7 +39,7 @@ const gchar *current_testcase_file = NULL;
 GList *internal_messages = NULL;
 
 static void
-print_failure(const gchar *custom_template, va_list custom_args, gchar *assertion_failure_template, ...)
+print_failure(const gchar *custom_template, va_list custom_args, const gchar *assertion_failure_template, ...)
 {
   va_list assertion_failure_args;
   fprintf(stderr, "\n  ###########################################################################\n  #\n");
@@ -420,7 +420,7 @@ assert_no_error_non_fatal(GError *error, const gchar *error_message, ...)
 static int
 cmp_guint32(const void *a, const void *b)
 {
-  return (*(guint32 *)a - *(guint32 *)b);
+  return (*(const guint32 *)a - *(const guint32 *)b);
 }
 
 gboolean
