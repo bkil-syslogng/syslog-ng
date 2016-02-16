@@ -55,6 +55,6 @@ modules_test_subdirs	=	\
 	modules_cryptofuncs modules_geoip modules_afstomp \
 	modules_graphite modules_riemann modules_python \
 	modules_systemd_journal modules_kvformat modules_date \
-	modules_cef modules_disk_buffer
+	modules_cef modules_diskq
 
 .PHONY: modules modules/
