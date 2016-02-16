@@ -28,7 +28,7 @@
 
 typedef struct _StatsCounterItem
 {
-  gint value;
+  guint32 value;
 } StatsCounterItem;
 
 
