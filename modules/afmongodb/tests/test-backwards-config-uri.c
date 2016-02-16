@@ -39,13 +39,9 @@
 #include "lib/plugin.h"
 #include "resolved-configurable-paths.h"
 
-extern gboolean debug_flag; // mainloop.h
-extern gboolean verbose_flag; // mainloop.h
-extern gboolean trace_flag; // mainloop.h
-extern gboolean log_stderr; // mainloop.h
 extern GList *internal_messages; // testutils.h
 
-static int _test_ret_num = 0;
+static guint _test_ret_num = 0;
 #define TEST_FAILED (_test_ret_num = 1)
 
 #define EXPECT_MSG(pattern, error_message) (\
@@ -143,7 +139,7 @@ _run_test(const gchar *mongo_config)
   GlobalConfig *test_cfg = cfg_new(0x0308);
   if (!test_cfg)
     {
-      msg_error("Can't create new configuration", NULL);
+      msg_error("Can't create new configuration", NULL, NULL);
       return FALSE;
     }
 
@@ -165,13 +161,13 @@ _run_test(const gchar *mongo_config)
   gboolean ok = cfg_load_config(test_cfg, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
-  msg_trace("after cfg_load_config()", NULL);
+  msg_trace("after cfg_load_config()", NULL, NULL);
 
   if (!ok)
     {
-      msg_error("Syntax error in configuration", NULL);
+      msg_error("Syntax error in configuration", NULL, NULL);
       cfg_free(test_cfg);
-      return ok;
+      return FALSE;
     }
 
   const gchar *persist_filename = "";
@@ -181,20 +177,20 @@ _run_test(const gchar *mongo_config)
   ok = cfg_init(test_cfg);
   stop_grabbing_messages();
 
-  msg_trace("after cfg_init()", NULL);
+  msg_trace("after cfg_init()", NULL, NULL);
 
   if (!ok)
-    msg_error("Failed to initialize configuration", NULL);
+    msg_error("Failed to initialize configuration", NULL, NULL);
 
   sleep(1);
-  msg_trace("before app_post_config_loaded()", NULL);
+  msg_trace("before app_post_config_loaded()", NULL, NULL);
   app_post_config_loaded();
 
   service_management_indicate_readiness();
   service_management_clear_status();
 //  iv_main();
 
-  msg_trace("before cfg_deinit()", NULL);
+  msg_trace("before cfg_deinit()", NULL, NULL);
   gboolean ok2 = cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
@@ -203,12 +199,12 @@ _run_test(const gchar *mongo_config)
       persist_config_free(test_cfg->persist);
       test_cfg->persist = NULL;
     }
-  msg_trace("before cfg_free()", NULL);
+  msg_trace("before cfg_free()", NULL, NULL);
   cfg_free(test_cfg);
 
   if (!ok2)
     {
-      msg_error("Failed to deinitialize configuration", NULL);
+      msg_error("Failed to deinitialize configuration", NULL, NULL);
     }
 
   return ok && ok2;
