@@ -160,7 +160,7 @@ typedef struct _CfgTree
 } CfgTree;
 
 gboolean cfg_tree_add_object(CfgTree *self, LogExprNode *rule);
-LogExprNode *cfg_tree_get_object(CfgTree *self, gint type, const gchar *name);
+LogExprNode *cfg_tree_get_object(CfgTree *self, gint type, gchar *name);
 
 gboolean cfg_tree_add_template(CfgTree *self, LogTemplate *template);
 LogTemplate *cfg_tree_lookup_template(CfgTree *self, const gchar *name);
