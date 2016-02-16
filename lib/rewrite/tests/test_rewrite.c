@@ -50,7 +50,8 @@ create_rewrite_rule(const char *raw_rewrite_rule)
   assert_true(parse_config(raw_config, LL_CONTEXT_ROOT, NULL, NULL), ASSERTION_ERROR("Parsing the given configuration failed"));
   assert_true(cfg_init(configuration), ASSERTION_ERROR("Config initialization failed"));
 
-  LogExprNode *expr_node = cfg_tree_get_object(&configuration->tree, ENC_REWRITE, "s_test");
+  gchar *name = g_strdup("s_test");
+  LogExprNode *expr_node = cfg_tree_get_object(&configuration->tree, ENC_REWRITE, name);
   return (LogRewrite *)expr_node->children->object;
 }
 

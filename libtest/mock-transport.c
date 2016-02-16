@@ -33,17 +33,17 @@ typedef struct
   LogTransport super;
   /* data is stored in a series of data chunks, that are going to be returned as individual reads */
   struct iovec iov[32];
-  gint iov_cnt;
+  gsize iov_cnt;
   /* index currently read i/o chunk */
-  gint current_iov_ndx;
+  gsize current_iov_ndx;
   /* position within the current I/O chunk */
-  gint current_iov_pos;
+  gsize current_iov_pos;
   gboolean input_is_a_stream;
   gboolean inject_eagain;
   gboolean eof_is_eagain;
 } LogTransportMock;
 
-gssize
+static gssize
 log_transport_mock_read_method(LogTransport *s, gpointer buf, gsize count, LogTransportAuxData *aux)
 {
   LogTransportMock *self = (LogTransportMock *) s;
@@ -80,7 +80,7 @@ log_transport_mock_read_method(LogTransport *s, gpointer buf, gsize count, LogTr
       return -1;
     }
 
-  memcpy(buf, current_iov->iov_base + self->current_iov_pos, count);
+  memcpy(buf, (const guint8*)current_iov->iov_base + self->current_iov_pos, count);
   self->current_iov_pos += count;
   if (self->current_iov_pos >= current_iov->iov_len)
     {

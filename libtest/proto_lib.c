@@ -33,7 +33,7 @@ assert_proto_server_status(LogProtoServer *proto, LogProtoStatus status, LogProt
   assert_gint(status, expected_status, "LogProtoServer expected status mismatch");
 }
 
-LogProtoStatus
+static LogProtoStatus
 proto_server_fetch(LogProtoServer *proto, const guchar **msg, gsize *msg_len)
 {
   Bookmark bookmark;

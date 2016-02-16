@@ -68,7 +68,7 @@ find_cr_or_lf(gchar *s, gsize n)
           ((((longword ^ cr_charmask) + magic_bits) ^ ~(longword ^ cr_charmask)) & ~magic_bits) != 0 ||
           ((((longword ^ lf_charmask) + magic_bits) ^ ~(longword ^ lf_charmask)) & ~magic_bits) != 0)
         {
-          gint i;
+          gsize i;
 
           char_ptr = (gchar *) (longword_ptr - 1);
 

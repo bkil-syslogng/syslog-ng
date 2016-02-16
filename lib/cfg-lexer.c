@@ -42,7 +42,7 @@
  */
 struct _CfgTokenBlock
 {
-  gint pos;
+  gsize pos;
   GArray *tokens;
 };
 
@@ -587,15 +587,13 @@ cfg_lexer_include_file(CfgLexer *self, const gchar *filename_)
     }
 }
 
-gboolean
+static gboolean
 cfg_lexer_include_buffer_without_backtick_substitution(CfgLexer *self, const gchar *name, const gchar *buffer, gsize length)
 {
   CfgIncludeLevel *level;
   gchar *lexer_buffer;
   gsize lexer_buffer_len;
   
-  g_assert(length >= 0);
-
   if (self->include_depth >= MAX_INCLUDE_DEPTH - 1)
     {
       msg_error("Include file depth is too deep, increase MAX_INCLUDE_DEPTH and recompile",
@@ -1059,7 +1057,7 @@ static const gchar *lexer_contexts[] =
 gint
 cfg_lexer_lookup_context_type_by_name(const gchar *name)
 {
-  gint i;
+  gsize i;
 
   for (i = 0; i < G_N_ELEMENTS(lexer_contexts); i++)
     {
@@ -1072,7 +1070,8 @@ cfg_lexer_lookup_context_type_by_name(const gchar *name)
 const gchar *
 cfg_lexer_lookup_context_name_by_type(gint type)
 {
-  g_assert(type < G_N_ELEMENTS(lexer_contexts));
+  g_assert(type >= 0);
+  g_assert((guint)type < G_N_ELEMENTS(lexer_contexts));
   return lexer_contexts[type];
 }
 
@@ -1118,7 +1117,7 @@ cfg_token_block_new()
 void
 cfg_token_block_free(CfgTokenBlock *self)
 {
-  gint i;
+  gsize i;
 
   for (i = 0; i < self->tokens->len; i++)
     {
