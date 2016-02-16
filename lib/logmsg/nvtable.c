@@ -617,20 +617,22 @@ nv_table_clear(NVTable *self)
 }
 
 void
-nv_table_init(NVTable *self, gsize alloc_length, gint num_static_entries)
+nv_table_init(NVTable *self, gsize alloc_length, gsize num_static_entries)
 {
+  g_assert(NV_TABLE_MAX_BYTES <= G_MAXUINT32);
   g_assert(alloc_length <= NV_TABLE_MAX_BYTES);
-  self->size = alloc_length;
+  self->size = (guint32) alloc_length;
   self->used = 0;
   self->num_dyn_entries = 0;
-  self->num_static_entries = num_static_entries;
+  g_assert(num_static_entries <= G_MAXUINT8);
+  self->num_static_entries = (guint8) num_static_entries;
   self->ref_cnt = 1;
   self->borrowed = FALSE;
   memset(&self->static_entries[0], 0, self->num_static_entries * sizeof(self->static_entries[0]));
 }
 
 NVTable *
-nv_table_new(gint num_static_entries, gint num_dyn_values, gint init_length)
+nv_table_new(gsize num_static_entries, gsize num_dyn_values, gsize init_length)
 {
   NVTable *self;
   gsize alloc_length;
@@ -643,7 +645,7 @@ nv_table_new(gint num_static_entries, gint num_dyn_values, gint init_length)
 }
 
 NVTable *
-nv_table_init_borrowed(gpointer space, gsize space_len, gint num_static_entries)
+nv_table_init_borrowed(gpointer space, gsize space_len, gsize num_static_entries)
 {
   NVTable *self = (NVTable *) space;
 
@@ -658,11 +660,11 @@ nv_table_init_borrowed(gpointer space, gsize space_len, gint num_static_entries)
 gboolean
 nv_table_realloc(NVTable *self, NVTable **new)
 {
-  gsize old_size = self->size;
-  gsize new_size;
+  guint32 old_size = self->size;
+  guint32 new_size;
 
   /* double the size of the current allocation */
-  new_size = ((gsize) self->size) << 1;
+  new_size = self->size << 1;
   if (new_size > NV_TABLE_MAX_BYTES)
     new_size = NV_TABLE_MAX_BYTES;
   if (new_size == old_size)
@@ -670,12 +672,12 @@ nv_table_realloc(NVTable *self, NVTable **new)
 
   if (self->ref_cnt == 1 && !self->borrowed)
     {
-      *new = self = g_realloc(self, new_size);
+      *new = self = g_realloc(self, (gsize) new_size);
 
       self->size = new_size;
       /* move the downwards growing region to the end of the new buffer */
-      memmove(NV_TABLE_ADDR(self, self->size - self->used),
-              NV_TABLE_ADDR(self, old_size - self->used),
+      memmove(NV_TABLE_ADDR_DIFF(self, self->size, self->used),
+              NV_TABLE_ADDR_DIFF(self, old_size, self->used),
               self->used);
     }
   else
@@ -688,8 +690,8 @@ nv_table_realloc(NVTable *self, NVTable **new)
       (*new)->borrowed = FALSE;
       (*new)->size = new_size;
 
-      memmove(NV_TABLE_ADDR((*new), (*new)->size - (*new)->used),
-              NV_TABLE_ADDR(self, old_size - self->used),
+      memmove(NV_TABLE_ADDR_DIFF((*new), (*new)->size, (*new)->used),
+              NV_TABLE_ADDR_DIFF(self, old_size, self->used),
               self->used);
 
       nv_table_unref(self);
@@ -740,8 +742,8 @@ nv_table_clone(NVTable *self, gint additional_space)
   new->ref_cnt = 1;
   new->borrowed = FALSE;
 
-  memcpy(NV_TABLE_ADDR(new, new->size - new->used),
-          NV_TABLE_ADDR(self, self->size - self->used),
+  memcpy(NV_TABLE_ADDR_DIFF(new, new->size, new->used),
+          NV_TABLE_ADDR_DIFF(self, self->size, self->used),
           self->used);
 
   return new;

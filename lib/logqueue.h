@@ -64,7 +64,7 @@ struct _LogQueue
   void (*push_tail)(LogQueue *self, LogMessage *msg, const LogPathOptions *path_options);
   void (*push_head)(LogQueue *self, LogMessage *msg, const LogPathOptions *path_options);
   LogMessage *(*pop_head)(LogQueue *self, LogPathOptions *path_options);
-  void (*ack_backlog)(LogQueue *self, gint n);
+  void (*ack_backlog)(LogQueue *self, guint n);
   void (*rewind_backlog)(LogQueue *self, guint rewind_count);
   void (*rewind_backlog_all)(LogQueue *self);
 
