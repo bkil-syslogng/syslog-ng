@@ -363,12 +363,12 @@ if test "x$ac_compiler_gnu" = "xyes"; then
                 -std=gnu99 -W -Wall -Wextra -Wshadow \
  -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
  -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
- -Winline -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
+ -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
  -Wabi -Wstack-protector -Waggregate-return -Winvalid-pch \
  -Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
  -Wpointer-arith -Wpointer-sign \
  -Wno-unused-parameter -Wno-missing-field-initializers"
- # -Wstrict-prototypes
+ # -Wstrict-prototypes -Winline
         fi
 
         if test "x$enable_gprof" = "xyes"; then

@@ -56,7 +56,7 @@ log_expr_node_get_content_name(gint content)
 /*
  * Return the textual representation of a node layout.
  */
-const gchar *
+static const gchar *
 log_expr_node_get_layout_name(gint layout)
 {
   switch (layout)
@@ -82,7 +82,7 @@ log_expr_node_get_layout_name(gint layout)
  * expressions are automatically named. In that case this function
  * will return a node matching @content but without an actual name.
  */
-LogExprNode *
+static LogExprNode *
 log_expr_node_get_container_rule(LogExprNode *self, gint content)
 {
   LogExprNode *node, *result = NULL;
@@ -107,7 +107,7 @@ log_expr_node_get_container_rule(LogExprNode *self, gint content)
  * This function appends @b to @a in a linked list using the ep_next field
  * in LogExprNode.
  **/
-void
+static void
 log_expr_node_append(LogExprNode *a, LogExprNode *b)
 {
   a->next = b;
@@ -165,7 +165,7 @@ log_expr_node_location_tag(LogExprNode *self)
  * the children's "parent" pointers so that the tree can be traversed
  * upwards too.
  */
-void
+static void
 log_expr_node_set_children(LogExprNode *self, LogExprNode *children)
 {
   LogExprNode *ep;
@@ -206,7 +206,7 @@ log_expr_node_set_object(LogExprNode *self, gpointer object, GDestroyNotify dest
  * This mechanism is used to avoid having to clone source/destination
  * pipes, which operation they don't support.
  */
-void
+static void
 log_expr_node_set_aux(LogExprNode *self, gpointer aux, GDestroyNotify destroy)
 {
   self->aux = aux;
@@ -374,7 +374,7 @@ log_expr_node_lookup_flag(const gchar *flag)
   return 0;
 }
 
-LogPipe *
+static LogPipe *
 cfg_tree_new_pipe(CfgTree *self, LogExprNode *related_expr)
 {
   LogPipe *pipe = log_pipe_new(self->cfg);
@@ -383,7 +383,7 @@ cfg_tree_new_pipe(CfgTree *self, LogExprNode *related_expr)
   return pipe;
 }
 
-LogMultiplexer *
+static LogMultiplexer *
 cfg_tree_new_mpx(CfgTree *self, LogExprNode *related_expr)
 {
   LogMultiplexer *pipe = log_multiplexer_new(self->cfg);
@@ -933,7 +933,7 @@ cfg_tree_compile_node(CfgTree *self, LogExprNode *node,
   return result;
 }
 
-gboolean
+static gboolean
 cfg_tree_compile_rule(CfgTree *self, LogExprNode *rule)
 {
   LogPipe *sub_pipe_head = NULL, *sub_pipe_tail = NULL;
@@ -944,8 +944,8 @@ cfg_tree_compile_rule(CfgTree *self, LogExprNode *rule)
 static gboolean
 cfg_tree_objects_equal(gconstpointer v1, gconstpointer v2)
 {
-  LogExprNode *r1 = (LogExprNode *) v1;
-  LogExprNode *r2 = (LogExprNode *) v2;
+  const LogExprNode *r1 = (const LogExprNode *) v1;
+  const LogExprNode *r2 = (const LogExprNode *) v2;
 
   if (r1->content != r2->content)
     return FALSE;
@@ -958,7 +958,7 @@ cfg_tree_objects_equal(gconstpointer v1, gconstpointer v2)
 static guint
 cfg_tree_objects_hash(gconstpointer v)
 {
-  LogExprNode *r = (LogExprNode *) v;
+  const LogExprNode *r = (const LogExprNode *) v;
 
   /* we assume that only rules with a name are hashed */
   return r->content + g_str_hash(r->name);
@@ -989,13 +989,13 @@ cfg_tree_add_object(CfgTree *self, LogExprNode *rule)
 }
 
 LogExprNode *
-cfg_tree_get_object(CfgTree *self, gint content, const gchar *name)
+cfg_tree_get_object(CfgTree *self, gint content, gchar *name)
 {
   LogExprNode lookup_node;
 
   memset(&lookup_node, 0, sizeof(lookup_node));
   lookup_node.content = content;
-  lookup_node.name = (gchar *) name;
+  lookup_node.name = name;
 
   return g_hash_table_lookup(self->objects, &lookup_node);
 }
@@ -1036,10 +1036,10 @@ cfg_tree_check_inline_template(CfgTree *self, const gchar *template_or_name, GEr
   return template;
 }
 
-gboolean
+static gboolean
 cfg_tree_compile(CfgTree *self)
 {
-  gint i;
+  gsize i;
 
   /* resolve references within the configuration */
 
@@ -1066,7 +1066,7 @@ cfg_tree_compile(CfgTree *self)
 gboolean
 cfg_tree_start(CfgTree *self)
 {
-  gint i;
+  gsize i;
 
   if (!cfg_tree_compile(self))
     return FALSE;
@@ -1095,7 +1095,7 @@ gboolean
 cfg_tree_stop(CfgTree *self)
 {
   gboolean success = TRUE;
-  gint i;
+  gsize i;
 
   for (i = 0; i < self->initialized_pipes->len; i++)
     {

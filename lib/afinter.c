@@ -421,7 +421,7 @@ afinter_postpone_mark(gint mark_freq)
     }
 }
 
-void
+static void
 afinter_message_posted(LogMessage *msg)
 {
   g_static_mutex_lock(&internal_msg_lock);
