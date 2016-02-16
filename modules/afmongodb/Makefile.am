@@ -1,5 +1,5 @@
 
-LIBMONGO_CFLAGS += -Werror -std=gnu90 -W -Wall -Wextra -Wshadow \
+LIBMONGO_CFLAGS += -Werror -std=gnu99 -W -Wall -Wextra -Wshadow \
  -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
  -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
  -Winline -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
@@ -11,8 +11,10 @@ LIBMONGO_CFLAGS += -Werror -std=gnu90 -W -Wall -Wextra -Wshadow \
  -Wno-unused-parameter -Wno-missing-field-initializers
 
 EXTRA_FLAGS = -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
- -Wpedantic -Wvariadic-macros -Wundef -Wswitch-default \
+ -Wvariadic-macros -Wswitch-default \
  -Wlong-long -Wredundant-decls
+
+# -Wpedantic -Wundef
 
 DIST_SUBDIRS 					+= modules/afmongodb/mongo-c-driver
 
