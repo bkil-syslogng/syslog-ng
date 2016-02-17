@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef TEMPLATE_FUNCTION_H_INCLUDED
-#define TEMPLATE_FUNCTION_H_INCLUDED
+#ifndef USER_FUNCTION_H_INCLUDED
+#define USER_FUNCTION_H_INCLUDED
 
 #include "syslog-ng.h"
 
