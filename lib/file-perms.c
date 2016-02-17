@@ -176,7 +176,7 @@ file_perm_options_apply_fd(const FilePermOptions *self, gint fd)
  * returns. (at least it won't fail because of missing directories).
  **/
 gboolean
-file_perm_options_create_containing_directory(const FilePermOptions *self, gchar *name)
+file_perm_options_create_containing_directory(const FilePermOptions *self, const gchar *name)
 {
   gchar *dirname;
   struct stat st;
@@ -187,43 +187,46 @@ file_perm_options_create_containing_directory(const FilePermOptions *self, gchar
   /* check that the directory exists */
   dirname = g_path_get_dirname(name);
   rc = stat(dirname, &st);
-  g_free(dirname);
 
   if (rc == 0)
     {
       /* directory already exists */
+      g_free(dirname);
       return TRUE;
     }
   else if (rc < 0 && errno != ENOENT)
     {
       /* some real error occurred */
+      g_free(dirname);
       return FALSE;
     }
 
   /* directory does not exist */
-  p = name + 1;
+  p = dirname;
 
-  p = strchr(p, '/');
-  while (p)
+  do
     {
-      *p = 0;
-      if (stat(name, &st) == 0)
+      p = strchr(p + 1, '/');
+      if (p)
+        *p = 0;
+      if (stat(dirname, &st) == 0)
         {
           if (!S_ISDIR(st.st_mode))
             return FALSE;
         }
       else if (errno == ENOENT)
         {
-          if (mkdir(name, self->dir_perm < 0 ? 0700 : (mode_t) self->dir_perm) == -1)
+          if (mkdir(dirname, self->dir_perm < 0 ? 0700 : (mode_t) self->dir_perm) == -1)
             return FALSE;
           saved_caps = g_process_cap_save();
           g_process_cap_modify(CAP_CHOWN, TRUE);
           g_process_cap_modify(CAP_FOWNER, TRUE);
-          file_perm_options_apply_dir(self, name);
+          file_perm_options_apply_dir(self, dirname);
           g_process_cap_restore(saved_caps);
         }
-      *p = '/';
-      p = strchr(p + 1, '/');
-    }
+      if (p)
+        *p = '/';
+    } while (p);
+  g_free(dirname);
   return TRUE;
 }

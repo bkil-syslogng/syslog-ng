@@ -50,6 +50,6 @@ void file_perm_options_init(FilePermOptions *self, GlobalConfig *cfg);
 gboolean file_perm_options_apply_file(const FilePermOptions *self, gchar *name);
 gboolean file_perm_options_apply_dir(const FilePermOptions *self, gchar *name);
 gboolean file_perm_options_apply_fd(const FilePermOptions *self, gint fd);
-gboolean file_perm_options_create_containing_directory(const FilePermOptions *self, gchar *name);
+gboolean file_perm_options_create_containing_directory(const FilePermOptions *self, const gchar *name);
 
 #endif
