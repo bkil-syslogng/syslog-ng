@@ -7,7 +7,6 @@ libtest_LIBRARIES		    =	\
 	libtest/libsyslog-ng-test.a
 
 libtest_libsyslog_ng_test_a_SOURCES =   \
-	libtest/libtest.c		\
 	libtest/testutils.c		\
 	libtest/testutils.h		\
 	libtest/msg_parse_lib.c		\
