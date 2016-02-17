@@ -483,6 +483,10 @@ g_process_set_caps(const gchar *caps)
     process_opts.caps = caps;
 }
 
+#ifdef SYSLOG_NG_HAVE_ENVIRON
+  extern char **environ;
+#endif
+
 /**
  * g_process_set_argv_space:
  * @argc: Original argc, as received by the main function in it's first parameter
@@ -495,7 +499,6 @@ void
 g_process_set_argv_space(gint argc, gchar **argv)
 {
 #ifdef SYSLOG_NG_HAVE_ENVIRON
-  extern char **environ;
   gchar *lastargv = NULL;
   gchar **envp    = environ;
   gint i;
