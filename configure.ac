@@ -374,6 +374,8 @@ if test "x$ac_compiler_gnu" = "xyes"; then
  -Wvariadic-macros -Wswitch-default"
  # -Wpedantic -Wundef -Wredundant-decls -Wlong-long
  # -Wstrict-prototypes -Winline -Wstack-protector
+        else
+                CPPFLAGS="${CPPFLAGS} -DG_DISABLE_ASSERT"
         fi
 
         if test "x$enable_gprof" = "xyes"; then
