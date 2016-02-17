@@ -360,15 +360,18 @@ if test "x$ac_compiler_gnu" = "xyes"; then
         CFLAGS="${CFLAGS} -Wall -Wshadow"
         if test "x$enable_debug" = "xyes"; then
                 CFLAGS="${ac_cv_env_CFLAGS_value} -Wall -g \
-                -std=gnu99 -W -Wall -Wextra -Wshadow \
+                -W -Wextra \
  -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
  -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
  -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
- -Wabi -Wstack-protector -Waggregate-return -Winvalid-pch \
+ -Wabi -Waggregate-return -Winvalid-pch \
  -Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
  -Wpointer-arith -Wpointer-sign \
- -Wno-unused-parameter -Wno-missing-field-initializers"
- # -Wstrict-prototypes -Winline
+ -Wno-unused-parameter -Wno-missing-field-initializers \
+ -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
+ -Wvariadic-macros -Wswitch-default"
+ # -Wpedantic -Wundef -Wredundant-decls -Wlong-long
+ # -Wstrict-prototypes -Winline -Wstack-protector
         fi
 
         if test "x$enable_gprof" = "xyes"; then
