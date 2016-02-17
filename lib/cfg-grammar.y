@@ -358,7 +358,6 @@ extern struct _StatsOptions *last_stats_options;
 #include "cfg-grammar.h"
 
 LogDriver *last_driver;
-LogParser *last_parser;
 LogSourceOptions *last_source_options;
 LogProtoServerOptions *last_proto_server_options;
 LogReaderOptions *last_reader_options;
