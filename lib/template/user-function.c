@@ -66,7 +66,7 @@ user_template_function_free(LogTemplateFunction *s)
   g_free(self);
 }
 
-LogTemplateFunction *
+static LogTemplateFunction *
 user_template_function_new(const gchar *name, LogTemplate *template)
 {
   UserTemplateFunction *self;

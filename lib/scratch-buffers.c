@@ -38,7 +38,7 @@ TLS_BLOCK_END;
 
 #define local_sb_gstrings        __tls_deref(sb_gstrings)
 
-GTrashStack *
+static GTrashStack *
 sb_gstring_acquire_buffer(void)
 {
   SBGString *sb;
@@ -55,7 +55,7 @@ sb_gstring_acquire_buffer(void)
   return (GTrashStack *) sb;
 }
 
-void
+static void
 sb_gstring_release_buffer(GTrashStack *s)
 {
   SBGString *sb = (SBGString *) s;
@@ -63,7 +63,7 @@ sb_gstring_release_buffer(GTrashStack *s)
   g_trash_stack_push(&local_sb_gstrings, sb);
 }
 
-void
+static void
 sb_gstring_free_stack(void)
 {
   SBGString *sb;
@@ -85,7 +85,7 @@ ScratchBufferStack SBGStringStack = {
 
 #define local_sb_th_gstrings        __tls_deref(sb_th_gstrings)
 
-GTrashStack *
+static GTrashStack *
 sb_th_gstring_acquire_buffer (void)
 {
   SBTHGString *sb;
@@ -103,13 +103,13 @@ sb_th_gstring_acquire_buffer (void)
   return (GTrashStack *)sb;
 }
 
-void
+static void
 sb_th_gstring_release_buffer(GTrashStack *s)
 {
   g_trash_stack_push(&local_sb_th_gstrings, s);
 }
 
-void
+static void
 sb_th_gstring_free_stack(void)
 {
   SBGString *sb;

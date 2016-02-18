@@ -1099,7 +1099,7 @@ log_writer_flush_finalize(LogWriter *self)
   return TRUE;
 }
 
-gboolean
+static gboolean
 log_writer_write_message(LogWriter *self, LogMessage *msg, LogPathOptions *path_options, gboolean *write_error)
 {
   gboolean consumed = FALSE;
@@ -1421,7 +1421,7 @@ log_writer_set_pending_proto(LogWriter *self, LogProtoClient *proto, gboolean pr
  * the destination LogProtoClient instance. It needs to be ran in the main
  * thread as it reregisters the watches associated with the main
  * thread. */
-void
+static void
 log_writer_reopen_deferred(gpointer s)
 {
   gpointer *args = (gpointer *) s;

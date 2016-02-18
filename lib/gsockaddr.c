@@ -190,7 +190,7 @@ g_sockaddr_inet_bind_prepare(int sock, GSockAddr *addr)
 }
 
 /*+ format an IPv4 address into human readable form */
-gchar *
+static gchar *
 g_sockaddr_inet_format(GSockAddr *addr, gchar *text, gulong n, gint format)
 {
   GSockAddrInet *self = (GSockAddrInet *) addr;

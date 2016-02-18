@@ -115,7 +115,7 @@ _regexp_matches(MultiLineRegexp *re, const guchar *str, gsize len)
   return match[0] >= 0;
 }
 
-gint
+static gint
 log_proto_prefix_garbage_multiline_get_offset_of_garbage(LogProtoREMultiLineServer *self, const guchar* line, gsize line_len)
 {
   gint match[3];
@@ -124,7 +124,7 @@ log_proto_prefix_garbage_multiline_get_offset_of_garbage(LogProtoREMultiLineServ
   return match[0];
 };
 
-gint
+static gint
 log_proto_prefix_suffix_multiline_get_offset_of_garbage(LogProtoREMultiLineServer *self, const guchar* line, gsize line_len)
 {
   gint match[3];

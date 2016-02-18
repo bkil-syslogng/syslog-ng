@@ -114,7 +114,7 @@ _generate_new_message_with_timestamp_of_the_triggering_message(LogStamp *msgstam
   return genmsg;
 }
 
-LogMessage *
+static LogMessage *
 _generate_message_inheriting_properties_from_the_entire_context(CorrellationContext *context)
 {
   LogMessage *genmsg = _generate_message_inheriting_properties_from_the_last_message(correllation_context_get_last_message(context));

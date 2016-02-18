@@ -74,7 +74,7 @@ path_resolver_populate_configure_variables(PathResolver *self, const gchar *sysp
       g_assert_not_reached();				\
     } while (0)
 
-gpointer
+static gpointer
 path_resolver_resolve(CacheResolver *s, const gchar *orig)
 {
   PathResolver *self = (PathResolver *) s;

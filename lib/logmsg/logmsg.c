@@ -961,7 +961,7 @@ log_msg_format_sdata(const LogMessage *self, GString *result,  guint32 seq_num)
   log_msg_append_format_sdata(self, result, seq_num);
 }
 
-gboolean
+static gboolean
 log_msg_append_tags_callback(const LogMessage *self, LogTagId tag_id, const gchar *name, gpointer user_data)
 {
   GString *result = (GString *) ((gpointer *) user_data)[0];

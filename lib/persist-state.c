@@ -310,7 +310,7 @@ _free_value(PersistState *self, PersistEntryHandle handle)
 
 /* key management */
 
-gboolean
+static gboolean
 persist_state_lookup_key(PersistState *self, const gchar *key, PersistEntryHandle *handle)
 {
   PersistEntry *entry;

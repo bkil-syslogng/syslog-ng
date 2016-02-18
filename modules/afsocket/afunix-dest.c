@@ -69,7 +69,7 @@ afunix_dd_free(LogPipe *s)
   afsocket_dd_free(s);
 }
 
-AFUnixDestDriver *
+static AFUnixDestDriver *
 afunix_dd_new_instance(TransportMapper *transport_mapper, gchar *filename, GlobalConfig *cfg)
 {
   AFUnixDestDriver *self = g_new0(AFUnixDestDriver, 1);

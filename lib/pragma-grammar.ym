@@ -51,7 +51,7 @@
 
 CfgArgs *last_module_args = NULL;
 
-gint
+static gint
 __process_version_string(gchar *value)
 {
   gchar *p, *end;

@@ -67,7 +67,7 @@ typedef struct _PDBProgramPattern
   PDBRule *rule;
 } PDBProgramPattern;
 
-void
+static void
 pdb_loader_start_element(GMarkupParseContext *context, const gchar *element_name, const gchar **attribute_names,
                          const gchar **attribute_values, gpointer user_data, GError **error)
 {
@@ -267,7 +267,7 @@ _populate_ruleset_radix(gpointer key, gpointer value, gpointer user_data)
   r_insert_node(state->ruleset->programs, pattern, pdb_program_ref(program), NULL);
 }
 
-void
+static void
 pdb_loader_end_element(GMarkupParseContext *context, const gchar *element_name, gpointer user_data, GError **error)
 {
   PDBLoader *state = (PDBLoader *) user_data;
@@ -390,7 +390,7 @@ pdb_loader_end_element(GMarkupParseContext *context, const gchar *element_name, 
     }
 }
 
-void
+static void
 pdb_loader_text(GMarkupParseContext *context, const gchar *text, gsize text_len, gpointer user_data, GError **error)
 {
   PDBLoader *state = (PDBLoader *) user_data;

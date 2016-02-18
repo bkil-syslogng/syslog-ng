@@ -125,7 +125,7 @@ pdb_context_free(CorrellationContext *s)
   correllation_context_free_method(s);
 }
 
-PDBContext *
+static PDBContext *
 pdb_context_new(CorrellationKey *key)
 {
   PDBContext *self = g_new0(PDBContext, 1);
@@ -149,7 +149,7 @@ typedef struct _PDBRateLimit
   guint64 last_check;
 } PDBRateLimit;
 
-PDBRateLimit *
+static PDBRateLimit *
 pdb_rate_limit_new(CorrellationKey *key)
 {
   PDBRateLimit *self = g_new0(PDBRateLimit, 1);
@@ -164,7 +164,7 @@ pdb_rate_limit_new(CorrellationKey *key)
   return self;
 }
 
-void
+static void
 pdb_rate_limit_free(PDBRateLimit *self)
 {
   if (self->key.host)
@@ -230,7 +230,7 @@ pdb_check_action_rate_limit(PDBAction *self, PDBRule *rule, PatternDB *db, LogMe
   return FALSE;
 }
 
-gboolean
+static gboolean
 pdb_is_action_triggered(PDBAction *self, PatternDB *db, PDBRule *rule, PDBActionTrigger trigger, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   if (self->trigger != trigger)
@@ -250,7 +250,7 @@ pdb_is_action_triggered(PDBAction *self, PatternDB *db, PDBRule *rule, PDBAction
   return TRUE;
 }
 
-LogMessage *
+static LogMessage *
 pdb_generate_message(PDBAction *self, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   if (context)
@@ -259,7 +259,7 @@ pdb_generate_message(PDBAction *self, PDBContext *context, LogMessage *msg, GStr
     return synthetic_message_generate_without_context(&self->content.message, self->content.inherit_mode, msg, buffer);
 }
 
-void
+static void
 pdb_execute_action_message(PDBAction *self, PatternDB *db, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   LogMessage *genmsg;
@@ -269,7 +269,7 @@ pdb_execute_action_message(PDBAction *self, PatternDB *db, PDBContext *context, 
   log_msg_unref(genmsg);
 }
 
-void
+static void
 pdb_execute_action(PDBAction *self, PatternDB *db, PDBRule *rule, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   switch (self->content_type)
@@ -285,14 +285,14 @@ pdb_execute_action(PDBAction *self, PatternDB *db, PDBRule *rule, PDBContext *co
     }
 }
 
-void
+static void
 pdb_trigger_action(PDBAction *self, PatternDB *db, PDBRule *rule, PDBActionTrigger trigger, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   if (pdb_is_action_triggered(self, db, rule, trigger, context, msg, buffer))
     pdb_execute_action(self, db, rule, context, msg, buffer);
 }
 
-void
+static void
 pdb_run_rule_actions(PDBRule *self, PatternDB *db, PDBActionTrigger trigger, PDBContext *context, LogMessage *msg, GString *buffer)
 {
   gint i;
@@ -317,7 +317,7 @@ pdb_run_rule_actions(PDBRule *self, PatternDB *db, PDBActionTrigger trigger, PDB
  * @matches: an array of RParserMatch entries
  * @ref_handle: if the matches are indirect matches, they are referenced based on this handle (eg. LM_V_MESSAGE)
  **/
-void
+static void
 _add_matches_to_message(LogMessage *msg, GArray *matches, NVHandle ref_handle, const gchar *input_string)
 {
   gint i;
@@ -346,7 +346,7 @@ _add_matches_to_message(LogMessage *msg, GArray *matches, NVHandle ref_handle, c
  *
  * NOTE: it also modifies @msg to store the name-value pairs found during lookup, so
  */
-PDBRule *
+static PDBRule *
 pdb_lookup_ruleset(PDBRuleSet *self, PDBLookupParams *lookup, GArray *dbg_list)
 {
   RNode *node;
@@ -514,7 +514,7 @@ pattern_db_timer_tick(PatternDB *self)
 }
 
 /* NOTE: lock should be acquired for writing before calling this function. */
-void
+static void
 pattern_db_set_time(PatternDB *self, const LogStamp *ls)
 {
   GTimeVal now;

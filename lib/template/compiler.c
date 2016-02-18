@@ -443,7 +443,7 @@ log_template_compiler_process_value(LogTemplateCompiler *self, GError **error)
   return TRUE;
 }
 
-gboolean
+static gboolean
 log_template_compiler_process_token(LogTemplateCompiler *self, GError **error)
 {
   self->msg_ref = 0;

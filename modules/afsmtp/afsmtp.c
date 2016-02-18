@@ -187,7 +187,7 @@ afsmtp_dd_add_header(LogDriver *d, const gchar *header, LogTemplate *value)
 /*
  * Utilities
  */
-void
+static void
 ignore_sigpipe (void)
 {
   struct sigaction sa;
