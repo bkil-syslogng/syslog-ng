@@ -31,7 +31,7 @@
 
 gboolean success = TRUE;
 
-gboolean
+static gboolean
 vp_keys_foreach(const gchar *name, TypeHint type, const gchar *value,
                 gsize value_len, gpointer user_data)
 {
@@ -46,7 +46,7 @@ vp_keys_foreach(const gchar *name, TypeHint type, const gchar *value,
   return FALSE;
 }
 
-void
+static void
 cat_keys_foreach(const gchar *name, gpointer user_data)
 {
   GString *res = (GString *) user_data;
@@ -59,7 +59,7 @@ cat_keys_foreach(const gchar *name, gpointer user_data)
 MsgFormatOptions parse_options;
 LogTemplateOptions template_options;
 
-LogMessage *
+static LogMessage *
 create_message(void)
 {
   LogMessage *msg;
@@ -81,7 +81,7 @@ create_template(const gchar *type_hint_string, const gchar *template_string)
   return template;
 }
 
-void
+static void
 testcase(const gchar *scope, const gchar *exclude, const gchar *expected, GPtrArray *transformers)
 {
   ValuePairs *vp;

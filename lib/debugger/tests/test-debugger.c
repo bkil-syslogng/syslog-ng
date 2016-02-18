@@ -25,7 +25,7 @@
 #include "debugger/debugger.h"
 #include "apphook.h"
 
-void
+static void
 test_debugger(void)
 {
   Debugger *debugger = debugger_new(configuration);

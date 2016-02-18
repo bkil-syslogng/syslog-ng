@@ -29,7 +29,7 @@
 #include "libtest/testutils.h"
 #include <unistd.h>
 
-void
+static void
 test_is_directory_return_false_in_case_of_regular_file(void)
 {
   int fd = open("test.file", O_CREAT | O_RDWR, 0644);

@@ -34,7 +34,7 @@
 #include "testutils.h"
 #include "filter/filter-netmask6.h"
 
-gchar*
+static gchar *
 calculate_network6(const gchar* ipv6, int prefix, gchar *calculated_network)
 {
   struct in6_addr network;
@@ -48,7 +48,7 @@ calculate_network6(const gchar* ipv6, int prefix, gchar *calculated_network)
   return calculated_network;
 }
 
-void
+static void
 assert_netmask6(const gchar* ipv6, gint prefix, const gchar* expected_network)
 {
   char error_msg[64];

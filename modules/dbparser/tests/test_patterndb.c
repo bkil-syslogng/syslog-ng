@@ -210,13 +210,13 @@ assert_msg_matches_and_has_tag(const gchar *pattern, const gchar *tag, gboolean 
   log_msg_unref(msg);
 }
 
-void
+static void
 assert_output_message_nvpair_equals(gint ndx, const gchar *name, const gchar *value)
 {
   assert_log_message_value(_get_output_message(ndx), log_msg_get_value_handle(name), value);
 }
 
-void
+static void
 assert_msg_matches_and_output_message_nvpair_equals_with_timeout(const gchar *pattern, gint timeout, gint ndx, const gchar *name, const gchar *value)
 {
   LogMessage *msg;
@@ -229,13 +229,13 @@ assert_msg_matches_and_output_message_nvpair_equals_with_timeout(const gchar *pa
   log_msg_unref(msg);
 }
 
-void
+static void
 assert_msg_matches_and_output_message_nvpair_equals(const gchar *pattern, gint ndx, const gchar *name, const gchar *value)
 {
   assert_msg_matches_and_output_message_nvpair_equals_with_timeout(pattern, 0, ndx, name, value);
 }
 
-void
+static void
 assert_output_message_has_tag(gint ndx, const gchar *tag, gboolean set)
 {
   if (set)
@@ -244,7 +244,7 @@ assert_output_message_has_tag(gint ndx, const gchar *tag, gboolean set)
     assert_log_message_doesnt_have_tag(_get_output_message(ndx), tag);
 }
 
-void
+static void
 assert_msg_matches_and_output_message_has_tag_with_timeout(const gchar *pattern, gint timeout, gint ndx, const gchar *tag, gboolean set)
 {
   LogMessage *msg;
@@ -256,7 +256,7 @@ assert_msg_matches_and_output_message_has_tag_with_timeout(const gchar *pattern,
   log_msg_unref(msg);
 }
 
-void
+static void
 assert_msg_matches_and_output_message_has_tag(const gchar *pattern, gint ndx, const gchar *tag, gboolean set)
 {
   assert_msg_matches_and_output_message_has_tag_with_timeout(pattern, 0, ndx, tag, set);
@@ -409,7 +409,7 @@ const gchar *pdb_ruletest_skeleton = \
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_rule(void)
 {
   _load_pattern_db_from_string(pdb_ruletest_skeleton);
@@ -488,7 +488,7 @@ const gchar *pdb_inheritance_enabled_skeleton = \
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_message_property_inheritance_enabled()
 {
   _load_pattern_db_from_string(pdb_inheritance_enabled_skeleton);
@@ -530,7 +530,7 @@ const gchar *pdb_inheritance_disabled_skeleton = \
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_message_property_inheritance_disabled()
 {
   _load_pattern_db_from_string(pdb_inheritance_disabled_skeleton);
@@ -573,7 +573,7 @@ const gchar *pdb_inheritance_context_skeleton =
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_message_property_inheritance_context(void)
 {
   _load_pattern_db_from_string(pdb_inheritance_context_skeleton);
@@ -590,7 +590,7 @@ test_patterndb_message_property_inheritance_context(void)
   _destroy_pattern_db();
 }
 
-void
+static void
 test_patterndb_message_property_inheritance(void)
 {
   test_patterndb_message_property_inheritance_enabled();
@@ -650,7 +650,7 @@ const gchar *pdb_msg_count_skeleton = \
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_context_length()
 {
   _load_pattern_db_from_string(pdb_msg_count_skeleton);
@@ -678,7 +678,7 @@ const gchar *tag_outside_of_rule_skeleton = \
  </ruleset>\
 </patterndb>";
 
-void
+static void
 test_patterndb_tags_outside_of_rule()
 {
   patterndb = pattern_db_new();

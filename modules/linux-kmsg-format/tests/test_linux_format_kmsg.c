@@ -51,7 +51,7 @@ assert_log_kmsg_value(LogMessage *message, const gchar *key,
   assert_string(actual_value, expected_value, NULL);
 }
 
-void
+static void
 test_kmsg_single_line(void)
 {
   const gchar cmsg[] = "5,2,1;Linux version 3.5-trunk-amd64 (Debian 3.5.2-1~experimental.1) (debian-kernel@lists.debian.org) (gcc version 4.6.3 (Debian 4.6.3-1) ) #1 SMP Mon Aug 20 04:17:46 UTC 2012\n";
@@ -74,7 +74,7 @@ test_kmsg_single_line(void)
   testcase_end();
 }
 
-void
+static void
 test_kmsg_multi_line(void)
 {
   const gchar msg[] = "6,202,98513;pci_root PNP0A08:00: host bridge window [io  0x0000-0x0cf7]\n" \
@@ -98,7 +98,7 @@ test_kmsg_multi_line(void)
   testcase_end();
 }
 
-void
+static void
 test_kmsg_with_extra_fields(void)
 {
   const gchar msg[] = "5,2,0,some extra field,3,4,5;And this is the real message\n";
@@ -164,7 +164,7 @@ test_kmsg_device_parsing(void)
   testcase_end();
 }
 
-void
+static void
 init_and_load_kmsgformat_module()
 {
   configuration = cfg_new(VERSION_VALUE);
@@ -175,7 +175,7 @@ init_and_load_kmsgformat_module()
   msg_format_options_init(&parse_options, configuration);
 }
 
-void
+static void
 deinit_kmsgformat_module()
 {
   if (configuration)

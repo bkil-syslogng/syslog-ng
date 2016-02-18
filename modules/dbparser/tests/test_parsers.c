@@ -112,7 +112,7 @@ test_string_parser_with_additional_end_characters(void)
   assert_parser_success(r_parser_string, "foo=bar", "=", NULL, "foo=bar");
 }
 
-void
+static void
 test_string(void)
 {
   PARSER_TESTCASE(test_string_parser_without_parameter_parses_a_word);
@@ -151,7 +151,7 @@ test_qstring_parser_extracts_word_from_quotes(void)
   assert_qstring_parser_success("{foo}", braces, "foo");
 }
 
-void
+static void
 test_qstring(void)
 {
   PARSER_TESTCASE(test_qstring_parser_extracts_word_from_quotes);

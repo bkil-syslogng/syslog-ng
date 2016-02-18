@@ -29,7 +29,7 @@
 #include "stats/stats-registry.h"
 #include "apphook.h"
 
-void
+static void
 test_log()
 {
   GString *command = g_string_sized_new(128);
@@ -85,7 +85,7 @@ test_log()
   return;
 }
 
-void
+static void
 test_stats()
 {
   GString *reply = NULL;
@@ -112,7 +112,7 @@ test_stats()
   return;
 }
 
-void
+static void
 test_reset_stats()
 {
   GString *reply = NULL;

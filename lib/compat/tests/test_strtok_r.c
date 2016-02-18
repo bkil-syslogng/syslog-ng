@@ -56,7 +56,7 @@
 
 typedef char *(STRTOK_R_FUN)(char *str, const char *delim, char **saveptr);
 
-void
+static void
 assert_if_tokenizer_concatenated_result_not_match(STRTOK_R_FUN tokenizer,
                                                   const char *delim,
                                                   const char *input,
@@ -90,7 +90,7 @@ assert_if_tokenizer_concatenated_result_not_match(STRTOK_R_FUN tokenizer,
   g_free(result);
 }
 
-void
+static void
 test_strtok_with_literals(STRTOK_R_FUN tokenizer_func)
 {
   assert_if_tokenizer_concatenated_result_not_match(tokenizer_func, ".",
