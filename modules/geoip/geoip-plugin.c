@@ -27,6 +27,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean geoip_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser geoip_parser_parser;
 
 static Plugin geoip_plugins[] =

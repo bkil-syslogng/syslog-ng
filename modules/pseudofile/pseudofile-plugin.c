@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean pseudofile_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser pseudofile_parser;
 
 static Plugin pseudofile_plugins[] =

@@ -37,6 +37,8 @@
 #include <stomp.h>
 #include "logthrdestdrv.h"
 
+gboolean afstomp_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 typedef struct {
   LogThrDestDriver super;
 

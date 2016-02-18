@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean json_plugin_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser json_parser_parser;
 
 static Plugin json_plugins[] =

@@ -27,6 +27,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean date_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED);
+
 extern CfgParser date_parser;
 
 static Plugin date_plugin =
