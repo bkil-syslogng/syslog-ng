@@ -35,7 +35,7 @@ typedef struct _DateParser
 } DateParser;
 
 void
-date_parser_set_format(LogParser *s, gchar *format)
+date_parser_set_format(LogParser *s, const gchar *format)
 {
   DateParser *self = (DateParser *) s;
 
@@ -44,7 +44,7 @@ date_parser_set_format(LogParser *s, gchar *format)
 }
 
 void
-date_parser_set_timezone(LogParser *s, gchar *tz)
+date_parser_set_timezone(LogParser *s, const gchar *tz)
 {
   DateParser *self = (DateParser *) s;
 
