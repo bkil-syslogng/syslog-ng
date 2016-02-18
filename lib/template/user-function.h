@@ -26,6 +26,7 @@
 #define USER_FUNCTION_H_INCLUDED
 
 #include "syslog-ng.h"
+#include "template/templates.h"
 
 void user_template_function_register(GlobalConfig *cfg, const gchar *name, LogTemplate *template);
 
