@@ -36,6 +36,7 @@ int _cfg_lexer_get_column(yyscan_t yyscanner);
 void _cfg_lexer_set_column (int  column_no , yyscan_t yyscanner);
 void cfg_lexer_unput_string(CfgLexer *self, const char *str);
 
+
 static gint
 yy_input_run_backtick_substitution(CfgLexer *self, gchar *buf, gsize buf_size)
 {
@@ -329,7 +330,7 @@ cfg_lexer_unput_string(CfgLexer *self, const char *str)
 }
 
 void
-cfg_lexer_start_block_state(CfgLexer *self, gchar block_boundary[2])
+cfg_lexer_start_block_state(CfgLexer *self, const gchar block_boundary[2])
 {
   memcpy(&self->block_boundary, block_boundary, sizeof(self->block_boundary));
   yy_push_state(block, self->state);

@@ -35,7 +35,7 @@
 /* FIXME: maybe we should return gchar with the result */
 
 gboolean
-r_parser_string(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_string(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   *len = 0;
 
@@ -196,14 +196,14 @@ r_parser_pcre_free_state(gpointer s)
 }
 
 static gboolean
-r_parser_anystring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_anystring(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   *len = strlen(str);
   return TRUE;
 }
 
 static gboolean
-r_parser_set(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_set(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   *len = 0;
 
@@ -222,12 +222,12 @@ r_parser_set(guint8 *str, gint *len, const gchar *param, gpointer state, RParser
 
 
 static gboolean
-r_parser_email(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_email(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint end;
   int count = 0;
 
-  gchar *email = "!#$%&'*+-/=?^_`{|}~.";
+  const gchar *email = "!#$%&'*+-/=?^_`{|}~.";
 
   *len = 0;
 
@@ -282,7 +282,7 @@ r_parser_email(guint8 *str, gint *len, const gchar *param, gpointer state, RPars
 }
 
 static gboolean
-r_parser_hostname(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_hostname(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   int count = 0;
 
@@ -306,7 +306,7 @@ r_parser_hostname(guint8 *str, gint *len, const gchar *param, gpointer state, RP
 }
 
 static gboolean
-_r_parser_lladdr(guint8 *str, gint *len, gint count, gint parts, gpointer state, RParserMatch *match)
+_r_parser_lladdr(const guint8 *str, gint *len, gint count, gint parts, gpointer state, RParserMatch *match)
 {
   gint i;
   *len = 0;
@@ -343,7 +343,7 @@ _r_parser_lladdr(guint8 *str, gint *len, gint count, gint parts, gpointer state,
 }
 
 static gboolean
-r_parser_lladdr(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_lladdr(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint count, parts;
 
@@ -366,13 +366,13 @@ r_parser_lladdr(guint8 *str, gint *len, const gchar *param, gpointer state, RPar
 }
 
 static gboolean
-r_parser_macaddr(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_macaddr(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   return _r_parser_lladdr(str, len, 17, 6, state, match);
 }
 
 static gboolean
-r_parser_ipv4(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_ipv4(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint dots = 0;
   gint octet = -1;
@@ -414,7 +414,7 @@ r_parser_ipv4(guint8 *str, gint *len, const gchar *param, gpointer state, RParse
 }
 
 static gboolean
-r_parser_ipv6(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_ipv6(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint colons = 0;
   gint dots = 0;
@@ -486,13 +486,13 @@ r_parser_ipv6(guint8 *str, gint *len, const gchar *param, gpointer state, RParse
 }
 
 static gboolean
-r_parser_ip(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_ip(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   return r_parser_ipv4(str, len, param, state, match) || r_parser_ipv6(str, len, param, state, match);
 }
 
 static gboolean
-r_parser_float(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_float(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gboolean dot = FALSE;
 
@@ -561,7 +561,7 @@ r_parser_number(guint8 *str, gint *len, const gchar *param, gpointer state, RPar
  * Create a new parsing node.
  **/
 static RParserNode *
-r_new_pnode(guint8 *key)
+r_new_pnode(const guint8 *key)
 {
   RParserNode *parser_node = g_new0(RParserNode, 1);
   gchar **params = g_strsplit(key, ":", 3);
@@ -803,7 +803,7 @@ r_add_child(RNode *parent, RNode *child)
 }
 
 static inline void
-r_add_child_check(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func)
+r_add_child_check(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc value_func)
 {
   guint8 *at;
 
@@ -899,7 +899,7 @@ r_find_child_by_first_character(RNode *root, char key)
 }
 
 void
-r_insert_node(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func)
+r_insert_node(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc value_func)
 {
   RNode *node;
   gint keylen = strlen(key);
@@ -1099,13 +1099,13 @@ typedef struct _RFindNodeState
 {
   gboolean require_complete_match;
   gboolean partial_match_found;
-  guint8 *whole_key;
+  const guint8 *whole_key;
   GArray *stored_matches;
   GArray *dbg_list;
   GPtrArray *applicable_nodes;
 } RFindNodeState;
 
-static RNode *_find_node_recursively(RFindNodeState *state, RNode *root, guint8 *key, gint keylen);
+static RNode *_find_node_recursively(RFindNodeState *state, RNode *root, const guint8 *key, gint keylen);
 
 static void
 _add_debug_info(RFindNodeState *state, RNode *node, RParserNode *pnode, gint i, gint match_off, gint match_len)
@@ -1131,7 +1131,7 @@ _add_literal_match_to_debug_info(RFindNodeState *state, RNode *node, gint litera
 }
 
 static void
-_add_parser_match_debug_info(RFindNodeState *state, RNode *root, RParserNode *parser_node, guint8 *remaining_key, gint extracted_match_len, RParserMatch *match_slot)
+_add_parser_match_debug_info(RFindNodeState *state, RNode *root, RParserNode *parser_node, const guint8 *remaining_key, gint extracted_match_len, RParserMatch *match_slot)
 {
   if (state->dbg_list && match_slot)
     _add_debug_info(state, root, parser_node, extracted_match_len, ((gint16) match_slot->ofs) + remaining_key - state->whole_key, ((gint16) match_slot->len) + extracted_match_len);
@@ -1146,7 +1146,7 @@ _truncate_debug_info(RFindNodeState *state, gint truncated_size)
 }
 
 static void
-_find_matching_literal_prefix(RNode *root, guint8 *key, gint keylen,
+_find_matching_literal_prefix(RNode *root, const guint8 *key, gint keylen,
                               gint *literal_prefix_inputlen,
                               gint *literal_prefix_radixlen)
 {
@@ -1186,7 +1186,7 @@ _find_matching_literal_prefix(RNode *root, guint8 *key, gint keylen,
 }
 
 static RNode *
-_find_child_by_remaining_key(RFindNodeState *state, RNode *root, guint8 *remaining_key, gint remaining_keylen)
+_find_child_by_remaining_key(RFindNodeState *state, RNode *root, const guint8 *remaining_key, gint remaining_keylen)
 {
   RNode *candidate;
 
@@ -1245,13 +1245,13 @@ _reset_matches_to_original_state(RFindNodeState *state, gint matches_base)
 }
 
 static gboolean
-_is_pnode_matching_initial_character(RParserNode *parser_node, guint8 *key)
+_is_pnode_matching_initial_character(RParserNode *parser_node, const guint8 *key)
 {
   return (parser_node->first <= key[0]) && (key[0] <= parser_node->last);
 }
 
 static gboolean
-_pnode_try_parse(RParserNode *parser_node, guint8 *key, gint *extracted_match_len, RParserMatch *match)
+_pnode_try_parse(RParserNode *parser_node, const guint8 *key, gint *extracted_match_len, RParserMatch *match)
 {
   if (!_is_pnode_matching_initial_character(parser_node, key))
     return FALSE;
@@ -1263,7 +1263,7 @@ _pnode_try_parse(RParserNode *parser_node, guint8 *key, gint *extracted_match_le
 }
 
 static void
-_fixup_match_offsets(RFindNodeState *state, RParserNode *parser_node, gint extracted_match_len, guint8 *remaining_key, RParserMatch *match)
+_fixup_match_offsets(RFindNodeState *state, RParserNode *parser_node, gint extracted_match_len, const guint8 *remaining_key, RParserMatch *match)
 {
   if (!(match->match))
     {
@@ -1292,7 +1292,7 @@ _clear_match_content(RParserMatch *match)
 }
 
 static RNode *
-_try_parse_with_a_given_child(RFindNodeState *state, RNode *root, gint parser_ndx, gint matches_slot_index, guint8 *remaining_key, gint remaining_keylen)
+_try_parse_with_a_given_child(RFindNodeState *state, RNode *root, gint parser_ndx, gint matches_slot_index, const guint8 *remaining_key, gint remaining_keylen)
 {
   RNode *child_node = root->pchildren[parser_ndx];
   RParserNode *parser_node = child_node->parser;
@@ -1333,7 +1333,7 @@ _try_parse_with_a_given_child(RFindNodeState *state, RNode *root, gint parser_nd
 }
 
 static RNode *
-_find_child_by_parser(RFindNodeState *state, RNode *root, guint8 *remaining_key, gint remaining_keylen)
+_find_child_by_parser(RFindNodeState *state, RNode *root, const guint8 *remaining_key, gint remaining_keylen)
 {
   gint dbg_list_base = state->dbg_list ? state->dbg_list->len : 0;
   gint matches_slot_index = 0;
@@ -1355,7 +1355,7 @@ _find_child_by_parser(RFindNodeState *state, RNode *root, guint8 *remaining_key,
 }
 
 static RNode *
-_find_node_recursively(RFindNodeState *state, RNode *root, guint8 *key, gint keylen)
+_find_node_recursively(RFindNodeState *state, RNode *root, const guint8 *key, gint keylen)
 {
   gint literal_prefix_inputlen, literal_prefix_radixlen;
 
@@ -1391,7 +1391,7 @@ _find_node_recursively(RFindNodeState *state, RNode *root, guint8 *key, gint key
     {
       /* we matched the key partially, go on with child nodes */
       RNode *ret;
-      guint8 *remaining_key = key + literal_prefix_inputlen;
+      const guint8 *remaining_key = key + literal_prefix_inputlen;
       gint remaining_keylen = keylen - literal_prefix_inputlen;
 
       /* prefer a literal match over parsers */
@@ -1415,7 +1415,7 @@ _find_node_recursively(RFindNodeState *state, RNode *root, guint8 *key, gint key
 }
 
 static RNode *
-_find_node_with_state(RFindNodeState *state, RNode *root, guint8 *key, gint keylen)
+_find_node_with_state(RFindNodeState *state, RNode *root, const guint8 *key, gint keylen)
 {
   RNode *ret;
 
@@ -1431,7 +1431,7 @@ _find_node_with_state(RFindNodeState *state, RNode *root, guint8 *key, gint keyl
 }
 
 RNode *
-r_find_node(RNode *root, guint8 *key, gint keylen, GArray *stored_matches)
+r_find_node(RNode *root, const guint8 *key, gint keylen, GArray *stored_matches)
 {
   RFindNodeState state = {
     .whole_key = key,
@@ -1442,7 +1442,7 @@ r_find_node(RNode *root, guint8 *key, gint keylen, GArray *stored_matches)
 }
 
 RNode *
-r_find_node_dbg(RNode *root, guint8 *key, gint keylen, GArray *stored_matches, GArray *dbg_list)
+r_find_node_dbg(RNode *root, const guint8 *key, gint keylen, GArray *stored_matches, GArray *dbg_list)
 {
   RFindNodeState state = {
     .whole_key = key,
@@ -1454,7 +1454,7 @@ r_find_node_dbg(RNode *root, guint8 *key, gint keylen, GArray *stored_matches, G
 }
 
 gchar **
-r_find_all_applicable_nodes(RNode *root, guint8 *key, gint keylen, RNodeGetValueFunc value_func)
+r_find_all_applicable_nodes(RNode *root, const guint8 *key, gint keylen, RNodeGetValueFunc value_func)
 {
   RFindNodeState state = {
     .whole_key = key,
@@ -1481,7 +1481,7 @@ r_find_all_applicable_nodes(RNode *root, guint8 *key, gint keylen, RNodeGetValue
  * r_new_node:
  */
 RNode *
-r_new_node(guint8 *key, gpointer value)
+r_new_node(const guint8 *key, gpointer value)
 {
   RNode *node = g_malloc(sizeof(RNode));
 

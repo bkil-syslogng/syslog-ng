@@ -61,13 +61,13 @@ void g_string_steal(GString *s);
         __buf = g_alloca(value_len + 1); \
         memcpy(__buf, value, value_len); \
         __buf[value_len] = 0; \
+        dest = (const gchar *) __buf; \
       } \
     else \
       { \
         /* value is zero terminated */ \
-        __buf = (gchar *) value; \
+        dest = (const gchar *) value; \
       } \
-    dest = __buf; \
   } while (0)
 
 gchar *__normalize_key(const gchar* buffer);
@@ -87,17 +87,17 @@ gchar *__normalize_key(const gchar* buffer);
  *
  * NOTE: don't use this unless strchr() really shows up in your profile.
  */
-static inline char *
+static inline const char *
 _strchr_optimized_for_single_char_haystack(const char *str, int c)
 {
   if (str[0] == c)
-    return (char *) str;
+    return (const char *) str;
   if (str[1] == '\0')
     {
       if (c != '\0')
         return NULL;
       else
-        return (char *) &str[1];
+        return (const char *) &str[1];
     }
   return strchr(str + 1, c);
 }
