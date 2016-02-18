@@ -812,7 +812,7 @@ r_add_child(RNode *parent, RNode *child)
 }
 
 static inline void
-r_add_child_check(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc value_func)
+r_add_child_check(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func)
 {
   guint8 *at;
 
@@ -908,10 +908,10 @@ r_find_child_by_first_character(RNode *root, char key)
 }
 
 void
-r_insert_node(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc value_func)
+r_insert_node(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func)
 {
   RNode *node;
-  gint keylen = strlen((const char *)key);
+  gint keylen = strlen(key);
   gint nodelen = root->keylen;
   gint i = 0;
 
@@ -952,7 +952,7 @@ r_insert_node(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc 
             r_insert_node(node, key + 2, value, value_func);
 
         }
-      else if ((keylen >= 2) && (end = strchr((const gchar *)key + 1, '@')) != NULL)
+      else if ((keylen >= 2) && (end = strchr((gchar *)key + 1, '@')) != NULL)
         {
           /* we are a parser node */
           *end = '\0';
