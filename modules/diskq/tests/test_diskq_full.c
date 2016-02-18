@@ -28,11 +28,13 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "testutils.h"
+#include "timeutils.h"
 #include "queue_utils_lib.h"
 #include "test_diskq_tools.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define DISKQ_FILENAME "test_become_full.qf"
 
@@ -44,7 +46,7 @@ static void msg_post_function(LogMessage *msg)
   log_msg_unref(msg);
 }
 
-void
+static void
 test_diskq_become_full(gboolean reliable)
 {
   LogQueue *q;
@@ -86,8 +88,7 @@ int
 main()
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("TZ=MET-1METDST");
 
   configuration = cfg_new(0x0308);
   plugin_load_module("syslogformat", configuration, NULL );

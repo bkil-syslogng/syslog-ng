@@ -108,8 +108,7 @@ main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 
   app_startup();
 
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
 
   plugin_load_module("syslogformat", configuration, NULL);
   plugin_load_module("basicfuncs", configuration, NULL);

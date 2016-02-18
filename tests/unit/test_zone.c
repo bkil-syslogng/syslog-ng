@@ -23,22 +23,10 @@
 
 #include "apphook.h"
 #include "timeutils.h"
-#include "timeutils.h"
 #include "logstamp.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-void
-set_tz(const char *tz)
-{
-  static char envbuf[64];
-
-  snprintf(envbuf, sizeof(envbuf), "TZ=%s", tz);
-  putenv(envbuf);
-  tzset();
-  clean_time_cache();
-}
 
 static void
 testcase(const gchar *zone, time_t utc, long expected_ofs)

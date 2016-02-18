@@ -21,6 +21,13 @@
  *
  */
 
+#include "testutils.h"
+#include "test_parsers_e2e.h"
+
+PatternDB *patterndb;
+GPtrArray *messages;
+gchar *filename;
+
 gboolean fail = FALSE;
 gboolean verbose = FALSE;
 
@@ -54,7 +61,7 @@ const gchar *pdb_parser_skeleton_postfix =  \
         </patterndb>";
 
 
-void
+static void
 test_pattern(const gchar *pattern, const gchar *rule, gboolean match)
 {
   gboolean result;
@@ -79,6 +86,23 @@ test_pattern(const gchar *pattern, const gchar *rule, gboolean match)
 }
 
 void
+_destroy_pattern_db(void)
+{
+  if (messages)
+    {
+      g_ptr_array_foreach(messages, (GFunc) log_msg_unref, NULL);
+      g_ptr_array_free(messages, TRUE);
+    }
+  messages = NULL;
+  pattern_db_free(patterndb);
+  patterndb = NULL;
+
+  g_unlink(filename);
+  g_free(filename);
+  filename = NULL;
+}
+
+static void
 test_parser(const gchar **test)
 {
   GString *str;
@@ -235,7 +259,7 @@ NULL,NULL
 const gchar **parsers[] = {test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12, NULL};
 
 void
-test_patterndb_parsers()
+test_patterndb_parsers(void)
 {
   gint i;
 
@@ -243,4 +267,26 @@ test_patterndb_parsers()
     {
       test_parser(parsers[i]);
     }
+}
+
+static void
+_emit_func(LogMessage *msg, gboolean synthetic, gpointer user_data)
+{
+  g_ptr_array_add(messages, log_msg_ref(msg));
+}
+
+void
+_load_pattern_db_from_string(const gchar *pdb)
+{
+  patterndb = pattern_db_new();
+  messages = g_ptr_array_new();
+
+  pattern_db_set_emit_func(patterndb, _emit_func, NULL);
+
+  g_file_open_tmp("patterndbXXXXXX.xml", &filename, NULL);
+  g_file_set_contents(filename, pdb, strlen(pdb), NULL);
+
+  assert_true(pattern_db_reload_ruleset(patterndb, configuration, filename), "Error loading ruleset [[[%s]]]", pdb);
+  assert_string(pattern_db_get_ruleset_version(patterndb), "3", "Invalid version");
+  assert_string(pattern_db_get_ruleset_pub_date(patterndb), "2010-02-22", "Invalid pubdate");
 }

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2011-2013 Balabit
- * Copyright (c) 2011-2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2010-2014 Balabit
+ * Copyright (c) 2010-2014 Balázs Scheidler <balazs.scheidler@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -20,31 +20,36 @@
  * COPYING for details.
  *
  */
-#include "template_lib.h"
+
+#ifndef TEST_PARSERS_E2E_H_
+#define TEST_PARSERS_E2E_H_
+
 #include "apphook.h"
+#include "tags.h"
+#include "logmsg/logmsg.h"
+#include "messages.h"
+#include "filter/filter-expr.h"
 #include "plugin.h"
 #include "cfg.h"
+#include "timerwheel.h"
+#include "libtest/msg_parse_lib.h"
 
-static void
-test_format_welf(void)
-{
-  assert_template_format("$(format-welf MSG=$MSG)", "MSG=árvíztűrőtükörfúrógép");
-  assert_template_format("$(format-welf MSG=$escaping)", "MSG=\"binary stuff follows \\\"\\xad árvíztűrőtükörfúrógép\"");
-  assert_template_format("$(format-welf MSG=$escaping2)", "MSG=\\xc3");
-  assert_template_format("$(format-welf MSG=$null)", "MSG=binary\\x00stuff");
-  assert_template_format_with_context("$(format-welf MSG=$MSG)", "MSG=árvíztűrőtükörfúrógép MSG=árvíztűrőtükörfúrógép");
-}
+#include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <glib/gstdio.h>
+#include "patterndb.h"
 
-int
-main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
-{
-  app_startup();
-  set_tz("TZ=UTC");
-  init_template_tests();
-  plugin_load_module("kvformat", configuration, NULL);
+#define MYHOST "MYHOST"
 
-  test_format_welf();
+extern PatternDB *patterndb;
+extern GPtrArray *messages;
+extern gchar *filename;
 
-  deinit_template_tests();
-  app_shutdown();
-}
+void test_patterndb_parsers(void);
+void _load_pattern_db_from_string(const gchar *pdb);
+void _destroy_pattern_db(void);
+
+#endif

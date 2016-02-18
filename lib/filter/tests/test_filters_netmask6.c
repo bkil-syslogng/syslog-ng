@@ -56,7 +56,7 @@ assert_netmask6(const gchar* ipv6, gint prefix, const gchar* expected_network)
 
   gchar *calculated_network = g_new0(char, INET6_ADDRSTRLEN);
   calculate_network6(ipv6, prefix, calculated_network);
-  assert_string(calculated_network, expected_network, error_msg);
+  assert_string(calculated_network, expected_network, "%s", error_msg);
   g_free(calculated_network);
 }
 

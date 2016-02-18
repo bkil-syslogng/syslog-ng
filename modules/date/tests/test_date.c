@@ -25,6 +25,7 @@
 #include "date-parser.h"
 #include "apphook.h"
 #include "testutils.h"
+#include "timeutils.h"
 #include "template_lib.h"
 
 #include <locale.h>
@@ -120,8 +121,7 @@ int main()
   app_startup();
 
   setlocale (LC_ALL, "C");
-  putenv("TZ=CET-1");
-  tzset();
+  set_tz("TZ=CET-1");
 
   configuration = cfg_new(0x0302);
 

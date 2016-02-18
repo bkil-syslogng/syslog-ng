@@ -26,6 +26,7 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "mainloop.h"
+#include "timeutils.h"
 #include "tls-support.h"
 #include "mainloop-io-worker.h"
 #include "libtest/queue_utils_lib.h"
@@ -41,7 +42,7 @@ MsgFormatOptions parse_options;
 #define OVERFLOW_SIZE 10000
 
 static void
-testcase_zero_diskbuf_and_normal_acks()
+testcase_zero_diskbuf_and_normal_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -66,7 +67,7 @@ testcase_zero_diskbuf_and_normal_acks()
 }
 
 static void
-testcase_zero_diskbuf_alternating_send_acks()
+testcase_zero_diskbuf_alternating_send_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -215,7 +216,7 @@ output_thread(gpointer args)
 
 
 static void
-testcase_with_threads()
+testcase_with_threads(void)
 {
   LogQueue *q;
   GThread *thread_feed[FEEDERS], *thread_consume;
@@ -255,8 +256,7 @@ int
 main()
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("TZ=MET-1METDST");
 
   configuration = cfg_new(0x0302);
   plugin_load_module("syslogformat", configuration, NULL);

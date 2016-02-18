@@ -1,3 +1,5 @@
+CFLAGS += -Wno-cast-qual
+
 lib_template_tests_TESTS	=		 \
 	lib/template/tests/test_template_compile 	\
 	lib/template/tests/test_template_on_error 	\

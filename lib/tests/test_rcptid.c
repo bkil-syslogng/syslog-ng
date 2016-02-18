@@ -34,14 +34,14 @@ gboolean verbose = FALSE;
 PersistState *state;
 
 static void
-setup_persist_id_test()
+setup_persist_id_test(void)
 {
   state = clean_and_create_persist_state_for_test("test_values.persist");
   rcptid_init(state, TRUE);
 }
 
 static void
-teardown_persist_id_test()
+teardown_persist_id_test(void)
 {
   commit_and_destroy_persist_state(state);
   rcptid_deinit();
