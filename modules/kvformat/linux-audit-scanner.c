@@ -19,6 +19,7 @@
  * COPYING for details.
  *
  */
+#include "linux-audit-scanner.h"
 #include "kv-scanner.h"
 #include "utf8utils.h"
 
