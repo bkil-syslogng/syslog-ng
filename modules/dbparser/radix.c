@@ -50,11 +50,12 @@ r_parser_string(const guint8 *str, gint *len, const gchar *param, gpointer state
 }
 
 gboolean
-r_parser_qstring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_qstring(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
-  guint8 *end;
+  const char *str = (const char *)ustr;
+  const char *end;
 
-  if ((end = strchr(str + 1, ((gchar *)&state)[0])) != NULL)
+  if ((end = strchr(str + 1, ((char *)&state)[0])) != NULL)
     {
       *len = (end - str) + 1;
 
@@ -72,9 +73,10 @@ r_parser_qstring(guint8 *str, gint *len, const gchar *param, gpointer state, RPa
 }
 
 static gboolean
-r_parser_estring_c(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_estring_c(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
-  guint8 *end;
+  const char *str = (const char *)ustr;
+  const char *end;
 
   if (!param)
     return FALSE;
@@ -91,9 +93,10 @@ r_parser_estring_c(guint8 *str, gint *len, const gchar *param, gpointer state, R
 }
 
 static gboolean
-r_parser_nlstring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_nlstring(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
-  guint8 *end;
+  const char *str = (const char *)ustr;
+  const char *end;
 
   if ((end = strchr(str, '\n')) != NULL)
     {
@@ -108,9 +111,10 @@ r_parser_nlstring(guint8 *str, gint *len, const gchar *param, gpointer state, RP
 }
 
 static gboolean
-r_parser_estring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_estring(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
-  guint8 *end;
+  const char *str = (const char *)ustr;
+  const char *end;
 
   if (!param)
     return FALSE;
@@ -133,8 +137,9 @@ typedef struct _RParserPCREState
 } RParserPCREState;
 
 static gboolean
-r_parser_pcre(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_pcre(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
+  const char *str = (const char *)ustr;
   RParserPCREState *self = (RParserPCREState *) state;
   gint rc;
   gint matches[2];
@@ -198,7 +203,7 @@ r_parser_pcre_free_state(gpointer s)
 static gboolean
 r_parser_anystring(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
-  *len = strlen(str);
+  *len = strlen((const char *)str);
   return TRUE;
 }
 
@@ -521,8 +526,9 @@ r_parser_float(const guint8 *str, gint *len, const gchar *param, gpointer state,
 }
 
 static gboolean
-r_parser_number(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
+r_parser_number(const guint8 *ustr, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
+  const char *str = (const char *)ustr;
   gint min_len = 1;
 
   if (g_str_has_prefix(str, "0x") || g_str_has_prefix(str, "0X"))
@@ -564,7 +570,7 @@ static RParserNode *
 r_new_pnode(const guint8 *key)
 {
   RParserNode *parser_node = g_new0(RParserNode, 1);
-  gchar **params = g_strsplit(key, ":", 3);
+  gchar **params = g_strsplit((const char *)key, ":", 3);
   guint params_len = g_strv_length(params);
 
   parser_node->first = 0;
@@ -902,7 +908,7 @@ void
 r_insert_node(RNode *root, const guint8 *key, gpointer value, RNodeGetValueFunc value_func)
 {
   RNode *node;
-  gint keylen = strlen(key);
+  gint keylen = strlen((const char *)key);
   gint nodelen = root->keylen;
   gint i = 0;
 

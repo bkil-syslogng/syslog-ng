@@ -57,7 +57,7 @@ find_eom(const guchar *s, gsize n)
         return char_ptr;
     }
 
-  longword_ptr = (gulong *) char_ptr;
+  longword_ptr = (const gulong *) char_ptr;
 
 #if GLIB_SIZEOF_LONG == 8
   magic_bits = 0x7efefefefefefeffL;
@@ -74,7 +74,7 @@ find_eom(const guchar *s, gsize n)
       if ((((longword + magic_bits) ^ ~longword) & ~magic_bits) != 0 ||
           ((((longword ^ charmask) + magic_bits) ^ ~(longword ^ charmask)) & ~magic_bits) != 0)
         {
-          gint i;
+          gsize i;
 
           char_ptr = (const guchar *) (longword_ptr - 1);
 

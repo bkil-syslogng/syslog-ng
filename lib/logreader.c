@@ -310,7 +310,7 @@ log_reader_handle_line(LogReader *self, const guchar *line, gsize length, LogTra
             evt_tag_printf("line", "%.*s", (int)length, line),
             NULL);
   /* use the current time to get the time zone offset */
-  m = log_msg_new((gchar *) line, length,
+  m = log_msg_new((const gchar *) line, length,
                   aux->peer_addr ? : self->peer_addr,
                   &self->options->parse_options);
 

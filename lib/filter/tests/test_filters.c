@@ -48,22 +48,22 @@ int debug = 1;
 GSockAddr *sender_saddr;
 MsgFormatOptions parse_options;
 
-static gint
+static guint32
 facility_bits(gchar *fac)
 {
   return 1 << (syslog_name_lookup_facility_by_name(fac) >> 3);
 }
 
-static gint
+static guint32
 level_bits(gchar *lev)
 {
   return 1 << syslog_name_lookup_level_by_name(lev);
 }
 
-static gint
+static guint32
 level_range(gchar *from, gchar *to)
 {
-  int r1, r2;
+  guint32 r1, r2;
 
   r1 = syslog_name_lookup_level_by_name(from);
   r2 = syslog_name_lookup_level_by_name(to);

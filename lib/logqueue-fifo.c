@@ -85,7 +85,7 @@ typedef struct _LogQueueFifo
   gint qoverflow_size; /* in number of elements */
 
   struct iv_list_head qbacklog;    /* entries that were sent but not acked yet */
-  gint qbacklog_len;
+  guint qbacklog_len;
 
   struct
   {
@@ -414,7 +414,7 @@ log_queue_fifo_ack_backlog(LogQueue *s, guint rewind_count)
   LogQueueFifo *self = (LogQueueFifo *) s;
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-  gint pos;
+  guint pos;
 
   for (pos = 0; pos < rewind_count && self->qbacklog_len > 0; pos++)
     {

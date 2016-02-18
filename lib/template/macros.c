@@ -592,7 +592,7 @@ log_macro_lookup(const gchar *macro, gint len)
 
   g_assert(macro_hash);
   g_strlcpy(buf, macro, MIN(sizeof(buf), len+1));
-  macro_id = GPOINTER_TO_INT(g_hash_table_lookup(macro_hash, buf));
+  macro_id = (guint)GPOINTER_TO_SIZE((guint *)g_hash_table_lookup(macro_hash, buf));
 
   if (cfg_is_config_version_older(configuration, 0x0300) && (macro_id == M_MESSAGE))
     {
@@ -614,7 +614,7 @@ log_macros_global_init(void)
   macro_hash = g_hash_table_new(g_str_hash, g_str_equal);
   for (i = 0; macros[i].name; i++)
     {
-      g_hash_table_insert(macro_hash, macros[i].name,
+      g_hash_table_insert(macro_hash, (char *)macros[i].name,
                           GINT_TO_POINTER(macros[i].id));
     }
   return;
