@@ -25,9 +25,9 @@
 #include <stdlib.h>
 
 static void
-testcase(gchar *msg, gsize msg_len, gsize eom_ofs)
+testcase(const gchar *msg, gsize msg_len, gsize eom_ofs)
 {
-  gchar *eom;
+  const gchar *eom;
 
   eom = find_cr_or_lf(msg, msg_len);
 

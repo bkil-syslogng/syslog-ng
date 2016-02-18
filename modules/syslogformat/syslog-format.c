@@ -1123,7 +1123,7 @@ syslog_format_handler(const MsgFormatOptions *parse_options,
                       LogMessage *self)
 {
   gboolean success;
-  gchar *p;
+  const gchar *p;
 
   while (length > 0 && (data[length - 1] == '\n' || data[length - 1] == '\0'))
     length--;
@@ -1159,10 +1159,11 @@ syslog_format_handler(const MsgFormatOptions *parse_options,
       gssize msglen;
       gchar *msg;
 
-      p = msg = (gchar *) log_msg_get_value(self, LM_V_MESSAGE, &msglen);
+      msg = (gchar *) log_msg_get_value(self, LM_V_MESSAGE, &msglen);
+      p = msg;
       while ((p = find_cr_or_lf(p, msg + msglen - p)))
         {
-          *p = ' ';
+          msg[p - msg] = ' ';
           p++;
         }
 

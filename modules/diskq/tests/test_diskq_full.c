@@ -66,7 +66,7 @@ test_diskq_become_full(gboolean reliable)
 
   log_queue_set_use_backlog(q, TRUE);
 
-  q->persist_name = "test_diskq";
+  q->persist_name = g_strdup("test_diskq");
   stats_lock();
   stats_register_counter(0, SCS_DESTINATION, q->persist_name, NULL, SC_TYPE_DROPPED, &q->dropped_messages);
   stats_counter_set(q->dropped_messages, 0);

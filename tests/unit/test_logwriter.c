@@ -41,7 +41,7 @@ gboolean verbose = FALSE;
 MsgFormatOptions parse_options;
 
 LogMessage *
-init_msg(gchar *msg_string, gboolean use_syslog_protocol)
+init_msg(const gchar *msg_string, gboolean use_syslog_protocol)
 {
   LogMessage *msg;
   GSockAddr *sa;
@@ -66,7 +66,7 @@ init_msg(gchar *msg_string, gboolean use_syslog_protocol)
 }
 
 void
-testcase(gchar *msg_string, gboolean input_is_rfc5424, gchar *template, guint writer_flags, gchar *expected_value)
+testcase(const gchar *msg_string, gboolean input_is_rfc5424, const gchar *const template, guint writer_flags, const gchar *const expected_value)
 {
   LogTemplate *templ = NULL;
   LogWriter *writer = NULL;
@@ -112,29 +112,29 @@ testcase(gchar *msg_string, gboolean input_is_rfc5424, gchar *template, guint wr
 int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
-  char *msg_syslog_str = "<132>1 2006-10-29T01:59:59.156+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] BOMAn application event log entry...";
-  char *expected_msg_syslog_str = "<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] BOMAn application event log entry...\n";
-  char *expected_msg_syslog_str_t = "<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] ID47 BOMAn application event log entry...\n";
-  char *expected_msg_syslog_to_bsd_str = "<132>Oct 29 01:59:59 mymachine evntslog[3535]: BOMAn application event log entry...\n";
-  char *expected_msg_syslog_to_file_str = "Oct 29 01:59:59 mymachine evntslog[3535]: BOMAn application event log entry...\n";
+  const char *msg_syslog_str = "<132>1 2006-10-29T01:59:59.156+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] BOMAn application event log entry...";
+  const char *expected_msg_syslog_str = "<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] BOMAn application event log entry...\n";
+  const char *expected_msg_syslog_str_t = "<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] ID47 BOMAn application event log entry...\n";
+  const char *expected_msg_syslog_to_bsd_str = "<132>Oct 29 01:59:59 mymachine evntslog[3535]: BOMAn application event log entry...\n";
+  const char *expected_msg_syslog_to_file_str = "Oct 29 01:59:59 mymachine evntslog[3535]: BOMAn application event log entry...\n";
 
-  char *msg_syslog_empty_str ="<132>1 2006-10-29T01:59:59.156+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"]";
-  char *expected_msg_syslog_empty_str ="<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] \n";
-  char *expected_msg_syslog_empty_str_t ="<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] ID47\n";
+  const char *msg_syslog_empty_str ="<132>1 2006-10-29T01:59:59.156+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"]";
+  const char *expected_msg_syslog_empty_str ="<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] \n";
+  const char *expected_msg_syslog_empty_str_t ="<132>1 2006-10-29T01:59:59+01:00 mymachine evntslog 3535 ID47 [exampleSDID@0 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@0 class=\"high\"] ID47\n";
 
-  char *msg_bsd_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép";
-  char *expected_msg_bsd_str = "Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
-  char *expected_msg_bsd_str_t = "155 23323 árvíztűrőtükörfúrógép";
-  char *expected_msg_bsd_to_syslog_str = "<155>1 2006-02-11T10:34:56+01:00 bzorp syslog-ng 23323 - - árvíztűrőtükörfúrógép\n";
-  char *expected_msg_bsd_to_proto_str = "<155>Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
+  const char *msg_bsd_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép";
+  const char *expected_msg_bsd_str = "Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
+  const char *expected_msg_bsd_str_t = "155 23323 árvíztűrőtükörfúrógép";
+  const char *expected_msg_bsd_to_syslog_str = "<155>1 2006-02-11T10:34:56+01:00 bzorp syslog-ng 23323 - - árvíztűrőtükörfúrógép\n";
+  const char *expected_msg_bsd_to_proto_str = "<155>Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
 
-  char *msg_zero_pri = "<0>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép";
-  char *expected_msg_zero_pri_str = "<0>Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
-  char *expected_msg_zero_pri_str_t = "0";
+  const char *msg_zero_pri = "<0>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép";
+  const char *expected_msg_zero_pri_str = "<0>Feb 11 10:34:56 bzorp syslog-ng[23323]:árvíztűrőtükörfúrógép\n";
+  const char *expected_msg_zero_pri_str_t = "0";
 
-  char *msg_bsd_empty_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:";
-  char *expected_msg_bsd_empty_str = "<155>Feb 11 10:34:56 bzorp syslog-ng[23323]:\n";
-  char *expected_msg_bsd_empty_str_t = "23323";
+  const char *msg_bsd_empty_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]:";
+  const char *expected_msg_bsd_empty_str = "<155>Feb 11 10:34:56 bzorp syslog-ng[23323]:\n";
+  const char *expected_msg_bsd_empty_str_t = "23323";
 
   if (argc > 1)
     verbose = TRUE;

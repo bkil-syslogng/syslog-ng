@@ -64,6 +64,8 @@ typedef struct _RParserMatch
   guint8 type;
 } RParserMatch;
 
+typedef gboolean (*ParserFun)(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
+
 typedef struct _RParserNode
 {
   /* user supplied parameters */
@@ -78,7 +80,7 @@ typedef struct _RParserNode
   guint8 type;
   NVHandle handle;
 
-  gboolean (*parse)(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
+  ParserFun parse;
   void (*free_state)(gpointer state);
 } RParserNode;
 

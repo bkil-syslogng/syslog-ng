@@ -53,7 +53,7 @@ typedef struct _loglinesType
 } loglinesType;
 
 loglinesType *
-testcase_get_logmessages(gchar *logs)
+testcase_get_logmessages(const gchar *logs)
 {
   int i, len;
   loglinesType *self;
@@ -87,13 +87,13 @@ testcase_get_logmessages(gchar *logs)
 }
 
 void
-testcase_frequent_words(gchar* logs, guint support, gchar *expected)
+testcase_frequent_words(const gchar* logs, guint support, const gchar *expected)
 {
   int i, twopass;
   gchar **expecteds;
   GHashTable *wordlist;
   loglinesType *logmessages;
-  gchar *delimiters = " :&~?![]=,;()'\"";
+  const gchar *delimiters = " :&~?![]=,;()'\"";
 
   logmessages = testcase_get_logmessages(logs);
 
@@ -297,7 +297,7 @@ test_clusters_find(gpointer key, gpointer value, gpointer user_data)
 }
 
 void
-testcase_find_clusters_slct(gchar* logs, guint support, gchar *expected)
+testcase_find_clusters_slct(const gchar* logs, guint support, const gchar *expected)
 {
   int i,j;
   gchar **expecteds;
@@ -305,7 +305,7 @@ testcase_find_clusters_slct(gchar* logs, guint support, gchar *expected)
   clusterfindData *find_data;
   GHashTable *clusters;
   Cluster *test_cluster;
-  gchar *delimiters = " :&~?![]=,;()'\"";
+  const gchar *delimiters = " :&~?![]=,;()'\"";
 
   logmessages = testcase_get_logmessages(logs);
 

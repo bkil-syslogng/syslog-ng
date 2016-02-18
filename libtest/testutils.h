@@ -85,7 +85,7 @@ gboolean assert_guint32_set_non_fatal(guint32 *actual, guint32 actual_length, gu
 __attribute__((format(gnu_printf, 5, 6)));
 gboolean assert_gpointer_non_fatal(gpointer actual, gpointer expected, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 3, 4)));
-gboolean assert_msg_field_equals_non_fatal(LogMessage *msg, gchar *field_name, gchar *expected_value, gssize expected_value_len, const gchar *error_message, ...)
+gboolean assert_msg_field_equals_non_fatal(LogMessage *msg, const gchar *field_name, const gchar *expected_value, gssize expected_value_len, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 5, 6)));
 
 

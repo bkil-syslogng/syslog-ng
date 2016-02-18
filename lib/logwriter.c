@@ -1048,13 +1048,13 @@ log_writer_format_log(LogWriter *self, LogMessage *lm, GString *result)
     }
   if (self->options->options & LWO_NO_MULTI_LINE)
     {
-      gchar *p;
+      const gchar *p;
 
       p = result->str;
       /* NOTE: the size is calculated to leave trailing new line */
       while ((p = find_cr_or_lf(p, result->str + result->len - p - 1)))
         {
-          *p = ' ';
+          result->str[p - result->str] = ' ';
           p++;
         }
 
