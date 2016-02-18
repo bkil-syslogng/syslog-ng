@@ -105,7 +105,7 @@ void *(*old_realloc)(void *ptr, size_t size);
 void *(*old_calloc)(size_t nmemb, size_t size);
 
 void
-z_mem_trace_init(gchar *tracefile)
+z_mem_trace_init(const gchar *tracefile)
 {
   int i;
   
@@ -597,7 +597,7 @@ calloc(size_t nmemb, size_t size)
 #else
 
 void 
-z_mem_trace_init(gchar *memtrace_file)
+z_mem_trace_init(const gchar *memtrace_file)
 {
 }
 
