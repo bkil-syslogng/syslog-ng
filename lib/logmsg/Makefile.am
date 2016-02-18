@@ -1,3 +1,5 @@
+CFLAGS += -Wno-bad-function-cast
+
 logmsgincludedir = ${pkgincludedir}/logmsg
 
 logmsginclude_HEADERS =     \

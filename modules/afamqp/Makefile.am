@@ -1,3 +1,5 @@
+CFLAGS += -Wno-aggregate-return
+
 DIST_SUBDIRS				+= modules/afamqp/rabbitmq-c
 
 if LIBRABBITMQ_INTERNAL

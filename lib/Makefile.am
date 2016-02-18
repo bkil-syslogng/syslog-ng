@@ -1,4 +1,4 @@
-
+CFLAGS += -Wno-format-nonliteral
 DIST_SUBDIRS				= lib/ivykis
 
 include lib/transport/Makefile.am
