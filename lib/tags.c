@@ -63,13 +63,13 @@ log_tags_get_by_name(const gchar *name)
 
      In both cases the return value is 0.
    */
-  guint id;
+  guint32 id;
 
   g_assert(log_tags_hash != NULL);
 
   g_static_mutex_lock(&log_tags_lock);
 
-  id = GPOINTER_TO_UINT(g_hash_table_lookup(log_tags_hash, name)) - 1;
+  id = GPOINTER_TO_SIZE((gchar *)g_hash_table_lookup(log_tags_hash, name)) - 1;
   if (id == 0xffffffff)
     {
       if (log_tags_num < LOG_TAGS_MAX - 1)
@@ -166,7 +166,7 @@ log_tags_dec_counter(LogTagId id)
 void
 log_tags_reinit_stats(GlobalConfig *cfg)
 {
-  gint id;
+  gsize id;
 
   stats_lock();
 
@@ -202,7 +202,7 @@ log_tags_global_init(void)
 void
 log_tags_global_deinit(void)
 {
-  gint i;
+  gsize i;
 
   g_static_mutex_lock(&log_tags_lock);
 

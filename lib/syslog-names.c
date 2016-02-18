@@ -97,7 +97,7 @@ syslog_name_lookup_id_by_name(const char *name, struct sl_name names[])
   return syslog_name_find_name(name, names);
 }
 
-int
+guint32
 syslog_name_lookup_value_by_name(const char *name, struct sl_name names[])
 {
   int i;
@@ -111,7 +111,7 @@ syslog_name_lookup_value_by_name(const char *name, struct sl_name names[])
 }
 
 const char *
-syslog_name_lookup_name_by_value(int value, struct sl_name names[])
+syslog_name_lookup_name_by_value(guint32 value, struct sl_name names[])
 {
   int i;
 

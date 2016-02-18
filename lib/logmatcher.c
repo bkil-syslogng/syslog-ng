@@ -136,7 +136,9 @@ log_matcher_posix_re_match(LogMatcher *s, LogMessage *msg, gint value_handle, co
 }
 
 static gchar *
-log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize value_len, LogTemplate *replacement, gssize *new_length)
+log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle,
+                             const gchar *value, gssize maybe_value_len,
+                             LogTemplate *replacement, gssize *new_length)
 {
   LogMatcherPosixRe *self = (LogMatcherPosixRe *) s; 
   regmatch_t matches[RE_MAX_MATCHES];
@@ -145,6 +147,12 @@ log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle, 
   gsize current_ofs = 0;
   gboolean first_round = TRUE;
   const gchar *buf;
+  gsize value_len;
+
+  if (maybe_value_len < 0)
+    value_len = strlen(value);
+  else
+    value_len = (gsize) maybe_value_len;
   
   APPEND_ZERO(buf, value, value_len);
 
@@ -234,7 +242,7 @@ typedef struct _LogMatcherString
 {
   LogMatcher super;
   gchar *pattern;
-  gint pattern_len;
+  gsize pattern_len;
 } LogMatcherString;
 
 static gboolean
@@ -303,15 +311,18 @@ log_matcher_string_match(LogMatcher *s, LogMessage *msg, gint value_handle, cons
 }
 
 static gchar *
-log_matcher_string_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize value_len, LogTemplate *replacement, gssize *new_length)
+log_matcher_string_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize maybe_value_len, LogTemplate *replacement, gssize *new_length)
 {
   LogMatcherString *self = (LogMatcherString *) s; 
   GString *new_value = NULL;
   gsize current_ofs = 0;
   gboolean first_round = TRUE;
 
-  if (value_len < 0)
+  gsize value_len;
+  if (maybe_value_len < 0)
     value_len = strlen(value);
+  else
+    value_len = (gsize) maybe_value_len;
 
   const gchar *match;
 

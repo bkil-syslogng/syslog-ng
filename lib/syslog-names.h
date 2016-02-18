@@ -39,7 +39,7 @@
 struct sl_name
 {
   const char *name;
-  int value;
+  guint32 value;
 };
 
 extern struct sl_name sl_levels[];
@@ -47,8 +47,8 @@ extern struct sl_name sl_facilities[];
 
 /* returns an index where this name is found */
 int syslog_name_lookup_id_by_name(const char *name, struct sl_name names[]);
-int syslog_name_lookup_value_by_name(const char *name, struct sl_name names[]);
-const char *syslog_name_lookup_name_by_value(int value, struct sl_name names[]);
+guint32 syslog_name_lookup_value_by_name(const char *name, struct sl_name names[]);
+const char *syslog_name_lookup_name_by_value(guint32 value, struct sl_name names[]);
 
 guint32 syslog_make_range(guint32 r1, guint32 r2);
 

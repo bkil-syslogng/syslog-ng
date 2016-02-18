@@ -40,12 +40,12 @@ persistable_state_presenter_get_constructor_by_prefix(const gchar *prefix)
 }
 
 void
-persistable_state_presenter_register_constructor(const gchar *prefix,
+persistable_state_presenter_register_constructor(gchar *prefix,
     PersistableStatePresenterConstructFunc handler)
 {
   if (!persist_state_storage)
     {
       persist_state_storage = g_hash_table_new(g_str_hash, g_str_equal);
     }
-  g_hash_table_insert(persist_state_storage, (gpointer) prefix, handler);
+  g_hash_table_insert(persist_state_storage, prefix, handler);
 }

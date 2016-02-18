@@ -63,7 +63,7 @@ gchar *g_sockaddr_format(GSockAddr *a, gchar *text, gulong n, gint format);
 guint16 g_sockaddr_get_port(GSockAddr *a);
 void g_sockaddr_set_port(GSockAddr *a, guint16 port);
 
-GSockAddr *g_sockaddr_new(struct sockaddr *sa, int salen);
+GSockAddr *g_sockaddr_new(struct sockaddr *sa, socklen_t salen);
 GSockAddr *g_sockaddr_ref(GSockAddr *a);
 void g_sockaddr_unref(GSockAddr *a);
 

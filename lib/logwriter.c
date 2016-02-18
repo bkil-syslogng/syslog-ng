@@ -869,8 +869,8 @@ log_writer_do_padding(LogWriter *self, GString *result)
       return;
     }
   /* store the original length of the result */
-  gint len = result->len;
-  gint padd_bytes = self->options->padding - result->len;
+  gsize len = result->len;
+  gsize padd_bytes = self->options->padding - len;
   /* set the size to the padded size, this will allocate the string */
   g_string_set_size(result, self->options->padding);
   memset(result->str + len - 1, '\0', padd_bytes);
@@ -932,7 +932,7 @@ log_writer_format_log(LogWriter *self, LogMessage *lm, GString *result)
 
       len = result->len;
       log_msg_append_format_sdata(lm, result, seq_num);
-      if (len == result->len)
+      if (len == (gssize) result->len)
         {
           /* NOTE: sd_param format did not generate any output, take it as an empty SD string */
           g_string_append_c(result, '-');

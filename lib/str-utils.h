@@ -54,6 +54,8 @@ void g_string_steal(GString *s);
 #define APPEND_ZERO(dest, value, value_len)	\
   do { \
     gchar *__buf; \
+    g_assert(value != NULL); \
+    g_assert(value_len + 1 >= 1); \
     if (G_UNLIKELY(value[value_len] != 0)) \
       { \
         /* value is NOT zero terminated */ \

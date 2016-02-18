@@ -125,7 +125,7 @@ msg_format_timestamp(gchar *buf, gsize buflen)
 {
   struct tm tm;
   GTimeVal now;
-  gint len;
+  gsize len;
   time_t now_sec;
 
   g_get_current_time(&now);
