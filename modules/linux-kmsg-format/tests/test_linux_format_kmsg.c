@@ -189,7 +189,7 @@ int
 main(void)
 {
   app_startup();
-  set_tz("TZ=UTC");
+  set_tz("UTC");
 
   init_and_load_kmsgformat_module();
 

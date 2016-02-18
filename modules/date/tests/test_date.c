@@ -121,7 +121,7 @@ int main()
   app_startup();
 
   setlocale (LC_ALL, "C");
-  set_tz("TZ=CET-1");
+  set_tz("CET-1");
 
   configuration = cfg_new(0x0302);
 
