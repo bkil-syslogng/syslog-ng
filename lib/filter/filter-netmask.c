@@ -61,17 +61,18 @@ filter_netmask_eval(FilterExprNode *s, LogMessage **msgs, gint num_msg)
 }
 
 FilterExprNode *
-filter_netmask_new(gchar *cidr)
+filter_netmask_new(const gchar *cidr)
 {
   FilterNetmask *self = g_new0(FilterNetmask, 1);
   gchar buf[32];
   gchar *slash;
 
   filter_expr_node_init_instance(&self->super);
-  slash = strchr(cidr, '/');
+  gchar *cidrw = g_strdup(cidr);
+  slash = strchr(cidrw, '/');
   if (strlen(cidr) >= sizeof(buf) || !slash)
     {
-      g_inet_aton(cidr, &self->address);
+      g_inet_aton(cidrw, &self->address);
       self->netmask.s_addr = htonl(0xFFFFFFFF);
     }
   else
@@ -92,6 +93,7 @@ filter_netmask_new(gchar *cidr)
             self->netmask.s_addr = htonl(((1 << prefix) - 1) << (32 - prefix));
         }
     }
+  g_free(cidrw);
   self->address.s_addr &= self->netmask.s_addr;
   self->super.eval = filter_netmask_eval;
   return &self->super;

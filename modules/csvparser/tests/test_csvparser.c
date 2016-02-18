@@ -50,11 +50,11 @@
 MsgFormatOptions parse_options;
 
 int
-testcase(gchar *msg, guint parse_flags, gint max_columns, gint dialect, guint32 flags, gchar *delimiters, gchar *quotes, gchar *null_value, const gchar *string_delims[], gchar *first_value, ...)
+testcase(const gchar *msg, guint parse_flags, gint max_columns, gint dialect, guint32 flags, const gchar *delimiters, const gchar *quotes, const gchar *null_value, const gchar *string_delims[], const gchar *first_value, ...)
 {
   LogMessage *logmsg;
   LogParser *p, *pclone;
-  gchar *expected_value;
+  const gchar *expected_value;
   gint i;
   va_list va;
   NVTable *nvtable;

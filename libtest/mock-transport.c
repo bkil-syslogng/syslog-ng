@@ -100,7 +100,7 @@ log_transport_mock_read_method(LogTransport *s, gpointer buf, gsize count, LogTr
 }
 
 static void
-log_transport_mock_init(LogTransportMock *self, gchar *read_buffer1, gssize read_buffer_length1, va_list va)
+log_transport_mock_init(LogTransportMock *self, const gchar *read_buffer1, gssize read_buffer_length1, va_list va)
 {
   gchar *buffer;
   gssize length;
@@ -110,7 +110,7 @@ log_transport_mock_init(LogTransportMock *self, gchar *read_buffer1, gssize read
   self->super.read = log_transport_mock_read_method;
   self->super.free_fn = log_transport_free_method;
 
-  buffer = read_buffer1;
+  buffer = (gchar *) read_buffer1;
   length = read_buffer_length1;
   while (buffer)
     {
@@ -123,7 +123,7 @@ log_transport_mock_init(LogTransportMock *self, gchar *read_buffer1, gssize read
       self->iov[self->iov_cnt].iov_base = buffer;
       self->iov[self->iov_cnt].iov_len = length;
       self->iov_cnt++;
-      buffer = va_arg(va, gchar *);
+      buffer = (gchar *) va_arg(va, const gchar *);
       length = va_arg(va, gint);
     }
 
@@ -132,7 +132,7 @@ log_transport_mock_init(LogTransportMock *self, gchar *read_buffer1, gssize read
 }
 
 LogTransport *
-log_transport_mock_stream_new(gchar *read_buffer1, gssize read_buffer_length1, ...)
+log_transport_mock_stream_new(const gchar *read_buffer1, gssize read_buffer_length1, ...)
 {
   LogTransportMock *self = g_new0(LogTransportMock, 1);
   va_list va;
@@ -145,7 +145,7 @@ log_transport_mock_stream_new(gchar *read_buffer1, gssize read_buffer_length1, .
 }
 
 LogTransport *
-log_transport_mock_endless_stream_new(gchar *read_buffer1, gssize read_buffer_length1, ...)
+log_transport_mock_endless_stream_new(const gchar *read_buffer1, gssize read_buffer_length1, ...)
 {
   LogTransportMock *self = g_new0(LogTransportMock, 1);
   va_list va;
@@ -159,7 +159,7 @@ log_transport_mock_endless_stream_new(gchar *read_buffer1, gssize read_buffer_le
 }
 
 LogTransport *
-log_transport_mock_records_new(gchar *read_buffer1, gssize read_buffer_length1, ...)
+log_transport_mock_records_new(const gchar *read_buffer1, gssize read_buffer_length1, ...)
 {
   LogTransportMock *self = g_new0(LogTransportMock, 1);
   va_list va;
@@ -171,7 +171,7 @@ log_transport_mock_records_new(gchar *read_buffer1, gssize read_buffer_length1, 
 }
 
 LogTransport *
-log_transport_mock_endless_records_new(gchar *read_buffer1, gssize read_buffer_length1, ...)
+log_transport_mock_endless_records_new(const gchar *read_buffer1, gssize read_buffer_length1, ...)
 {
   LogTransportMock *self = g_new0(LogTransportMock, 1);
   va_list va;

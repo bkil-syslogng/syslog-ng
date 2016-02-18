@@ -84,7 +84,7 @@ assert_hostname_short(const gchar *expected)
 }
 
 static void
-assert_fqdn_conversion(gchar *hostname, const gchar *expected)
+assert_fqdn_conversion(const gchar *hostname, const gchar *expected)
 {
   gchar buf[256];
 
@@ -94,7 +94,7 @@ assert_fqdn_conversion(gchar *hostname, const gchar *expected)
 }
 
 static void
-assert_short_conversion(gchar *hostname, const gchar *expected)
+assert_short_conversion(const gchar *hostname, const gchar *expected)
 {
   gchar buf[256];
 
@@ -182,24 +182,24 @@ test_domain_override_replaces_domain_detected_on_the_system(void)
 
 /* NOTE: we are testing a private function */
 static const gchar *
-_invoke_extract_fqdn_from_hostent(gchar *primary_host, gchar **aliases)
+_invoke_extract_fqdn_from_hostent(const gchar *primary_host, const gchar **aliases)
 {
   struct hostent hostent;
 
   memset(&hostent, 0, sizeof(hostent));
-  hostent.h_name = primary_host;
-  hostent.h_aliases = aliases;
+  hostent.h_name = (gchar *) primary_host;
+  hostent.h_aliases = (gchar **) aliases;
   return _extract_fqdn_from_hostent(&hostent);
 }
 
 static void
-assert_extract_fqdn_from_hostent(gchar *primary_host, gchar **aliases, const gchar *expected)
+assert_extract_fqdn_from_hostent(const gchar *primary_host, const gchar **aliases, const gchar *expected)
 {
   assert_string(_invoke_extract_fqdn_from_hostent(primary_host, aliases), expected, "_extract_fqdn didn't return the requested hostname");
 }
 
 static void
-assert_extract_fqdn_from_hostent_fails(gchar *primary_host, gchar **aliases)
+assert_extract_fqdn_from_hostent_fails(const gchar *primary_host, const gchar **aliases)
 {
   assert_null(_invoke_extract_fqdn_from_hostent(primary_host, aliases), "_extract_fqdn returned non-NULL when we expected failure");
 }
@@ -207,7 +207,7 @@ assert_extract_fqdn_from_hostent_fails(gchar *primary_host, gchar **aliases)
 static void
 test_extract_fqdn_from_hostent_uses_primary_name_if_it_is_an_fqdn(void)
 {
-  gchar *aliases[] = { "bzorp", "bzorp.lan", NULL };
+  const gchar *aliases[] = { "bzorp", "bzorp.lan", NULL };
 
   assert_extract_fqdn_from_hostent("bzorp.balabit", aliases, "bzorp.balabit");
 }
@@ -215,7 +215,7 @@ test_extract_fqdn_from_hostent_uses_primary_name_if_it_is_an_fqdn(void)
 static void
 test_extract_fqdn_from_hostent_finds_the_first_fqdn_in_aliases_if_primary_is_short(void)
 {
-  gchar *aliases[] = { "bzorp", "bzorp.lan", NULL };
+  const gchar *aliases[] = { "bzorp", "bzorp.lan", NULL };
 
   assert_extract_fqdn_from_hostent("bzorp", aliases, "bzorp.lan");
 }
@@ -223,7 +223,7 @@ test_extract_fqdn_from_hostent_finds_the_first_fqdn_in_aliases_if_primary_is_sho
 static void
 test_extract_fqdn_from_hostent_returns_NULL_when_no_fqdn_is_found(void)
 {
-  gchar *aliases[] = { "bzorp", "foobar", NULL };
+  const gchar *aliases[] = { "bzorp", "foobar", NULL };
 
   assert_extract_fqdn_from_hostent_fails("bzorp", aliases);
 }

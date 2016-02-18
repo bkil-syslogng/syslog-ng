@@ -63,7 +63,7 @@ set_new_log_message_attributes(LogMessage *log_message)
 }
 
 void
-test_cloning_with_log_message(gchar *msg)
+test_cloning_with_log_message(const gchar *msg)
 {
   LogMessage *original_log_message, *log_message, *cloned_log_message;
   regex_t bad_hostname;

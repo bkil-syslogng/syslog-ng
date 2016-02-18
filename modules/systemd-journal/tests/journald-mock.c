@@ -198,7 +198,7 @@ mock_entry_new(const gchar *cursor)
 }
 
 void
-mock_entry_add_data(MockEntry *self, gchar *data)
+mock_entry_add_data(MockEntry *self, const gchar *cdata)
 {
   g_ptr_array_add(self->data, data);
 }
