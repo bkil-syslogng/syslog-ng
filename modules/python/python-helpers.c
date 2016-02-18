@@ -117,7 +117,7 @@ _py_do_import(const gchar *modname)
   return modobj;
 }
 
-gboolean
+static gboolean
 _split_fully_qualified_name(const gchar *input, gchar **module, gchar **class)
 {
   const gchar *p;

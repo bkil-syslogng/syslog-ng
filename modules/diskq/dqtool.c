@@ -214,7 +214,7 @@ dqtool_mode(int *argc, char **argv[])
   return NULL;
 }
 
-void
+static void
 usage(void)
 {
   gint mode;
@@ -227,7 +227,7 @@ usage(void)
   exit(1);
 }
 
-void
+static void
 version(void)
 {
   printf(SYSLOG_NG_VERSION "\n");

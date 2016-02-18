@@ -122,7 +122,7 @@ typedef struct _PdbToolMergeState
   gboolean in_rule;
 } PdbToolMergeState;
 
-void
+static void
 pdbtool_merge_start_element(GMarkupParseContext *context, const gchar *element_name, const gchar **attribute_names,
                                         const gchar **attribute_values, gpointer user_data, GError **error)
 {
@@ -162,7 +162,7 @@ pdbtool_merge_start_element(GMarkupParseContext *context, const gchar *element_n
 }
 
 
-void
+static void
 pdbtool_merge_end_element(GMarkupParseContext *context, const gchar *element_name, gpointer user_data, GError **error)
 {
   PdbToolMergeState *state = (PdbToolMergeState *) user_data;
@@ -182,7 +182,7 @@ pdbtool_merge_end_element(GMarkupParseContext *context, const gchar *element_nam
     g_string_append_printf(state->merged, "</%s>", element_name);
 }
 
-void
+static void
 pdbtool_merge_text(GMarkupParseContext *context, const gchar *text, gsize text_len, gpointer user_data, GError **error)
 {
   PdbToolMergeState *state = (PdbToolMergeState *) user_data;
@@ -354,7 +354,7 @@ static gchar *filter_string = NULL;
 static gboolean debug_pattern = FALSE;
 static gboolean debug_pattern_parse = FALSE;
 
-gboolean
+static gboolean
 pdbtool_match_values(NVHandle handle, const gchar *name, const gchar *value, gssize length, gpointer user_data)
 {
   gint *ret = user_data;
@@ -861,7 +861,7 @@ static GOptionEntry test_options[] =
 
 static gboolean dump_program_tree = FALSE;
 
-void
+static void
 pdbtool_walk_tree(RNode *root, gint level, gboolean program)
 {
   gint i;
@@ -1096,7 +1096,7 @@ static GOptionEntry patternize_options[] =
 };
 
 
-const gchar *
+static const gchar *
 pdbtool_mode(int *argc, char **argv[])
 {
   gint i;
@@ -1145,7 +1145,7 @@ static struct
   { NULL, NULL },
 };
 
-void
+static void
 usage(void)
 {
   gint mode;

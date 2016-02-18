@@ -90,7 +90,7 @@ interactive_mode(void)
   msg_init(TRUE);
 }
 
-gboolean
+static gboolean
 get_installer_version(gchar **inst_version)
 {
   gchar line[1024];
@@ -120,7 +120,7 @@ get_installer_version(gchar **inst_version)
 #define ON_OFF_STR(x) (x ? "on" : "off")
 
 
-void
+static void
 version(void)
 {
   if (!get_installer_version(&installer_version) || installer_version == NULL)

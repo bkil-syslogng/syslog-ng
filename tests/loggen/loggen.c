@@ -599,7 +599,7 @@ gint active_finished;
 gint connect_finished;
 guint64 sum_count;
 
-gpointer
+static gpointer
 idle_thread(gpointer st)
 {
   int sock;
@@ -630,7 +630,7 @@ error:
   return NULL;
 }
 
-gpointer
+static gpointer
 active_thread(gpointer st)
 {
 
@@ -734,7 +734,7 @@ static GOptionEntry file_option_entries[] =
   { NULL }
 };
 
-void
+static void
 version(void)
 {
   printf(SYSLOG_NG_PACKAGE_NAME " " SYSLOG_NG_VERSION "\n");
