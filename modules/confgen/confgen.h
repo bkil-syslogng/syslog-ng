@@ -27,4 +27,6 @@
 #include "syslog-ng.h"
 #include "cfg.h"
 
+gboolean confgen_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 #endif

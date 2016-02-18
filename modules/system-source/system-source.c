@@ -43,6 +43,8 @@
 #include <inttypes.h>
 #endif
 
+gboolean system_source_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static void
 system_sysblock_add_unix_dgram_driver(GString *sysblock, const gchar *path,
                                       const gchar *perms, const gchar *recvbuf_size)

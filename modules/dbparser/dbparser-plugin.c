@@ -27,6 +27,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean dbparser_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser dbparser_parser;
 
 static Plugin dbparser_plugins[] =

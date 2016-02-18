@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean afuser_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser afuser_parser;
 
 static Plugin afuser_plugins[] =

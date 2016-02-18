@@ -26,6 +26,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean pacctformat_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static MsgFormatHandler *
 pacct_format_construct(Plugin *self, GlobalConfig *cfg, gint plugin_type, const gchar *plugin_name)
 {

@@ -36,6 +36,8 @@ typedef enum
     AFSMTP_RCPT_TYPE_SENDER,
   } afsmtp_rcpt_type_t;
 
+gboolean afsmtp_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 LogDriver *afsmtp_dd_new(GlobalConfig *cfg);
 
 void afsmtp_dd_set_host(LogDriver *d, const gchar *host);

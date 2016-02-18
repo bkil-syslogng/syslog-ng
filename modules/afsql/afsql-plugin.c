@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean afsql_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser afsql_parser;
 
 static Plugin afsql_plugins[] =

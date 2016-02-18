@@ -38,6 +38,8 @@ gchar *format_hex_string_with_delimiter(gpointer str, gsize str_len, gchar *resu
 
 
 gboolean
+scan_day_abbrev(const gchar **buf, gint *left, gint *wday);
+gboolean
 scan_iso_timestamp(const gchar **buf, gint *left, struct tm *tm);
 gboolean
 scan_pix_timestamp(const gchar **buf, gint *left, struct tm *tm);
