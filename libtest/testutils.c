@@ -230,7 +230,13 @@ assert_gdouble_non_fatal(gdouble actual, gdouble expected, const gchar *error_me
 {
   va_list args;
 
-  if (fabs(actual - expected) < DBL_MIN)
+  if ((isfinite(actual) && isfinite(expected) && (fabs(actual - expected) < DBL_MIN)))
+    return TRUE;
+
+  if (isinf(actual) && isinf(expected) && (signbit(actual) == signbit(expected)))
+    return TRUE;
+
+  if (isnan(actual) && isnan(expected))
     return TRUE;
 
   va_start(args, error_message);
