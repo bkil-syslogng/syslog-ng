@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-void
+static void
 test_expiration(void)
 {
   gint i;
@@ -131,7 +131,7 @@ test_expiration(void)
     }
 }
 
-void
+static void
 test_dns_cache_benchmark(void)
 {
   GTimeVal start, end;

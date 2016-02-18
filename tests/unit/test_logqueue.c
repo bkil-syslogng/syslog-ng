@@ -40,7 +40,7 @@ MsgFormatOptions parse_options;
 
 #define OVERFLOW_SIZE 10000
 
-void
+static void
 testcase_zero_diskbuf_and_normal_acks()
 {
   LogQueue *q;
@@ -65,7 +65,7 @@ testcase_zero_diskbuf_and_normal_acks()
   log_queue_unref(q);
 }
 
-void
+static void
 testcase_zero_diskbuf_alternating_send_acks()
 {
   LogQueue *q;
@@ -99,7 +99,7 @@ testcase_zero_diskbuf_alternating_send_acks()
 GStaticMutex tlock;
 glong sum_time;
 
-gpointer
+static gpointer
 threaded_feed(gpointer args)
 {
   LogQueue *q = args;
@@ -145,7 +145,7 @@ threaded_feed(gpointer args)
   return NULL;
 }
 
-gpointer
+static gpointer
 threaded_consume(gpointer st)
 {
   LogQueue *q = (LogQueue *) st;
@@ -197,7 +197,7 @@ threaded_consume(gpointer st)
   return NULL;
 }
 
-gpointer
+static gpointer
 output_thread(gpointer args)
 {
   WorkerOptions wo;
@@ -214,7 +214,7 @@ output_thread(gpointer args)
 }
 
 
-void
+static void
 testcase_with_threads()
 {
   LogQueue *q;

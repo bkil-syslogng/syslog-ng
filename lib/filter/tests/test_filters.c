@@ -70,7 +70,7 @@ level_range(const gchar *from, const gchar *to)
   return syslog_make_range(r1, r2);
 }
 
-FilterExprNode *
+static FilterExprNode *
 compile_pattern(FilterRE *f, const gchar *regexp, const gchar *type, gint flags)
 {
   gboolean result;
@@ -88,31 +88,31 @@ compile_pattern(FilterRE *f, const gchar *regexp, const gchar *type, gint flags)
   return NULL;
 }
 
-FilterExprNode *
+static FilterExprNode *
 create_posix_regexp_filter(NVHandle handle, const gchar *regexp, gint flags)
 {
   return compile_pattern(filter_re_new(handle), regexp, "posix", flags);
 }
 
-FilterExprNode *
+static FilterExprNode *
 create_posix_regexp_match(const gchar* regexp, gint flags)
 {
   return compile_pattern(filter_match_new(), regexp, "posix", flags);
 }
 
-FilterExprNode *
+static FilterExprNode *
 create_pcre_regexp_filter(gint field, const gchar* regexp, gint flags)
 {
   return compile_pattern(filter_re_new(field), regexp, "pcre", flags);
 }
 
-FilterExprNode *
+static FilterExprNode *
 create_pcre_regexp_match(const gchar* regexp, gint flags)
 {
   return compile_pattern(filter_match_new(), regexp, "pcre", flags);
 }
 
-LogTemplate *
+static LogTemplate *
 create_template(const gchar *template)
 {
   LogTemplate *t;
@@ -123,7 +123,8 @@ create_template(const gchar *template)
 }
 
 
-void
+static void
+testcase(const gchar *msg,
          FilterExprNode *f,
          gboolean expected_result)
 {
@@ -156,7 +157,7 @@ void
   filter_expr_unref(f);
 }
 
-void
+static void
 testcase_with_backref_chk(const gchar *msg,
          FilterExprNode *f,
          gboolean expected_result,

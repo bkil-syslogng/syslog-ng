@@ -27,7 +27,7 @@
 
 
 
-void
+static void
 assert_escaped_binary_with_unsafe_chars(const gchar *str, const gchar *expected_escaped_str, const gchar *unsafe_chars)
 {
   gchar *escaped_str = convert_unsafe_utf8_to_escaped_binary(str, -1, unsafe_chars);
@@ -36,13 +36,13 @@ assert_escaped_binary_with_unsafe_chars(const gchar *str, const gchar *expected_
   g_free(escaped_str);
 }
 
-void
+static void
 assert_escaped_binary(const gchar *str, const gchar *expected_escaped_str)
 {
   assert_escaped_binary_with_unsafe_chars(str, expected_escaped_str, NULL);
 }
 
-void
+static void
 assert_escaped_text_with_unsafe_chars(const gchar *str, const gchar *expected_escaped_str, const gchar *unsafe_chars)
 {
   gchar *escaped_str = convert_unsafe_utf8_to_escaped_text(str, -1, unsafe_chars);
@@ -51,7 +51,7 @@ assert_escaped_text_with_unsafe_chars(const gchar *str, const gchar *expected_es
   g_free(escaped_str);
 }
 
-void
+static void
 assert_escaped_text(const gchar *str, const gchar *expected_escaped_str)
 {
   assert_escaped_text_with_unsafe_chars(str, expected_escaped_str, NULL);

@@ -105,7 +105,7 @@ test_vp_value(const gchar *name, const gchar *prefix,
   return FALSE;
 }
 
-void
+static void
 test_value_pairs_walk_prefix_data(GlobalConfig *cfg)
 {
   ValuePairs *vp;

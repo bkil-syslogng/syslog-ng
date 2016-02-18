@@ -25,7 +25,7 @@
 #include "apphook.h"
 #include "plugin.h"
 
-void
+static void
 test_hash(void)
 {
   assert_template_format("$(sha1 foo)", "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33");

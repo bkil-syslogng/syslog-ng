@@ -44,7 +44,7 @@
 
 static MsgFormatOptions parse_options;
 
-gboolean
+static gboolean
 evaluate_testcase(const gchar *msg,
          FilterExprNode *filter_node)
 {
@@ -60,7 +60,7 @@ evaluate_testcase(const gchar *msg,
   return result;
 }
 
-void
+static void
 test_filter_returns_false_when_list_is_empty(const char* top_srcdir)
 {
   gchar* list_file_with_zero_lines = g_strdup_printf(LIST_FILE_DIR "empty.list", top_srcdir);
@@ -72,7 +72,7 @@ test_filter_returns_false_when_list_is_empty(const char* top_srcdir)
   g_free(list_file_with_zero_lines);
 }
 
-void
+static void
 test_string_searched_for_is_not_in_the_list(const char* top_srcdir)
 {
   gchar* list_file_with_one_line = g_strdup_printf(LIST_FILE_DIR "test.list", top_srcdir);
@@ -82,7 +82,7 @@ test_string_searched_for_is_not_in_the_list(const char* top_srcdir)
   g_free(list_file_with_one_line);
 }
 
-void
+static void
 test_given_macro_is_not_available_in_this_message(const char* top_srcdir)
 {
   gchar* list_file_with_one_line = g_strdup_printf(LIST_FILE_DIR "test.list", top_srcdir);
@@ -92,7 +92,7 @@ test_given_macro_is_not_available_in_this_message(const char* top_srcdir)
   g_free(list_file_with_one_line);
 }
 
-void
+static void
 test_list_file_doesnt_exist(const char* top_srcdir)
 {
   gchar* list_file_which_doesnt_exist = g_strdup_printf(LIST_FILE_DIR "notexisting.list", top_srcdir);
@@ -100,7 +100,7 @@ test_list_file_doesnt_exist(const char* top_srcdir)
   g_free(list_file_which_doesnt_exist);
 }
 
-void
+static void
 test_list_file_contains_only_one_line(const char* top_srcdir)
 {
   gchar* list_file_with_one_line = g_strdup_printf(LIST_FILE_DIR "test.list", top_srcdir);
@@ -110,7 +110,7 @@ test_list_file_contains_only_one_line(const char* top_srcdir)
   g_free(list_file_with_one_line);
 }
 
-void
+static void
 test_list_file_contains_lot_of_lines(const char* top_srcdir)
 {
   gchar* list_file_which_has_a_lot_of_lines = g_strdup_printf(LIST_FILE_DIR "lot_of_lines.list", top_srcdir);
@@ -120,7 +120,7 @@ test_list_file_contains_lot_of_lines(const char* top_srcdir)
   g_free(list_file_which_has_a_lot_of_lines);
 }
 
-void
+static void
 test_filter_with_ip_address(const char* top_srcdir)
 {
   gchar* list_file_with_ip_address = g_strdup_printf(LIST_FILE_DIR "ip.list", top_srcdir);
@@ -130,7 +130,7 @@ test_filter_with_ip_address(const char* top_srcdir)
   g_free(list_file_with_ip_address);
 }
 
-void
+static void
 test_filter_with_long_line(const char* top_srcdir)
 {
   gchar* list_file_with_long_line = g_strdup_printf(LIST_FILE_DIR "long_line.list", top_srcdir);
@@ -140,7 +140,7 @@ test_filter_with_long_line(const char* top_srcdir)
   g_free(list_file_with_long_line);
 }
 
-void
+static void
 run_testcases(const char* top_srcdir)
 {
   test_filter_returns_false_when_list_is_empty(top_srcdir);

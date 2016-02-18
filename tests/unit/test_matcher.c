@@ -30,7 +30,7 @@
 
 MsgFormatOptions parse_options;
 
-LogMatcher *
+static LogMatcher *
 construct_matcher(gint matcher_flags, LogMatcher *(*construct)(const LogMatcherOptions *options))
 {
   LogMatcherOptions matcher_options;
@@ -42,7 +42,7 @@ construct_matcher(gint matcher_flags, LogMatcher *(*construct)(const LogMatcherO
 }
 
 
-int
+static int
 testcase_match(const gchar *log, const gchar *pattern, gboolean expected_result, LogMatcher *m)
 {
   LogMessage *msg;
@@ -79,7 +79,7 @@ testcase_match(const gchar *log, const gchar *pattern, gboolean expected_result,
   return 0;
 }
 
-int
+static int
 testcase_replace(const gchar *log, const gchar *re, const gchar *replacement, const gchar *expected_result, LogMatcher *m)
 {
   LogMessage *msg;

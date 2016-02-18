@@ -51,13 +51,13 @@ do { \
   if (verbose) printf(fmt, ##args); \
 } while (0);
 
-gchar *
+static gchar *
 get_tag_by_id(LogTagId id)
 {
   return g_strdup_printf("tags%d", id);
 }
 
-void
+static void
 test_tags(void)
 {
   guint i, check;
@@ -103,7 +103,7 @@ test_tags(void)
     }
 }
 
-void
+static void
 test_msg_tags()
 {
   gchar *name;
@@ -159,7 +159,7 @@ test_msg_tags()
 
 }
 
-void
+static void
 test_filters(gboolean not)
 {
   LogMessage *msg = log_msg_new_empty();
