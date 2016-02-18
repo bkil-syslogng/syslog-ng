@@ -607,7 +607,7 @@ z_mem_trace_stats(void)
 }
 
 void 
-z_mem_trace_dump()
+z_mem_trace_dump(void)
 {
 }
 
