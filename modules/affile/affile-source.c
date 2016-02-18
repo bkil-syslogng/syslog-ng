@@ -129,7 +129,7 @@ affile_is_device_node(const gchar *filename)
   return !S_ISREG(st.st_mode);
 }
 
-gboolean
+static gboolean
 affile_sd_open_file(AFFileSourceDriver *self, const gchar *name, gint *fd)
 {
   return affile_open_file(name, &self->file_open_options, &self->file_perm_options, fd);
