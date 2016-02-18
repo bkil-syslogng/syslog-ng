@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-unsigned long
+static unsigned long
 absolute_value(signed long diff)
 {
   if (diff < 0)
@@ -53,7 +53,7 @@ absolute_value(signed long diff)
  * be used for testcases that lack year information. ts_month is the 0
  * based month in the timestamp being parsed.
  */
-time_t
+static time_t
 get_bsd_year_utc(int ts_month)
 {
   struct tm *tm;
@@ -73,7 +73,7 @@ get_bsd_year_utc(int ts_month)
   return mktime(tm);
 }
 
-void
+static void
 assert_log_message_sdata_pairs(LogMessage *message, const gchar *expected_sd_pairs[][2])
 {
   gint i;
@@ -84,14 +84,14 @@ assert_log_message_sdata_pairs(LogMessage *message, const gchar *expected_sd_pai
     }
 }
 
-void
+static void
 simulate_log_readers_effect_on_timezone_offset(LogMessage *message)
 {
   if (message->timestamps[LM_TS_STAMP].zone_offset == -1)
     message->timestamps[LM_TS_STAMP].zone_offset = get_local_timezone_ofs(message->timestamps[LM_TS_STAMP].tv_sec);
 }
 
-LogMessage *
+static LogMessage *
 parse_log_message(const gchar *raw_message_str, gint parse_flags, const gchar *bad_hostname_re)
 {
   LogMessage *message;
@@ -184,7 +184,7 @@ testcase(gchar *msg,
   testcase_end();
 }
 
-void
+static void
 test_log_messages_can_be_parsed()
 {
   const gchar *ignore_sdata_pairs[][2] = { { NULL, NULL } };

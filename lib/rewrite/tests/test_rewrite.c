@@ -29,7 +29,7 @@
 #include "cfg-grammar.h"
 #include "rewrite/rewrite-expr.h"
 
-void
+static void
 expect_config_parse_failure(const char *raw_rewrite_rule)
 {
   char raw_config[1024];
@@ -40,7 +40,7 @@ expect_config_parse_failure(const char *raw_rewrite_rule)
   cfg_free(configuration);
 };
 
-LogRewrite *
+static LogRewrite *
 create_rewrite_rule(const char *raw_rewrite_rule)
 {
   char raw_config[1024];
@@ -55,7 +55,7 @@ create_rewrite_rule(const char *raw_rewrite_rule)
   return (LogRewrite *)expr_node->children->object;
 }
 
-LogMessage *
+static LogMessage *
 create_message_with_fields(const char *field_name, ...)
 {
   va_list args;
@@ -74,27 +74,27 @@ create_message_with_fields(const char *field_name, ...)
   return msg;
 }
 
-LogMessage *
+static LogMessage *
 create_message_with_field(const char *field_name, const char *field_value)
 {
   return create_message_with_fields(field_name, field_value, NULL);
 }
 
-void
+static void
 invoke_rewrite_rule(LogRewrite *pipe_, LogMessage *msg)
 {
   LogPathOptions po = LOG_PATH_OPTIONS_INIT;
   log_pipe_queue((LogPipe *) pipe_, log_msg_ref(msg), &po);
 };
 
-void
+static void
 rewrite_teardown(LogMessage* msg)
 {
   log_msg_unref(msg);
   cfg_free(configuration);
 }
 
-void
+static void
 test_condition_success()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set(\"00100\", value(\"device_id\") condition(program(\"ARCGIS\")));");
@@ -104,7 +104,7 @@ test_condition_success()
   rewrite_teardown(msg);
 }
 
-void
+static void
 test_reference_on_condition_cloned()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set(\"00100\", value(\"device_id\") condition(program(\"ARCGIS\")));");
@@ -115,7 +115,8 @@ test_reference_on_condition_cloned()
   cfg_free(configuration);
 }
 
-void test_set_field_exist_and_set_literal_string()
+static void
+test_set_field_exist_and_set_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set(\"value\" value(\"field1\") );");
   LogMessage *msg = create_message_with_field("field1", "oldvalue");
@@ -124,7 +125,8 @@ void test_set_field_exist_and_set_literal_string()
   rewrite_teardown(msg);
 }
 
-void test_set_field_not_exist_and_set_literal_string()
+static void
+test_set_field_not_exist_and_set_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set(\"value\" value(\"field1\") );");
   LogMessage *msg = log_msg_new_empty();
@@ -133,7 +135,8 @@ void test_set_field_not_exist_and_set_literal_string()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_set_template_string()
+static void
+test_set_field_exist_and_set_template_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set(\"$field2\" value(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue", "field2","newvalue", NULL);
@@ -142,7 +145,8 @@ void test_set_field_exist_and_set_template_string()
   rewrite_teardown(msg);
 }
 
-void test_subst_field_exist_and_substring_substituted()
+static void
+test_subst_field_exist_and_substring_substituted()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("subst(\"substring\" \"substitute\" value(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "asubstringb", NULL);
@@ -151,7 +155,8 @@ void test_subst_field_exist_and_substring_substituted()
   rewrite_teardown(msg);
 }
 
-void test_subst_field_exist_and_substring_substituted_with_template()
+static void
+test_subst_field_exist_and_substring_substituted_with_template()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("subst(\"substring\" \"$field2\" value(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "asubstringb", "field2","substitute", NULL);
@@ -160,7 +165,8 @@ void test_subst_field_exist_and_substring_substituted_with_template()
   rewrite_teardown(msg);
 }
 
-void test_subst_field_exist_and_substring_substituted_only_once_without_global()
+static void
+test_subst_field_exist_and_substring_substituted_only_once_without_global()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("subst(\"substring\" \"substitute\" value(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "substring substring", NULL);
@@ -169,7 +175,8 @@ void test_subst_field_exist_and_substring_substituted_only_once_without_global()
   rewrite_teardown(msg);
 }
 
-void test_subst_field_exist_and_substring_substituted_every_occurence_with_global()
+static void
+test_subst_field_exist_and_substring_substituted_every_occurence_with_global()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("subst(\"substring\" \"substitute\" value(\"field1\") flags(global) );");
   LogMessage *msg = create_message_with_fields("field1", "substring substring", NULL);
@@ -178,7 +185,8 @@ void test_subst_field_exist_and_substring_substituted_every_occurence_with_globa
   rewrite_teardown(msg);
 }
 
-void test_subst_field_exist_and_substring_substituted_when_regexp_matched()
+static void
+test_subst_field_exist_and_substring_substituted_when_regexp_matched()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("subst(\"[0-9]+\" \"substitute\" value(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "a123b", NULL);
@@ -187,7 +195,8 @@ void test_subst_field_exist_and_substring_substituted_when_regexp_matched()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_literal_string()
+static void
+test_set_field_exist_and_group_set_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field1\") );");
   LogMessage *msg = create_message_with_field("field1", "oldvalue");
@@ -196,7 +205,8 @@ void test_set_field_exist_and_group_set_literal_string()
   rewrite_teardown(msg);
 }
 
-void test_set_field_honors_time_zone()
+static void
+test_set_field_honors_time_zone()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("set('${ISODATE}' value('UTCDATE') time-zone('Asia/Tokyo'));");
   LogMessage *msg = create_message_with_fields("field1", "a123b", NULL);
@@ -205,7 +215,8 @@ void test_set_field_honors_time_zone()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_multiple_fields_with_glob_pattern_literal_string()
+static void
+test_set_field_exist_and_group_set_multiple_fields_with_glob_pattern_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field.*\") );");
   LogMessage *msg = create_message_with_fields("field.name1", "oldvalue","field.name2", "oldvalue", NULL);
@@ -215,7 +226,8 @@ void test_set_field_exist_and_group_set_multiple_fields_with_glob_pattern_litera
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_multiple_fields_with_glob_question_mark_pattern_literal_string()
+static void
+test_set_field_exist_and_group_set_multiple_fields_with_glob_question_mark_pattern_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field?\") );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue","field2", "oldvalue", NULL);
@@ -225,7 +237,8 @@ void test_set_field_exist_and_group_set_multiple_fields_with_glob_question_mark_
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_multiple_fields_with_multiple_glob_pattern_literal_string()
+static void
+test_set_field_exist_and_group_set_multiple_fields_with_multiple_glob_pattern_literal_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field1\" \"field2\") );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue","field2", "oldvalue", NULL);
@@ -235,7 +248,8 @@ void test_set_field_exist_and_group_set_multiple_fields_with_multiple_glob_patte
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_template_string()
+static void
+test_set_field_exist_and_group_set_template_string()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"$field2\" values(\"field1\") );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue", "field2", "value", NULL);
@@ -244,7 +258,8 @@ void test_set_field_exist_and_group_set_template_string()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_template_string_with_old_value()
+static void
+test_set_field_exist_and_group_set_template_string_with_old_value()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"$_ alma\" values(\"field1\") );");
   LogMessage *msg = create_message_with_field("field1", "value");
@@ -253,7 +268,8 @@ void test_set_field_exist_and_group_set_template_string_with_old_value()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_when_condition_doesnt_match()
+static void
+test_set_field_exist_and_group_set_when_condition_doesnt_match()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field1\") condition( program(\"program1\") ) );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue", "PROGRAM", "program2", NULL);
@@ -262,7 +278,8 @@ void test_set_field_exist_and_group_set_when_condition_doesnt_match()
   rewrite_teardown(msg);
 }
 
-void test_set_field_exist_and_group_set_when_condition_matches()
+static void
+test_set_field_exist_and_group_set_when_condition_matches()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field1\") condition( program(\"program\") ) );");
   LogMessage *msg = create_message_with_fields("field1", "oldvalue", "PROGRAM", "program", NULL);
@@ -271,7 +288,8 @@ void test_set_field_exist_and_group_set_when_condition_matches()
   rewrite_teardown(msg);
 }
 
-void test_set_field_cloned()
+static void
+test_set_field_cloned()
 {
   LogRewrite *test_rewrite = create_rewrite_rule("groupset(\"value\" values(\"field1\") condition( program(\"program\") ) );");
   LogPipe *cloned_rule = log_pipe_clone(&test_rewrite->super);
@@ -280,7 +298,8 @@ void test_set_field_cloned()
   cfg_free(configuration);
 }
 
-void test_set_field_invalid_template()
+static void
+test_set_field_invalid_template()
 {
   expect_config_parse_failure("groupset(\"${alma\" values(\"field1\") );");
 }

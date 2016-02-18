@@ -28,7 +28,7 @@
 
 #include <stdlib.h>
 
-LogMessage *
+static LogMessage *
 construct_log_message(void)
 {
   const gchar *raw_msg = "foo";
@@ -39,7 +39,7 @@ construct_log_message(void)
   return msg;
 }
 
-LogMessage *
+static LogMessage *
 clone_cow_log_message(LogMessage *msg)
 {
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
@@ -58,7 +58,7 @@ NVHandle nv_handle;
 NVHandle sd_handle;
 const gchar *tag_name = "tag";
 
-LogMessage *
+static LogMessage *
 construct_log_message_with_all_bells_and_whistles(void)
 {
   LogMessage *msg = construct_log_message();
@@ -73,7 +73,7 @@ construct_log_message_with_all_bells_and_whistles(void)
   return msg;
 }
 
-void
+static void
 assert_log_msg_clear_clears_all_properties(LogMessage *msg)
 {
   log_msg_clear(msg);
@@ -129,7 +129,7 @@ test_rcptid_is_automatically_assigned_to_a_newly_created_log_message(void)
 }
 
 
-void
+static void
 test_log_message(void)
 {
   MSG_TESTCASE(test_log_message_can_be_created_and_freed);

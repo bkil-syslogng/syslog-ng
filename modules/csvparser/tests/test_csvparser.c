@@ -49,7 +49,7 @@
 
 MsgFormatOptions parse_options;
 
-int
+static int
 testcase(const gchar *msg, guint parse_flags, gint max_columns, gint dialect, guint32 flags, const gchar *delimiters, const gchar *quotes, const gchar *null_value, const gchar *string_delims[], const gchar *first_value, ...)
 {
   LogMessage *logmsg;

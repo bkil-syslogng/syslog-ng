@@ -40,7 +40,7 @@ gboolean success = TRUE;
 gboolean verbose = FALSE;
 MsgFormatOptions parse_options;
 
-LogMessage *
+static LogMessage *
 init_msg(const gchar *msg_string, gboolean use_syslog_protocol)
 {
   LogMessage *msg;
@@ -65,7 +65,7 @@ init_msg(const gchar *msg_string, gboolean use_syslog_protocol)
   return msg;
 }
 
-void
+static void
 testcase(const gchar *msg_string, gboolean input_is_rfc5424, const gchar *const template, guint writer_flags, const gchar *const expected_value)
 {
   LogTemplate *templ = NULL;

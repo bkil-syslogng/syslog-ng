@@ -35,7 +35,7 @@
 static gboolean task_called;
 static gboolean poll_triggered;
 
-void
+static void
 add_mock_entries(gpointer user_data)
 {
   Journald *journald = user_data;
@@ -52,7 +52,7 @@ add_mock_entries(gpointer user_data)
   journald_mock_add_entry(journald, entry);
 }
 
-void
+static void
 handle_new_entry(gpointer user_data)
 {
   Journald *journald = user_data;
@@ -61,13 +61,13 @@ handle_new_entry(gpointer user_data)
   poll_triggered = TRUE;
 }
 
-void
+static void
 stop_timer_expired(gpointer user_data)
 {
   iv_quit();
 }
 
-void
+static void
 __test_seeks(Journald *journald)
 {
   gint result = journald_seek_head(journald);
@@ -104,7 +104,7 @@ __test_seeks(Journald *journald)
 
 }
 
-void
+static void
 __test_cursors(Journald *journald)
 {
   gchar *cursor;
@@ -140,7 +140,11 @@ __test_cursors(Journald *journald)
   g_free(cursor);
 }
 
-void
+static void
+__test_enumerate(Journald *journald)
+__attribute__((unused));
+
+static void
 __test_enumerate(Journald *journald)
 {
   const void *data;
@@ -174,7 +178,7 @@ __test_enumerate(Journald *journald)
   assert_gint(result, 0, ASSERTION_ERROR("Should not contain more elements"));
 }
 
-void
+static void
 __test_fd_handling(Journald *journald)
 {
   gint fd = journald_get_fd(journald);
@@ -211,7 +215,7 @@ __test_fd_handling(Journald *journald)
   assert_true(poll_triggered, ASSERTION_ERROR("Poll event isn't triggered"));
 }
 
-void
+static void
 test_journald_mock()
 {
   Journald *journald = journald_mock_new();
@@ -229,7 +233,7 @@ test_journald_mock()
   journald_free(journald);
 }
 
-void
+static void
 __helper_test(gchar *key, gchar *value, gpointer user_data)
 {
   GHashTable *result = user_data;
@@ -238,7 +242,7 @@ __helper_test(gchar *key, gchar *value, gpointer user_data)
 }
 
 
-void
+static void
 test_journald_helper()
 {
   Journald *journald = journald_mock_new();
@@ -269,7 +273,7 @@ test_journald_helper()
   g_hash_table_unref(result);
 }
 
-MockEntry *
+static MockEntry *
 __create_real_entry(Journald *journal, const gchar *cursor_name)
 {
   MockEntry *entry = mock_entry_new(cursor_name);
@@ -302,7 +306,7 @@ __create_real_entry(Journald *journal, const gchar *cursor_name)
   return entry;
 }
 
-MockEntry *
+static MockEntry *
 __create_dummy_entry(Journald *journal, const gchar *cursor_name)
 {
   MockEntry *entry = mock_entry_new(cursor_name);
@@ -312,7 +316,7 @@ __create_dummy_entry(Journald *journal, const gchar *cursor_name)
   return entry;
 }
 
-void
+static void
 _test_default_working_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_dummy_entry(journal, "default_test");
@@ -321,7 +325,7 @@ _test_default_working_init(TestCase *self, TestSource *src, Journald *journal, J
   self->user_data = options;
 }
 
-void
+static void
 _test_default_working_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   const gchar *message = log_msg_get_value(msg, LM_V_MESSAGE, NULL);
@@ -335,7 +339,7 @@ _test_default_working_test(TestCase *self, TestSource *src, LogMessage *msg)
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_prefix_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_real_entry(journal, "prefix_test");
@@ -345,7 +349,17 @@ _test_prefix_init(TestCase *self, TestSource *src, Journald *journal, JournalRea
   journald_mock_add_entry(journal, entry);
 }
 
-void
+static void
+__test_message_has_no_prefix(TestCase *self, LogMessage *msg)
+{
+  gchar *requested_name = g_strdup_printf("%s%s", (gchar *)self->user_data, "MESSAGE");
+  gssize value_len;
+  log_msg_get_value_by_name(msg, requested_name, &value_len);
+  assert_gint(value_len, 0, ASSERTION_ERROR("MESSAGE has prefix"));
+  g_free(requested_name);
+}
+
+static void
 __test_other_has_prefix(TestCase *self, LogMessage *msg)
 {
   gchar *requested_name = g_strdup_printf("%s%s", (gchar *) self->user_data, "_CMDLINE");
@@ -355,18 +369,19 @@ __test_other_has_prefix(TestCase *self, LogMessage *msg)
   g_free(requested_name);
 }
 
-void
+static void
 _test_prefix_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   const gchar *message = log_msg_get_value(msg, LM_V_MESSAGE, NULL);
   assert_string(message, "pam_unix(sshd:session): session opened for user foo_user by (uid=0)", ASSERTION_ERROR("Bad message"));
 
+  __test_message_has_no_prefix(self, msg);
   __test_other_has_prefix(self, msg);
 
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_field_size_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_real_entry(journal, "field_size_test");
@@ -374,7 +389,7 @@ _test_field_size_init(TestCase *self, TestSource *src, Journald *journal, Journa
   journald_mock_add_entry(journal, entry);
 }
 
-gboolean
+static gboolean
 __check_value_len(NVHandle handle, const gchar *name, const gchar *value, gssize value_len, gpointer user_data)
 {
   TestCase *self = user_data;
@@ -388,14 +403,14 @@ __check_value_len(NVHandle handle, const gchar *name, const gchar *value, gssize
 }
 
 
-void
+static void
 _test_field_size_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   log_msg_values_foreach(msg, __check_value_len, self);
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_timezone_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_real_entry(journal, "time_zone_test");
@@ -403,14 +418,14 @@ _test_timezone_init(TestCase *self, TestSource *src, Journald *journal, JournalR
   journald_mock_add_entry(journal, entry);
 }
 
-void
+static void
 _test_timezone_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   assert_gint(msg->timestamps[LM_TS_STAMP].zone_offset, 9 * 3600, ASSERTION_ERROR("Bad time zone info"));
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_default_level_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_dummy_entry(journal, "test default level");
@@ -422,7 +437,7 @@ _test_default_level_init(TestCase *self, TestSource *src, Journald *journal, Jou
   journald_mock_add_entry(journal, entry);
 }
 
-void
+static void
 _test_default_level_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   gint level = GPOINTER_TO_INT(self->user_data);
@@ -430,7 +445,7 @@ _test_default_level_test(TestCase *self, TestSource *src, LogMessage *msg)
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_default_facility_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = __create_dummy_entry(journal, "test default facility");
@@ -441,7 +456,7 @@ _test_default_facility_init(TestCase *self, TestSource *src, Journald *journal, 
   journald_mock_add_entry(journal, entry);
 }
 
-void
+static void
 _test_default_facility_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   gint facility = GPOINTER_TO_INT(self->user_data);
@@ -449,7 +464,7 @@ _test_default_facility_test(TestCase *self, TestSource *src, LogMessage *msg)
   test_source_finish_tc(src);
 }
 
-void
+static void
 _test_program_field_init(TestCase *self, TestSource *src, Journald *journal, JournalReader *reader, JournalReaderOptions *options)
 {
   MockEntry *entry = mock_entry_new("test _COMM first win");
@@ -469,7 +484,7 @@ _test_program_field_init(TestCase *self, TestSource *src, Journald *journal, Jou
   self->user_data = journal;
 }
 
-void
+static void
 _test_program_field_test(TestCase *self, TestSource *src, LogMessage *msg)
 {
   Journald *journal = self->user_data;
@@ -488,12 +503,14 @@ _test_program_field_test(TestCase *self, TestSource *src, LogMessage *msg)
     }
 }
 
-void
+static void
 test_journal_reader()
 {
   TestSource *src = test_source_new(configuration);
   TestCase tc_default_working = { _test_default_working_init, _test_default_working_test, NULL, NULL };
-  TestCase tc_prefix = { _test_prefix_init, _test_prefix_test, NULL, "this.is.a.prefix." };
+  gchar *str = g_strdup("this.is.a.prefix.");
+  TestCase tc_prefix = { _test_prefix_init, _test_prefix_test, NULL, str };
+  g_free(str);
   TestCase tc_max_field_size = { _test_field_size_init, _test_field_size_test, NULL, GINT_TO_POINTER(10)};
   TestCase tc_timezone = { _test_timezone_init, _test_timezone_test, NULL, NULL };
   TestCase tc_default_level =  { _test_default_level_init, _test_default_level_test, NULL, GINT_TO_POINTER(LOG_ERR) };

@@ -200,10 +200,12 @@ mock_entry_new(const gchar *cursor)
 void
 mock_entry_add_data(MockEntry *self, const gchar *cdata)
 {
+  gchar *data = g_strdup(cdata);
   g_ptr_array_add(self->data, data);
+  g_free(data);
 }
 
-void
+static void
 mock_entry_free(gpointer s)
 {
   MockEntry *self = (MockEntry *)s;

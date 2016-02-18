@@ -34,7 +34,7 @@ add_dummy_template_to_configuration(void)
   cfg_tree_add_template(&configuration->tree, dummy);
 }
 
-void
+static void
 test_cond_funcs(void)
 {
   assert_template_format_with_context("$(grep 'facility(local3)' $PID)", "23323,23323");
@@ -75,7 +75,7 @@ test_cond_funcs(void)
   assert_template_format_with_context("$(or)", "");
 }
 
-void
+static void
 test_str_funcs(void)
 {
   assert_template_format("$(ipv4-to-int $SOURCEIP)", "168496141");
@@ -118,7 +118,7 @@ test_str_funcs(void)
   assert_template_format("$(padding foo 10 abc)", "abcabcafoo");
 }
 
-void
+static void
 test_numeric_funcs(void)
 {
   assert_template_format("$(+ $FACILITY_NUM 1)", "20");
@@ -138,7 +138,7 @@ test_numeric_funcs(void)
   assert_template_format("$(- 10000000000 5000000000)", "5000000000");
 }
 
-void
+static void
 test_misc_funcs(void)
 {
   unsetenv("OHHELLO");

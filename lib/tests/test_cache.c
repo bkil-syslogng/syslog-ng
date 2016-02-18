@@ -26,21 +26,21 @@
 gint fetch_count;
 gint free_fn_count;
 
-void *
+static void *
 fetch(CacheResolver *self, const gchar *key)
 {
   fetch_count++;
   return g_strdup_printf("almafa_%s", key);
 }
 
-void
+static void
 free_fn(CacheResolver *self)
 {
   free_fn_count++;
   return;
 }
 
-CacheResolver *
+static CacheResolver *
 dummy_cache_resolver(void)
 {
   CacheResolver *self = g_new0(CacheResolver, 1);
@@ -79,7 +79,7 @@ assert_cache_lookup_cached(Cache *c, const gchar *key)
   assert_gint(fetch_count, 0, "Cache lookup unexpected when looking up cached elements, but one did arrive key=\"%s\"", key);
 }
 
-void
+static void
 test_cache_write_and_read(void)
 {
   Cache *c;
@@ -97,7 +97,7 @@ test_cache_write_and_read(void)
   cache_free(c);
 }
 
-void
+static void
 test_cache_free_calls_resolver_free_fn(void)
 {
   Cache *c;
