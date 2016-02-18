@@ -352,7 +352,7 @@ log_macro_expand(GString *result, gint id, gboolean escape, const LogTemplateOpt
       break;
     case M_SOURCE_IP:
       {
-        gchar *ip;
+        const gchar *ip;
         
         if(_is_message_source_an_ip_address(msg))
           {
@@ -585,7 +585,7 @@ log_macro_expand_simple(GString *result, gint id, const LogMessage *msg)
 }
 
 guint
-log_macro_lookup(gchar *macro, gint len)
+log_macro_lookup(const gchar *macro, gint len)
 {
   gchar buf[256];
   gint macro_id;

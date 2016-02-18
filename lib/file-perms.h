@@ -47,8 +47,8 @@ void file_perm_options_set_dir_perm(FilePermOptions *s, gint dir_perm);
 void file_perm_options_defaults(FilePermOptions *self);
 void file_perm_options_init(FilePermOptions *self, GlobalConfig *cfg);
 
-gboolean file_perm_options_apply_file(const FilePermOptions *self, gchar *name);
-gboolean file_perm_options_apply_dir(const FilePermOptions *self, gchar *name);
+gboolean file_perm_options_apply_file(const FilePermOptions *self, const gchar *name);
+gboolean file_perm_options_apply_dir(const FilePermOptions *self, const gchar *name);
 gboolean file_perm_options_apply_fd(const FilePermOptions *self, gint fd);
 gboolean file_perm_options_create_containing_directory(const FilePermOptions *self, const gchar *name);
 

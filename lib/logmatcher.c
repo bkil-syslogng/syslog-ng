@@ -144,7 +144,7 @@ log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle, 
   GString *new_value = NULL;
   gsize current_ofs = 0;
   gboolean first_round = TRUE;
-  gchar *buf;
+  const gchar *buf;
   
   APPEND_ZERO(buf, value, value_len);
 
@@ -275,7 +275,7 @@ log_matcher_string_match_string(LogMatcherString *self, const gchar *value, gsiz
     {
       if (self->super.flags & LMF_ICASE)
         {
-          gchar *buf;
+          const gchar *buf;
           gchar *res;
 
           APPEND_ZERO(buf, value, value_len);
@@ -421,7 +421,7 @@ log_matcher_glob_match(LogMatcher *s, LogMessage *msg, gint value_handle, const 
   if (G_LIKELY((msg->flags & LF_UTF8) || g_utf8_validate(value, value_len, NULL)))
     {
       static gboolean warned = FALSE;
-      gchar *buf;
+      const gchar *buf;
       
       if (G_UNLIKELY(!warned && (msg->flags & LF_UTF8) == 0))
         {

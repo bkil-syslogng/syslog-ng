@@ -171,7 +171,7 @@ _is_at_the_end_of_columns(CSVScanner *self)
 static void
 _parse_opening_quote_character(CSVScanner *self)
 {
-  gchar *quote = _strchr_optimized_for_single_char_haystack(self->options->quotes_start, *self->src);
+  const gchar *quote = _strchr_optimized_for_single_char_haystack(self->options->quotes_start, *self->src);
 
   if (quote != NULL)
     {

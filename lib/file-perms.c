@@ -120,7 +120,7 @@ file_perm_options_init(FilePermOptions *self, GlobalConfig *cfg)
 }
 
 gboolean
-file_perm_options_apply_file(const FilePermOptions *self, gchar *name)
+file_perm_options_apply_file(const FilePermOptions *self, const gchar *name)
 {
 #ifndef _MSC_VER
   gboolean result = TRUE;
@@ -136,7 +136,7 @@ file_perm_options_apply_file(const FilePermOptions *self, gchar *name)
 }
 
 gboolean
-file_perm_options_apply_dir(const FilePermOptions *self, gchar *name)
+file_perm_options_apply_dir(const FilePermOptions *self, const gchar *name)
 {
 #ifndef _MSC_VER
   gboolean result = TRUE;
