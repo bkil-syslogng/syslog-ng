@@ -198,16 +198,14 @@ mock_entry_new(const gchar *cursor)
 {
   MockEntry *self = g_new0(MockEntry, 1);
   self->cursor = g_strdup(cursor);
-  self->data = g_ptr_array_new();
+  self->data = g_ptr_array_new_with_free_func(g_free);
   return self;
 }
 
 void
-mock_entry_add_data(MockEntry *self, const gchar *cdata)
+mock_entry_add_data(MockEntry *self, const gchar *data)
 {
-  gchar *data = g_strdup(cdata);
-  g_ptr_array_add(self->data, data);
-  g_free(data);
+  g_ptr_array_add(self->data, g_strdup(data));
 }
 
 static void
