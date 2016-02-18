@@ -1,3 +1,5 @@
+CFLAGS += -Wcast-qual
+
 lib_logproto_tests_TESTS		 = \
 	lib/logproto/tests/test_logproto   \
 	lib/logproto/tests/test_findeom

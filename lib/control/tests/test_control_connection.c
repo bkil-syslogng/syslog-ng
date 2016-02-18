@@ -190,7 +190,9 @@ test_control_connection(gsize transaction_size)
   g_string_assign(moc_connection->source_buffer->buffer,"test command\n");
   moc_connection->transaction_size = transaction_size;
   control_connection_start_watches((ControlConnection *)moc_connection);
-  assert_string(result_string->str, "OK\n.\n", "BAD Behaviour transaction_size: %d",transaction_size);
+  assert_string(result_string->str,
+                "OK\n.\n", "BAD Behaviour transaction_size: %" G_GSIZE_FORMAT,
+                transaction_size);
 }
 
 int

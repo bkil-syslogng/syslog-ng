@@ -150,7 +150,7 @@ _current_token(void)
 #define assert_parser_float(expected)                           \
   _next_token();                                                        \
   assert_token_type(LL_FLOAT);                                         \
-  assert_true(_current_token()->fnum == expected, "Bad parsed value at %s:%d", __FUNCTION__, __LINE__);
+  assert_true(fabs(_current_token()->fnum - expected) < DBL_MIN, "Bad parsed value at %s:%d", __FUNCTION__, __LINE__);
 
 #define assert_parser_identifier(expected) \
   _next_token();                                                        \

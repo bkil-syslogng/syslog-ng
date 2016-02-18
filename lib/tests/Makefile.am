@@ -1,3 +1,5 @@
+CFLAGS += -Wno-format -Wno-cast-qual
+
 lib_tests_TESTS		= \
 	lib/tests/test_cfg_lexer_subst	\
 	lib/tests/test_cfg_tree		\

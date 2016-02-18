@@ -28,6 +28,7 @@
 #include "logqueue-disk-reliable.h"
 #include "apphook.h"
 #include "plugin.h"
+#include "timeutils.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,12 +65,13 @@ _init_diskq_for_test(gint64 size, gint64 membuf_size)
   LogQueue *q = log_queue_disk_reliable_new(&options);
   struct stat st;
   num_of_ack = 0;
-  gchar *filename = FILENAME;
+  const gchar *filename = FILENAME;
   unlink(filename);
   log_queue_disk_load_queue(q, filename);
   dq = (LogQueueDiskReliable *)q;
   lseek(dq->super.qdisk->fd, size - 1, SEEK_SET);
-  write(dq->super.qdisk->fd, "", 1);
+  ssize_t written = write(dq->super.qdisk->fd, "", 1);
+  assert_gint64(written, 1, ASSERTION_ERROR("INITIALIZATION FAILED"));
   fstat(dq->super.qdisk->fd, &st);
   assert_gint64(st.st_size, size, ASSERTION_ERROR("INITIALIZATION FAILED"));
   dq->super.super.use_backlog = TRUE;
@@ -238,7 +240,7 @@ test_over_EOF()
  * the qbacklog contains 3 messages,
  * but messages in qbacklog are the end of the backlog
  */
-void
+static void
 _prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
 {
   gint i;
@@ -293,7 +295,7 @@ _prepare_rewind_backlog_test(LogQueueDiskReliable *dq, gint64 *start_pos)
       ASSERTION_ERROR("Reliable diskq isn't empty"));
 }
 
-void
+static void
 test_rewind_backlog_without_using_qbacklog(LogQueueDiskReliable *dq, gint64 old_read_pos)
 {
   /*
@@ -307,7 +309,7 @@ test_rewind_backlog_without_using_qbacklog(LogQueueDiskReliable *dq, gint64 old_
     assert_gint(dq->qbacklog->length, NUMBER_MESSAGES_IN_QUEUE(3), ASSERTION_ERROR("Incorrect number of items in the qbacklog"));
 }
 
-void
+static void
 test_rewind_backlog_partially_used_qbacklog(LogQueueDiskReliable *dq, gint64 old_read_pos)
 {
   /*
@@ -322,7 +324,7 @@ test_rewind_backlog_partially_used_qbacklog(LogQueueDiskReliable *dq, gint64 old
   assert_gint(dq->qbacklog->length, NUMBER_MESSAGES_IN_QUEUE(2), ASSERTION_ERROR("Incorrect number of items in the qbacklog"));
 }
 
-void
+static void
 test_rewind_backlog_use_whole_qbacklog(LogQueueDiskReliable *dq)
 {
   /*
@@ -347,7 +349,7 @@ test_rewind_backlog_use_whole_qbacklog(LogQueueDiskReliable *dq)
  * qbacklog contains messages: 1 2 3
  * qbacklog must be always in sync with backlog
  */
-void
+static void
 test_rewind_backlog()
 {
   LogQueueDiskReliable *dq = _init_diskq_for_test(QDISK_RESERVED_SPACE + mark_message_serialized_size * 10, mark_message_serialized_size * 5);
@@ -368,8 +370,7 @@ gint
 main(gint argc, gchar **argv)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("TZ=MET-1METDST");
 
   configuration = cfg_new(0x0308);
   plugin_load_module("syslogformat", configuration, NULL);

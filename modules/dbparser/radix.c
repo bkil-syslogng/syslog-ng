@@ -21,6 +21,9 @@
  *
  */
 
+#ifndef RADIX_C_INCLUDED
+#define RADIX_C_INCLUDED
+
 #include "radix.h"
 
 #include <string.h>
@@ -1530,3 +1533,5 @@ r_free_node(RNode *node, void (*free_fn)(gpointer data))
 
   g_free(node);
 }
+
+#endif

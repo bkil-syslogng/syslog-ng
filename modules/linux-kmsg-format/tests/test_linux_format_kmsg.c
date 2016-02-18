@@ -116,19 +116,19 @@ test_kmsg_with_extra_fields(void)
   testcase_end();
 }
 
-void
+static void
 test_kmsg_device_parsing(void)
 {
-  gchar msg_subsys[] = "6,202,98513;pci_root PNP0A08:00: host bridge window [io  0x0000-0x0cf7]\n" \
+  const gchar msg_subsys[] = "6,202,98513;pci_root PNP0A08:00: host bridge window [io  0x0000-0x0cf7]\n" \
     " SUBSYSTEM=acpi\n" \
     " DEVICE=+acpi:PNP0A08:00\n";
-  gchar msg_block[] = "6,202,98513;Fake message\n" \
+  const gchar msg_block[] = "6,202,98513;Fake message\n" \
     " DEVICE=b12:1\n";
-  gchar msg_char[] = "6,202,98513;Fake message\n" \
+  const gchar msg_char[] = "6,202,98513;Fake message\n" \
     " DEVICE=c3:4\n";
-  gchar msg_netdev[] = "6,202,98513;Fake message\n" \
+  const gchar msg_netdev[] = "6,202,98513;Fake message\n" \
     " DEVICE=n8\n";
-  gchar msg_unknown[] = "6,202,98513;Fake message\n" \
+  const gchar msg_unknown[] = "6,202,98513;Fake message\n" \
     " DEVICE=w12345\n";
   LogMessage *parsed_message;
 
@@ -165,7 +165,7 @@ test_kmsg_device_parsing(void)
 }
 
 static void
-init_and_load_kmsgformat_module()
+init_and_load_kmsgformat_module(void)
 {
   configuration = cfg_new(VERSION_VALUE);
   plugin_load_module("linux-kmsg-format", configuration, NULL);
@@ -176,7 +176,7 @@ init_and_load_kmsgformat_module()
 }
 
 static void
-deinit_kmsgformat_module()
+deinit_kmsgformat_module(void)
 {
   if (configuration)
     cfg_free(configuration);
@@ -189,8 +189,7 @@ int
 main(void)
 {
   app_startup();
-  putenv("TZ=UTC");
-  tzset();
+  set_tz("TZ=UTC");
 
   init_and_load_kmsgformat_module();
 

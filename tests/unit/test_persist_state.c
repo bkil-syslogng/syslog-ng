@@ -46,7 +46,8 @@ test_persist_state_open_success_on_invalid_file(void)
   unlink("test_invalid_magic.persist");
 
   fd = open("test_invalid_magic.persist", O_CREAT | O_RDWR, 0777);
-  write(fd, "aaa", 3);
+  ssize_t ok = write(fd, "aaa", 3);
+  assert_true(ok == 3, "can't write to file!");
   close(fd);
 
   state = persist_state_new("test_invalid_magic.persist");
@@ -63,7 +64,8 @@ test_persist_state_open_fails_on_invalid_file_with_dump(void)
   unlink("test_invalid_magic.persist");
 
   fd = open("test_invalid_magic.persist", O_CREAT | O_RDWR, 0777);
-  write(fd, "aaa", 3);
+  ssize_t ok = write(fd, "aaa", 3);
+  assert_true(ok == 3, "can't write to file!");
   close(fd);
 
   state = persist_state_new("test_invalid_magic.persist");
@@ -205,12 +207,14 @@ test_persist_state_foreach_entry(void)
   test_state->value = 3;
   persist_state_unmap_entry(state, handle);
 
-  persist_state_foreach_entry(state, _foreach_callback_assertions, "test_userdata");
+  gchar *str = g_strdup("test_userdata");
+  persist_state_foreach_entry(state, _foreach_callback_assertions, str);
+  g_free(str);
 
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_values(void)
 {
   PersistState *state;
@@ -297,7 +301,7 @@ test_values(void)
 }
 
 static void
-test_persist_state_temp_file_cleanup_on_cancel()
+test_persist_state_temp_file_cleanup_on_cancel(void)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_persist_state_temp_file_cleanup_on_cancel.persist");
 
@@ -310,7 +314,7 @@ test_persist_state_temp_file_cleanup_on_cancel()
 }
 
 static void
-test_persist_state_temp_file_cleanup_on_commit_destroy()
+test_persist_state_temp_file_cleanup_on_commit_destroy(void)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_persist_state_temp_file_cleanup_on_commit_destroy.persist");
 

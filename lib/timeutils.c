@@ -31,6 +31,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <iv.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const char *month_names_abbrev[] =
 {
@@ -950,4 +952,15 @@ time_zone_info_free(TimeZoneInfo *self)
   zone_info_free(self->zone);
   zone_info_free(self->zone64);
   g_free(self);
+}
+
+void
+set_tz(const char *tz)
+{
+  static char envbuf[64];
+
+  snprintf(envbuf, sizeof(envbuf), "TZ=%s", tz);
+  putenv(envbuf);
+  tzset();
+  clean_time_cache();
 }

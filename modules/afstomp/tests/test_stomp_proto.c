@@ -44,8 +44,8 @@ assert_stomp_body(stomp_frame* frame, const char* body)
   assert_string(frame->body, body, "Stomp body assertion failed");
 }
 
-test_only_command()
 static void
+test_only_command(void)
 {
   stomp_frame frame;
 
@@ -54,8 +54,8 @@ static void
   stomp_frame_deinit(&frame);
 }
 
-test_command_and_data()
 static void
+test_command_and_data(void)
 {
   stomp_frame frame;
 
@@ -65,8 +65,8 @@ static void
   stomp_frame_deinit(&frame);
 };
 
-test_command_and_header_and_data()
 static void
+test_command_and_header_and_data(void)
 {
   stomp_frame frame;
 
@@ -77,8 +77,8 @@ static void
   stomp_frame_deinit(&frame);
 };
 
-test_command_and_header()
 static void
+test_command_and_header(void)
 {
   stomp_frame frame;
 
@@ -88,8 +88,8 @@ static void
   stomp_frame_deinit(&frame);
 };
 
-test_generate_gstring_from_frame()
 static void
+test_generate_gstring_from_frame(void)
 {
   stomp_frame frame;
   GString* actual;
