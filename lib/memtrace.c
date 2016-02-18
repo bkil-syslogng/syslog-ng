@@ -209,7 +209,7 @@ z_mem_trace_stats(void)
 static gpointer z_mem_trace_check_canaries(gpointer ptr);
 
 void
-z_mem_trace_dump()
+z_mem_trace_dump(void)
 {
   int i;
   
