@@ -25,5 +25,6 @@
 #define CONFGEN_H_INCLUDED
 
 #include "syslog-ng.h"
+#include "cfg.h"
 
 #endif

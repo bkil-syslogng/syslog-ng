@@ -22,7 +22,6 @@
  */
 
 #include "confgen.h"
-#include "cfg.h"
 #include "cfg-lexer.h"
 #include "messages.h"
 #include "plugin.h"

@@ -22,6 +22,7 @@
  *
  */
 
+#include "debugger-main.h"
 #include "debugger/debugger.h"
 #include "logpipe.h"
 

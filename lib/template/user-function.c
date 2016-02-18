@@ -22,6 +22,7 @@
  *
  */
 
+#include "user-function.h"
 #include "template/function.h"
 #include "plugin.h"
 

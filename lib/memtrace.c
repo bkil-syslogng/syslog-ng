@@ -23,6 +23,7 @@
  */
    
 #include "syslog-ng.h"
+#include "memtrace.h"
 
 #if SYSLOG_NG_ENABLE_MEMTRACE
 
