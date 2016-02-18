@@ -120,10 +120,10 @@ parse_log_message(const gchar *raw_message_str, gint parse_flags, const gchar *b
   return message;
 }
 
-void
-testcase(gchar *msg,
+static void
+testcase(const gchar *msg,
          gint parse_flags,
-         gchar *bad_hostname_re,
+         const gchar *bad_hostname_re,
          gint expected_pri,
          unsigned long expected_stamp_sec,
          unsigned long expected_stamp_usec,
@@ -185,7 +185,7 @@ testcase(gchar *msg,
 }
 
 static void
-test_log_messages_can_be_parsed()
+test_log_messages_can_be_parsed(void)
 {
   const gchar *ignore_sdata_pairs[][2] = { { NULL, NULL } };
   const gchar *empty_sdata_pairs[][2] = { { NULL, NULL } };
@@ -896,8 +896,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("TZ=MET-1METDST");
   init_and_load_syslogformat_module();
 
   test_log_messages_can_be_parsed();

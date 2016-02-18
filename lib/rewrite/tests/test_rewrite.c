@@ -308,7 +308,9 @@ int
 main(int argc, char **argv)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
+  gchar *env = g_strdup("TZ=MET-1METDST");
+  putenv(env);
+  g_free(env);
   tzset();
 
   start_grabbing_messages();

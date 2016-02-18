@@ -177,11 +177,16 @@ journald_get_realtime_usec(Journald *self, guint64 *usec)
 }
 
 Journald *
-journald_mock_new()
+journald_mock_new(void)
 {
   Journald *self = g_new0(Journald, 1);
 
-  pipe(self->fds);
+  int ok = pipe(self->fds);
+  if (ok < 0)
+    {
+      g_free(self);
+      return NULL;
+    }
   g_fd_set_nonblock(self->fds[0], TRUE);
   g_fd_set_nonblock(self->fds[1], TRUE);
 

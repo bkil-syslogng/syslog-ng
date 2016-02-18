@@ -35,9 +35,9 @@
 gboolean fail = FALSE;
 gboolean verbose = FALSE;
 
-void r_print_node(RNode *node, int depth);
+static void r_print_node(RNode *node, int depth);
 
-void
+static void
 r_print_pnode(RNode *node, int depth)
 {
   int i;
@@ -53,7 +53,7 @@ r_print_pnode(RNode *node, int depth)
     r_print_pnode(node->pchildren[i], depth + 1);
 }
 
-void
+static void
 r_print_node(RNode *node, int depth)
 {
   int i;
@@ -69,27 +69,29 @@ r_print_node(RNode *node, int depth)
     r_print_pnode(node->pchildren[i], depth + 1);
 }
 
-void
-insert_node_with_value(RNode *root, gchar *key, gpointer value)
+static void
+insert_node_with_value(RNode *root, const gchar *key, const gchar *value)
 {
-  gchar *dup;
+  gchar *dup_key, *dup_value;
 
   /* NOTE: we need to duplicate the key as r_insert_node modifies its input
    * and it might be a read-only string literal */
 
-  dup = g_strdup(key);
-  r_insert_node(root, dup, value ? : key, NULL);
-  g_free(dup);
+  dup_key = g_strdup(key);
+  dup_value = g_strdup(value);
+  r_insert_node(root, dup_key, dup_value ? : dup_key, NULL);
+  g_free(dup_value);
+  g_free(dup_key);
 }
 
-void
-insert_node(RNode *root, gchar *key)
+static void
+insert_node(RNode *root, const gchar *key)
 {
   insert_node_with_value(root, key, NULL);
 }
 
-void
-test_search_value(RNode *root, gchar *key, gchar *expected_value)
+static void
+test_search_value(RNode *root, const gchar *key, const gchar *expected_value)
 {
   RNode *ret = r_find_node(root, key, strlen(key), NULL);
 
@@ -228,7 +230,7 @@ test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
   g_array_free(matches, TRUE);
 }
 
-void
+static void
 test_literals(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -288,7 +290,7 @@ test_literals(void)
   r_free_node(root, NULL);
 }
 
-void
+static void
 test_parsers(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -367,7 +369,7 @@ test_parsers(void)
   r_free_node(root, NULL);
 }
 
-void
+static void
 test_matches(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -687,7 +689,7 @@ test_matches(void)
   r_free_node(root, NULL);
 }
 
-void
+static void
 test_zorp_logs(void)
 {
   RNode *root = r_new_node("", NULL);

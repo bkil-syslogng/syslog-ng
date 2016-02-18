@@ -36,6 +36,7 @@
 #include "queue_utils_lib.h"
 #include "test_diskq_tools.h"
 #include "testutils.h"
+#include "timeutils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +52,7 @@
 MsgFormatOptions parse_options;
 
 static void
-testcase_zero_diskbuf_and_normal_acks()
+testcase_zero_diskbuf_and_normal_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -83,7 +84,7 @@ testcase_zero_diskbuf_and_normal_acks()
 }
 
 static void
-testcase_zero_diskbuf_alternating_send_acks()
+testcase_zero_diskbuf_alternating_send_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -116,7 +117,7 @@ testcase_zero_diskbuf_alternating_send_acks()
 }
 
 static void
-testcase_ack_and_rewind_messages()
+testcase_ack_and_rewind_messages(void)
 {
   LogQueue *q;
   gint i;
@@ -297,8 +298,7 @@ main()
   return 0;
 #endif
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("TZ=MET-1METDST");
 
   configuration = cfg_new(0x308);
   plugin_load_module("syslogformat", configuration, NULL);

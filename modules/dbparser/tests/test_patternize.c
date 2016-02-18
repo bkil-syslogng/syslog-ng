@@ -52,7 +52,7 @@ typedef struct _loglinesType
   guint num_of_logs;
 } loglinesType;
 
-loglinesType *
+static loglinesType *
 testcase_get_logmessages(const gchar *logs)
 {
   int i, len;
@@ -86,7 +86,7 @@ testcase_get_logmessages(const gchar *logs)
   return self;
 }
 
-void
+static void
 testcase_frequent_words(const gchar* logs, guint support, const gchar *expected)
 {
   int i, twopass;
@@ -151,7 +151,7 @@ testcase_frequent_words(const gchar* logs, guint support, const gchar *expected)
   g_free(logmessages);
 }
 
-void
+static void
 frequent_words_tests()
 {
 
@@ -222,7 +222,7 @@ typedef struct _clusterfind2Data
   guint lines_in_cluster;
 } clusterfind2Data;
 
-void
+static void
 test_clusters_loglines_find(gpointer value, gpointer user_data)
 {
   clusterfind2Data *data;
@@ -242,7 +242,7 @@ test_clusters_loglines_find(gpointer value, gpointer user_data)
 
 }
 
-gboolean
+static gboolean
 test_clusters_find(gpointer key, gpointer value, gpointer user_data)
 {
   int i;
@@ -296,7 +296,7 @@ test_clusters_find(gpointer key, gpointer value, gpointer user_data)
 
 }
 
-void
+static void
 testcase_find_clusters_slct(const gchar* logs, guint support, const gchar *expected)
 {
   int i,j;
@@ -366,8 +366,8 @@ testcase_find_clusters_slct(const gchar* logs, guint support, const gchar *expec
   g_strfreev(expecteds);
 }
 
-void
-find_clusters_slct_tests()
+static void
+find_clusters_slct_tests(void)
 {
   testcase_find_clusters_slct(
       "a\n", 0,
@@ -445,7 +445,7 @@ find_clusters_slct_tests()
 }
 
 int
-main()
+main(void)
 {
   app_startup();
   configuration = cfg_new(0x0201);

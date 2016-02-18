@@ -28,6 +28,11 @@ modules_dbparser_tests_test_patternize_LDADD	=	\
 modules_dbparser_tests_test_patternize_LDFLAGS	=	\
 	$(PREOPEN_CORE)
 
+modules_dbparser_tests_test_patterndb_SOURCES	=	\
+	modules/dbparser/tests/test_patterndb.c \
+	modules/dbparser/tests/test_parsers_e2e.c \
+	modules/dbparser/tests/test_parsers_e2e.h
+
 modules_dbparser_tests_test_patterndb_CFLAGS	=	\
 	$(TEST_CFLAGS)					\
 	-I$(top_srcdir)/modules/dbparser

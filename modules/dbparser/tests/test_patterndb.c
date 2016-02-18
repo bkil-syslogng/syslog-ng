@@ -21,70 +21,12 @@
  *
  */
 
-#include "apphook.h"
-#include "tags.h"
-#include "logmsg/logmsg.h"
-#include "messages.h"
-#include "filter/filter-expr.h"
-#include "patterndb.h"
-#include "plugin.h"
-#include "cfg.h"
-#include "timerwheel.h"
-#include "libtest/msg_parse_lib.h"
+#include "test_parsers_e2e.h"
 
-#include <stdio.h>
-#include <sys/time.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
-#include <glib/gstdio.h>
 
-#define MYHOST "MYHOST"
 #define MYPID "999"
 
-PatternDB *patterndb;
-gchar *filename;
-GPtrArray *messages;
 gboolean keep_patterndb_state = FALSE;
-
-static void
-_emit_func(LogMessage *msg, gboolean synthetic, gpointer user_data)
-{
-  g_ptr_array_add(messages, log_msg_ref(msg));
-}
-
-static void
-_load_pattern_db_from_string(gchar *pdb)
-{
-  patterndb = pattern_db_new();
-  messages = g_ptr_array_new();
-
-  pattern_db_set_emit_func(patterndb, _emit_func, NULL);
-
-  g_file_open_tmp("patterndbXXXXXX.xml", &filename, NULL);
-  g_file_set_contents(filename, pdb, strlen(pdb), NULL);
-
-  assert_true(pattern_db_reload_ruleset(patterndb, configuration, filename), "Error loading ruleset [[[%s]]]", pdb);
-  assert_string(pattern_db_get_ruleset_version(patterndb), "3", "Invalid version");
-  assert_string(pattern_db_get_ruleset_pub_date(patterndb), "2010-02-22", "Invalid pubdate");
-}
-
-static void
-_destroy_pattern_db(void)
-{
-  if (messages)
-    {
-      g_ptr_array_foreach(messages, (GFunc) log_msg_unref, NULL);
-      g_ptr_array_free(messages, TRUE);
-    }
-  messages = NULL;
-  pattern_db_free(patterndb);
-  patterndb = NULL;
-
-  g_unlink(filename);
-  g_free(filename);
-  filename = NULL;
-}
 
 static void
 _reset_pattern_db_state(void)
@@ -489,7 +431,7 @@ const gchar *pdb_inheritance_enabled_skeleton = \
 </patterndb>";
 
 static void
-test_patterndb_message_property_inheritance_enabled()
+test_patterndb_message_property_inheritance_enabled(void)
 {
   _load_pattern_db_from_string(pdb_inheritance_enabled_skeleton);
 
@@ -531,7 +473,7 @@ const gchar *pdb_inheritance_disabled_skeleton = \
 </patterndb>";
 
 static void
-test_patterndb_message_property_inheritance_disabled()
+test_patterndb_message_property_inheritance_disabled(void)
 {
   _load_pattern_db_from_string(pdb_inheritance_disabled_skeleton);
 
@@ -651,7 +593,7 @@ const gchar *pdb_msg_count_skeleton = \
 </patterndb>";
 
 static void
-test_patterndb_context_length()
+test_patterndb_context_length(void)
 {
   _load_pattern_db_from_string(pdb_msg_count_skeleton);
 
@@ -679,7 +621,7 @@ const gchar *tag_outside_of_rule_skeleton = \
 </patterndb>";
 
 static void
-test_patterndb_tags_outside_of_rule()
+test_patterndb_tags_outside_of_rule(void)
 {
   patterndb = pattern_db_new();
   messages = NULL;
@@ -691,8 +633,6 @@ test_patterndb_tags_outside_of_rule()
   assert_false(pattern_db_reload_ruleset(patterndb, configuration, filename), "successfully loaded an invalid patterndb file");
   _destroy_pattern_db();
 }
-
-#include "test_parsers_e2e.c"
 
 int
 main(int argc, char *argv[])

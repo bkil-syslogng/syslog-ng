@@ -23,6 +23,7 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "cfg.h"
+#include "timeutils.h"
 
 #include <stdarg.h>
 
@@ -218,8 +219,7 @@ int
 main(int argc, char *argv[])
 {
   app_startup();
-  putenv("TZ=UTC");
-  tzset();
+  set_tz("UTC");
   init_template_tests();
   plugin_load_module("cef", configuration, NULL);
 
