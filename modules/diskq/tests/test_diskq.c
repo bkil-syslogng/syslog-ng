@@ -298,7 +298,7 @@ main()
   return 0;
 #endif
   app_startup();
-  set_tz("TZ=MET-1METDST");
+  set_tz("MET-1METDST");
 
   configuration = cfg_new(0x308);
   plugin_load_module("syslogformat", configuration, NULL);

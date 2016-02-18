@@ -370,7 +370,7 @@ gint
 main(gint argc, gchar **argv)
 {
   app_startup();
-  set_tz("TZ=MET-1METDST");
+  set_tz("MET-1METDST");
 
   configuration = cfg_new(0x0308);
   plugin_load_module("syslogformat", configuration, NULL);

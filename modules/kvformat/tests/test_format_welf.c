@@ -39,7 +39,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  set_tz("TZ=UTC");
+  set_tz("UTC");
   init_template_tests();
   plugin_load_module("kvformat", configuration, NULL);
 

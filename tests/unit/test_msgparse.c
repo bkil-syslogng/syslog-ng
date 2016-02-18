@@ -896,7 +896,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  set_tz("TZ=MET-1METDST");
+  set_tz("MET-1METDST");
   init_and_load_syslogformat_module();
 
   test_log_messages_can_be_parsed();
