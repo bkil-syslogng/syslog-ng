@@ -38,6 +38,8 @@
 #include "mongoc.h"
 #include <time.h>
 
+gboolean afmongodb_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 typedef struct
 {
   gchar *name;
