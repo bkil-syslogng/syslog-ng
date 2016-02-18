@@ -82,7 +82,7 @@ struct _LogTemplateFunction
 };
 
 #define TEMPLATE_FUNCTION_PROTOTYPE(prefix) \
-  static gpointer                                                              \
+  gpointer                                                              \
   prefix ## _construct(Plugin *self,                                    \
                        GlobalConfig *cfg,                               \
                        gint plugin_type, const gchar *plugin_name)
@@ -92,7 +92,8 @@ struct _LogTemplateFunction
 
 /* helper macros for template function plugins */
 #define TEMPLATE_FUNCTION(state_struct, prefix, prepare, eval, call, free_state, arg) \
-  TEMPLATE_FUNCTION_PROTOTYPE(prefix) 					\
+  TEMPLATE_FUNCTION_DECLARE(prefix)                                      \
+  TEMPLATE_FUNCTION_PROTOTYPE(prefix)                                    \
   {                                                                     \
     static LogTemplateFunction func = {                                 \
       sizeof(state_struct),                                             \
