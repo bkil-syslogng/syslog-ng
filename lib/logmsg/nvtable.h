@@ -217,7 +217,7 @@ static inline gchar *
 nv_table_addr_diff(NVTable *self, guint32 x, guint32 y)
 {
   g_assert(x >= y);
-  return (gchar *) (self + (gsize)(x - y));
+  return (gchar *) (self) + (gsize)(x - y);
 }
 
 /* 256MB, this is an artificial limit, but must be less than MAX_GUINT32 as
