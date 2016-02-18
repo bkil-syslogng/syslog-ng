@@ -1,3 +1,4 @@
+CFLAGS += -Wno-cast-qual -Wno-sign-compare
 logprotoincludedir			= ${pkgincludedir}/logproto
 
 logprotoinclude_HEADERS = \
