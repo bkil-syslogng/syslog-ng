@@ -72,15 +72,11 @@ r_print_node(RNode *node, int depth)
 static void
 insert_node_with_value(RNode *root, const gchar *key, const gchar *value)
 {
-  gchar *dup_key, *dup_value;
-
   /* NOTE: we need to duplicate the key as r_insert_node modifies its input
    * and it might be a read-only string literal */
 
-  dup_key = g_strdup(key);
-  dup_value = g_strdup(value);
-  r_insert_node(root, dup_key, dup_value ? : dup_key, NULL);
-  g_free(dup_value);
+  gchar *dup_key = g_strdup(key);
+  r_insert_node(root, dup_key, value ? g_strdup(value) : g_strdup(key), NULL);
   g_free(dup_key);
 }
 
@@ -287,7 +283,7 @@ test_literals(void)
 
   test_search(root, "qwqw", FALSE);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
 static void
@@ -366,7 +362,7 @@ test_parsers(void)
   test_search_value(root, "@", "@@");
   test_search_value(root, "@@", "@@@@");
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
 static void
@@ -686,7 +682,7 @@ test_matches(void)
 
   test_search_matches(root, "zzz árvíztűrőtükörfúrógép", "test", "árvíztűrőtükörfúró", NULL);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
 static void
@@ -704,7 +700,7 @@ test_zorp_logs(void)
   test_search_value(root, "Deny udp src OUTSIDE:10.0.0.0/1234 dst INSIDE:192.168.0.0/5678 by access-group \"OUTSIDE\" [0xb74026ad, 0x0]", "CISCO");
   test_search_matches(root, "1, 2006-08-22 16:31:39,INFO,BLK,", "Seq", "1", "DateTime", "2006-08-22 16:31:39", "Severity", "INFO", "Comp", "BLK", NULL);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 
 }
 
