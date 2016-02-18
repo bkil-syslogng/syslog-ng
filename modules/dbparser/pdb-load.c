@@ -20,6 +20,7 @@
  * COPYING for details.
  *
  */
+#include "pdb-load.h"
 #include "patterndb.h"
 #include "pdb-rule.h"
 #include "pdb-program.h"

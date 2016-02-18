@@ -22,6 +22,7 @@
  *
  */
 
+#include "logqueue-fifo.h"
 #include "logqueue.h"
 #include "logpipe.h"
 #include "messages.h"
