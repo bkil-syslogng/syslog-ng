@@ -1,3 +1,5 @@
+CFLAGS += -Wno-cast-qual
+
 templateincludedir			= ${pkgincludedir}/template
 
 templateinclude_HEADERS = \

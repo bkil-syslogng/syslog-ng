@@ -1,5 +1,7 @@
 if ENABLE_PACCT
 
+CFLAGS += -Wno-double-promotion
+
 module_LTLIBRARIES				+= modules/pacctformat/libpacctformat.la
 modules_pacctformat_libpacctformat_la_SOURCES	=	\
 	modules/pacctformat/pacct-format.c		\

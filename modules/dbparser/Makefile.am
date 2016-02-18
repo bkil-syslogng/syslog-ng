@@ -1,3 +1,5 @@
+CFLAGS += -Wno-pointer-sign
+
 noinst_LTLIBRARIES					+= modules/dbparser/libsyslog-ng-patterndb.la
 
 modules_dbparser_libsyslog_ng_patterndb_la_SOURCES	=	\

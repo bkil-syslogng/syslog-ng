@@ -1,5 +1,7 @@
 if ENABLE_NATIVE
 
+CFLAGS += -Wno-sign-conversion -Wno-conversion -Wno-switch-default -Wno-strict-overflow # HACK
+
 export top_srcdir
 export top_builddir
 
