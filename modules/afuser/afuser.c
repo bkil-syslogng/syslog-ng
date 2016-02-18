@@ -160,7 +160,7 @@ finish:
   log_dest_driver_queue_method(s, msg, path_options, user_data);
 }
 
-void
+static void
 afuser_dd_free(LogPipe *s)
 {
   AFUserDestDriver *self = (AFUserDestDriver *) s;

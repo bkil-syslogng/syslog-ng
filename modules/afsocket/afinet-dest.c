@@ -410,7 +410,7 @@ afinet_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
   log_dest_driver_queue_method(s, msg, path_options, user_data);
 }
 
-void
+static void
 afinet_dd_free(LogPipe *s)
 {
   AFInetDestDriver *self = (AFInetDestDriver *) s;

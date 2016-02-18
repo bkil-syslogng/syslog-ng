@@ -243,7 +243,7 @@ main_loop_reload_config_apply(void)
 }
 
 /* initiate configuration reload */
-void
+static void
 main_loop_reload_config_initiate(void)
 {
   if (main_loop_is_terminating())

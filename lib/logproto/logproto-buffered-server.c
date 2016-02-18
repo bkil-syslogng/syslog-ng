@@ -427,7 +427,7 @@ log_proto_buffered_server_convert_state(LogProtoBufferedServer *self, guint8 per
   return FALSE;
 }
 
-gboolean
+static gboolean
 log_proto_buffered_server_restart_with_state(LogProtoServer *s, PersistState *persist_state, const gchar *persist_name)
 {
   LogProtoBufferedServer *self = (LogProtoBufferedServer *) s;

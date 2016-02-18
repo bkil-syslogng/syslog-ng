@@ -83,7 +83,7 @@ log_rewrite_set_free(LogPipe *s)
   log_rewrite_free_method(s);
 }
 
-gboolean
+static gboolean
 log_rewrite_set_init_method(LogPipe *s)
 {
   LogRewriteSet *self = (LogRewriteSet *) s;

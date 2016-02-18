@@ -462,7 +462,7 @@ afsocket_dd_save_connection(AFSocketDestDriver *self)
     }
 }
 
-gboolean
+static gboolean
 afsocket_dd_deinit(LogPipe *s)
 {
   AFSocketDestDriver *self = (AFSocketDestDriver *) s;

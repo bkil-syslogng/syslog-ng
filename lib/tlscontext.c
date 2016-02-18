@@ -32,7 +32,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-gboolean
+static gboolean
 tls_get_x509_digest(X509 *x, GString *hash_string)
 {
   gint j;
@@ -50,7 +50,7 @@ tls_get_x509_digest(X509 *x, GString *hash_string)
   return TRUE;
 }
 
-int
+static int
 tls_session_verify_fingerprint(X509_STORE_CTX *ctx)
 {
   SSL *ssl = X509_STORE_CTX_get_app_data(ctx);
@@ -101,7 +101,7 @@ tls_x509_format_dn(X509_NAME *name, GString *dn)
   BIO_free(bio);
 }
 
-int
+static int
 tls_session_verify_dn(X509_STORE_CTX *ctx)
 {
   SSL *ssl = X509_STORE_CTX_get_app_data(ctx);
@@ -129,7 +129,7 @@ tls_session_verify_dn(X509_STORE_CTX *ctx)
   return match;
 }
 
-int
+static int
 tls_session_verify(TLSSession *self, int ok, X509_STORE_CTX *ctx)
 {
   /* untrusted means that we have to accept the certificate even if it is untrusted */
@@ -172,7 +172,7 @@ tls_session_verify(TLSSession *self, int ok, X509_STORE_CTX *ctx)
   return ok;
 }
 
-int
+static int
 tls_session_verify_callback(int ok, X509_STORE_CTX *ctx)
 {
   SSL *ssl = X509_STORE_CTX_get_app_data(ctx);

@@ -178,7 +178,7 @@ afsocket_sc_free(LogPipe *s)
   log_pipe_free_method(s);
 }
 
-AFSocketSourceConnection *
+static AFSocketSourceConnection *
 afsocket_sc_new(GSockAddr *peer_addr, int fd, GlobalConfig *cfg)
 {
   AFSocketSourceConnection *self = g_new0(AFSocketSourceConnection, 1);
@@ -193,7 +193,7 @@ afsocket_sc_new(GSockAddr *peer_addr, int fd, GlobalConfig *cfg)
   return self;
 }
 
-void
+static void
 afsocket_sd_add_connection(AFSocketSourceDriver *self, AFSocketSourceConnection *connection)
 {
   self->connections = g_list_prepend(self->connections, connection);

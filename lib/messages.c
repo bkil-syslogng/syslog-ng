@@ -229,7 +229,7 @@ msg_event_free(EVTREC *e)
   g_static_mutex_unlock(&evtlog_lock);
 }
 
-void
+static void
 msg_log_func(const gchar *log_domain, GLogLevelFlags log_flags, const gchar *msg, gpointer user_data)
 {
   int pri = EVT_PRI_INFO;

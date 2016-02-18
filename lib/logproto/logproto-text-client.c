@@ -150,7 +150,7 @@ log_proto_text_client_post(LogProtoClient *s, guchar *msg, gsize msg_len, gboole
   return log_proto_text_client_submit_write(s, msg, msg_len, (GDestroyNotify) g_free, -1);
 }
 
-void
+static void
 log_proto_text_client_free(LogProtoClient *s)
 {
   LogProtoTextClient *self = (LogProtoTextClient *)s;

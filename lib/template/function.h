@@ -82,7 +82,7 @@ struct _LogTemplateFunction
 };
 
 #define TEMPLATE_FUNCTION_PROTOTYPE(prefix) \
-  gpointer                                                              \
+  static gpointer                                                              \
   prefix ## _construct(Plugin *self,                                    \
                        GlobalConfig *cfg,                               \
                        gint plugin_type, const gchar *plugin_name)

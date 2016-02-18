@@ -39,14 +39,14 @@ typedef struct _ControlConnectionUnix
   gint fd;
 } ControlConnectionUnix;
 
-gint
+static gint
 control_connection_unix_write(ControlConnection *s, gpointer buffer, gsize size)
 {
   ControlConnectionUnix *self = (ControlConnectionUnix *)s;
   return write(self->control_io.fd, buffer, size);
 }
 
-gint
+static gint
 control_connection_unix_read(ControlConnection *s, gpointer buffer, gsize size)
 {
   ControlConnectionUnix *self = (ControlConnectionUnix *)s;
@@ -88,14 +88,14 @@ control_connection_update_watches(ControlConnection *s)
     }
 }
 
-void
+static void
 control_connection_unix_free(ControlConnection *s)
 {
   ControlConnectionUnix *self = (ControlConnectionUnix *)s;
   close(self->control_io.fd);
 }
 
-ControlConnection *
+static ControlConnection *
 control_connection_new(ControlServer *server, gint sock)
 {
   ControlConnectionUnix *self = g_new0(ControlConnectionUnix, 1);
@@ -184,7 +184,7 @@ control_server_start(ControlServer *s)
   return;
 }
 
-void
+static void
 control_server_unix_free(ControlServer *s)
 {
   ControlServerUnix *self = (ControlServerUnix *)s;

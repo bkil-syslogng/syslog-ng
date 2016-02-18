@@ -29,7 +29,7 @@ typedef struct _TFCondState
   gint grep_max_count;
 } TFCondState;
 
-gboolean
+static gboolean
 tf_cond_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent, gint argc, gchar *argv[], GError **error)
 {
   TFCondState *state = (TFCondState *) s;
@@ -61,7 +61,7 @@ tf_cond_free_state(gpointer s)
   tf_simple_func_free_state(&state->super);
 }
 
-gboolean
+static gboolean
 tf_grep_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent, gint argc, gchar *argv[], GError **error)
 {
   TFCondState *state = (TFCondState *) s;
@@ -100,7 +100,7 @@ tf_grep_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent, gint
  * Options:
  *  --max-count or -m          The maximum number of matches, 0 for unlimited
  */
-void
+static void
 tf_grep_call(LogTemplateFunction *self, gpointer s, const LogTemplateInvokeArgs *args, GString *result)
 {
   gint i, msg_ndx;
@@ -132,7 +132,7 @@ tf_grep_call(LogTemplateFunction *self, gpointer s, const LogTemplateInvokeArgs 
 
 TEMPLATE_FUNCTION(TFCondState, tf_grep, tf_grep_prepare, NULL, tf_grep_call, tf_cond_free_state, NULL);
 
-gboolean
+static gboolean
 tf_if_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent, gint argc, gchar *argv[], GError **error)
 {
   g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
@@ -145,7 +145,7 @@ tf_if_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent, gint a
   return tf_cond_prepare(self, s, parent, argc, argv, error);
 }
 
-void
+static void
 tf_if_call(LogTemplateFunction *self, gpointer s, const LogTemplateInvokeArgs *args, GString *result)
 {
   TFCondState *state = (TFCondState *) s;

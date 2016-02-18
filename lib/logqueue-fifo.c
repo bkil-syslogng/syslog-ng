@@ -112,7 +112,7 @@ log_queue_fifo_get_length(LogQueue *s)
   return self->qoverflow_wait_len + self->qoverflow_output_len;
 }
 
-gboolean
+static gboolean
 log_queue_fifo_is_empty_racy(LogQueue *s)
 {
   LogQueueFifo *self = (LogQueueFifo *) s;

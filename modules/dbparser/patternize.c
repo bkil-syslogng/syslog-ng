@@ -56,7 +56,7 @@ static void _ptz_debug_print_cluster(gpointer key, gpointer value, gpointer dumm
 }
 #endif
 
-guint
+static guint
 ptz_str2hash(gchar *string, guint modulo, guint seed)
 {
   int i;
@@ -70,7 +70,7 @@ ptz_str2hash(gchar *string, guint modulo, guint seed)
   return seed % modulo;
 }
 
-gchar *
+static gchar *
 ptz_find_delimiters(gchar *str, gchar *delimdef)
 {
   gchar *remainder;
@@ -90,7 +90,7 @@ ptz_find_delimiters(gchar *str, gchar *delimdef)
   return g_string_free(delimiters, FALSE);
 }
 
-gboolean
+static gboolean
 ptz_find_frequent_words_remove_key_predicate(gpointer key, gpointer value, gpointer support)
 {
   return (*((guint *) value) < GPOINTER_TO_UINT(support));
@@ -189,7 +189,7 @@ ptz_find_frequent_words(GPtrArray *logs, guint support, gchar *delimiters, gbool
   return wordlist;
 }
 
-gboolean
+static gboolean
 ptz_find_clusters_remove_cluster_predicate(gpointer key, gpointer value, gpointer data)
 {
   Cluster *val = (Cluster *) value;
@@ -346,7 +346,7 @@ ptz_merge_clusterlists(gpointer _key, gpointer _value, gpointer _target)
   return TRUE;
 }
 
-GHashTable *
+static GHashTable *
 ptz_find_clusters_step(Patternizer *self, GPtrArray *logs, guint support, guint num_of_samples)
 {
   msg_progress("Searching clusters", evt_tag_int("input lines", logs->len), NULL);
@@ -431,7 +431,7 @@ ptz_find_clusters(Patternizer *self)
 }
 
 
-void
+static void
 ptz_print_patterndb_rule(gpointer key, gpointer value, gpointer user_data)
 {
   char uuid_string[37];
