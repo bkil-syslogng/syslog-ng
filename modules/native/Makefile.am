@@ -21,7 +21,7 @@ modules_native_libsyslog_ng_native_connector_a_CPPFLAGS = \
   -I$(top_srcdir)/modules/native        \
   -I$(top_builddir)/modules/native
 
-modules_native_libsyslog_ng_native_connector_a_LDFLAGS = $(MODULE_LDFLAGS)
+modules_native_libsyslog_ng_native_connector_a_DEPENDENCIES = $(MODULE_DEPS_LIBS)
 
 else
 modules/native modules/native/ mod-native: modules/native/libnative.la
