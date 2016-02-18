@@ -25,7 +25,7 @@
 #include "template/simple-function.h"
 #include "template/templates.h"
 
-void
+static void
 log_template_append_format_recursive(LogTemplate *self, const LogTemplateInvokeArgs *args, GString *result)
 {
   log_template_append_format_with_context(self,

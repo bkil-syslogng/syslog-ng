@@ -33,13 +33,13 @@ struct _TWEntry
   GDestroyNotify user_data_free;
 };
 
-void
+static void
 tw_entry_add(struct iv_list_head *head, TWEntry *new)
 {
   iv_list_add_tail(&new->list, head);
 }
 
-void
+static void
 tw_entry_unlink(TWEntry *entry)
 {
   iv_list_del_init(&entry->list);
@@ -87,7 +87,7 @@ typedef struct _TWLevel
   struct iv_list_head slots[0];
 } TWLevel;
 
-TWLevel *
+static TWLevel *
 tw_level_new(gint bits, gint shift)
 {
   TWLevel *self;
@@ -105,7 +105,7 @@ tw_level_new(gint bits, gint shift)
   return self;
 }
 
-void
+static void
 tw_level_free(TWLevel *self)
 {
   gint i;
@@ -135,7 +135,7 @@ struct _TimerWheel
   GDestroyNotify assoc_data_free;
 };
 
-void
+static void
 timer_wheel_add_timer_entry(TimerWheel *self, TWEntry *entry)
 {
   guint64 level_base;

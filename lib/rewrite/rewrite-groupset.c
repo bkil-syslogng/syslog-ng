@@ -96,7 +96,7 @@ log_rewrite_groupset_clone(LogPipe *s)
    return &cloned->super.super;
 };
 
-void
+static void
 log_rewrite_groupset_free(LogPipe *s)
 {
   LogRewriteGroupSet *self = (LogRewriteGroupSet *) s;

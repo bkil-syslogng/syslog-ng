@@ -207,7 +207,7 @@ nv_table_resolve_indirect(NVTable *self, NVEntry *entry, gssize *length)
   return referenced_value + entry->vindirect.ofs;
 }
 
-static const inline gchar *
+inline static const gchar *
 nv_table_resolve_entry(NVTable *self, NVEntry *entry, gssize *length)
 {
   if (!entry->indirect)
@@ -616,7 +616,7 @@ nv_table_clear(NVTable *self)
   memset(&self->static_entries[0], 0, self->num_static_entries * sizeof(self->static_entries[0]));
 }
 
-void
+static void
 nv_table_init(NVTable *self, gsize alloc_length, gsize num_static_entries)
 {
   g_assert(NV_TABLE_MAX_BYTES <= G_MAXUINT32);

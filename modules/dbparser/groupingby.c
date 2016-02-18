@@ -117,7 +117,7 @@ grouping_by_set_synthetic_message(LogParser *s, SyntheticMessage *message)
 }
 
 /* NOTE: lock should be acquired for writing before calling this function. */
-void
+static void
 grouping_by_set_time(GroupingBy *self, const LogStamp *ls)
 {
   GTimeVal now;
@@ -147,7 +147,7 @@ grouping_by_set_time(GroupingBy *self, const LogStamp *ls)
  * invocation.  See the timing comment at pattern_db_process() for more
  * information.
  */
-void
+static void
 _grouping_by_timer_tick(GroupingBy *self)
 {
   GTimeVal now;

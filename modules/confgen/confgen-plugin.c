@@ -30,7 +30,7 @@
 #include <string.h>
 #include <errno.h>
 
-gboolean
+static gboolean
 confgen_generate(CfgLexer *lexer, gint type, const gchar *name, CfgArgs *args, gpointer user_data)
 {
   gchar *value;

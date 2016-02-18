@@ -488,7 +488,7 @@ log_reader_set_options(LogReader *s, LogPipe *control, LogReaderOptions *options
  * the source LogProtoServer instance. It needs to be ran in the main
  * thread as it reregisters the watches associated with the main
  * thread. */
-void
+static void
 log_reader_reopen_deferred(gpointer s)
 {
   gpointer *args = (gpointer *) s;

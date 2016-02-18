@@ -46,7 +46,7 @@ log_rewrite_subst_get_matcher_options(LogRewrite *s)
   return &self->matcher_options;
 }
 
-void
+static void
 log_rewrite_subst_process(LogRewrite *s, LogMessage **pmsg, const LogPathOptions *path_options)
 {
   LogRewriteSubst *self = (LogRewriteSubst *) s;
@@ -100,7 +100,7 @@ log_rewrite_subst_clone(LogPipe *s)
   return &cloned->super.super;
 }
 
-void
+static void
 log_rewrite_subst_free(LogPipe *s)
 {
   LogRewriteSubst *self = (LogRewriteSubst *) s;

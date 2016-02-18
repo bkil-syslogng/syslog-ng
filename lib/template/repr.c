@@ -24,7 +24,7 @@
 
 #include "template/repr.h"
 
-void
+static void
 log_template_elem_free(LogTemplateElem *e)
 {
   switch (e->type)

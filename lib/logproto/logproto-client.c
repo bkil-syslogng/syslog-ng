@@ -29,7 +29,7 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
-gboolean
+static gboolean
 log_proto_client_validate_options_method(LogProtoClient *s)
 {
   return TRUE;

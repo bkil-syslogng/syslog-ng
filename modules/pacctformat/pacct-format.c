@@ -73,7 +73,7 @@ static NVHandle handle_ac_comm;
 #define PACCT_FORMAT(msg, rec, field, format) \
   PACCT_FORMAT_CONVERT(msg, rec, field, format, PACCT_CONVERT_NOP)
 
-void
+static void
 pacct_register_handles(void)
 {
   PACCT_REGISTER(ac_flag);
@@ -96,7 +96,7 @@ pacct_register_handles(void)
   PACCT_REGISTER(ac_comm);
 }
 
-void
+static void
 pacct_format_handler(const MsgFormatOptions *options, const guchar *data, gsize length, LogMessage *msg)
 {
   acct_t *rec;

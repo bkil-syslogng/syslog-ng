@@ -292,7 +292,7 @@ format_hex_string(gpointer data, gsize data_len, gchar *result, gsize result_len
 
 /* parse 32 bit ints */
 
-gboolean
+static gboolean
 scan_uint32(const gchar **buf, gint *left, gint field_width, guint32 *num)
 {
   guint32 result;
@@ -315,7 +315,7 @@ scan_uint32(const gchar **buf, gint *left, gint field_width, guint32 *num)
   return TRUE;
 }
 
-gboolean
+static gboolean
 scan_int(const gchar **buf, gint *left, gint field_width, gint *num)
 {
   guint32 value;
@@ -326,7 +326,7 @@ scan_int(const gchar **buf, gint *left, gint field_width, gint *num)
   return TRUE;
 }
 
-gboolean
+static gboolean
 scan_expect_char(const gchar **buf, gint *left, gchar value)
 {
   if (*left == 0)
@@ -381,7 +381,7 @@ scan_day_abbrev(const gchar **buf, gint *left, gint *wday)
   return TRUE;
 }
 
-gboolean
+static gboolean
 scan_month_abbrev(const gchar **buf, gint *left, gint *mon)
 {
   *mon = -1;

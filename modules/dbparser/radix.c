@@ -71,7 +71,7 @@ r_parser_qstring(guint8 *str, gint *len, const gchar *param, gpointer state, RPa
     return FALSE;
 }
 
-gboolean
+static gboolean
 r_parser_estring_c(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   guint8 *end;
@@ -90,7 +90,7 @@ r_parser_estring_c(guint8 *str, gint *len, const gchar *param, gpointer state, R
     return FALSE;
 }
 
-gboolean
+static gboolean
 r_parser_nlstring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   guint8 *end;
@@ -107,7 +107,7 @@ r_parser_nlstring(guint8 *str, gint *len, const gchar *param, gpointer state, RP
     return FALSE;
 }
 
-gboolean
+static gboolean
 r_parser_estring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   guint8 *end;
@@ -132,7 +132,7 @@ typedef struct _RParserPCREState
   pcre_extra *extra;
 } RParserPCREState;
 
-gboolean
+static gboolean
 r_parser_pcre(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   RParserPCREState *self = (RParserPCREState *) state;
@@ -146,7 +146,7 @@ r_parser_pcre(guint8 *str, gint *len, const gchar *param, gpointer state, RParse
   return TRUE;
 }
 
-gpointer
+static gpointer
 r_parser_pcre_compile_state(const gchar *expr)
 {
   RParserPCREState *self = g_new0(RParserPCREState, 1);
@@ -195,14 +195,14 @@ r_parser_pcre_free_state(gpointer s)
   g_free(self);
 }
 
-gboolean
+static gboolean
 r_parser_anystring(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   *len = strlen(str);
   return TRUE;
 }
 
-gboolean
+static gboolean
 r_parser_set(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   *len = 0;
@@ -221,7 +221,7 @@ r_parser_set(guint8 *str, gint *len, const gchar *param, gpointer state, RParser
 }
 
 
-gboolean
+static gboolean
 r_parser_email(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint end;
@@ -281,7 +281,7 @@ r_parser_email(guint8 *str, gint *len, const gchar *param, gpointer state, RPars
   return FALSE;
 }
 
-gboolean
+static gboolean
 r_parser_hostname(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   int count = 0;
@@ -342,7 +342,7 @@ _r_parser_lladdr(guint8 *str, gint *len, gint count, gint parts, gpointer state,
   return TRUE;
 }
 
-gboolean
+static gboolean
 r_parser_lladdr(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint count, parts;
@@ -365,13 +365,13 @@ r_parser_lladdr(guint8 *str, gint *len, const gchar *param, gpointer state, RPar
   return _r_parser_lladdr(str, len, count, parts, state, match);
 }
 
-gboolean
+static gboolean
 r_parser_macaddr(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   return _r_parser_lladdr(str, len, 17, 6, state, match);
 }
 
-gboolean
+static gboolean
 r_parser_ipv4(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint dots = 0;
@@ -413,7 +413,7 @@ r_parser_ipv4(guint8 *str, gint *len, const gchar *param, gpointer state, RParse
   return TRUE;
 }
 
-gboolean
+static gboolean
 r_parser_ipv6(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint colons = 0;
@@ -485,13 +485,13 @@ r_parser_ipv6(guint8 *str, gint *len, const gchar *param, gpointer state, RParse
   return TRUE;
 }
 
-gboolean
+static gboolean
 r_parser_ip(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   return r_parser_ipv4(str, len, param, state, match) || r_parser_ipv6(str, len, param, state, match);
 }
 
-gboolean
+static gboolean
 r_parser_float(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gboolean dot = FALSE;
@@ -520,7 +520,7 @@ r_parser_float(guint8 *str, gint *len, const gchar *param, gpointer state, RPars
   return FALSE;
 }
 
-gboolean
+static gboolean
 r_parser_number(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match)
 {
   gint min_len = 1;
@@ -751,7 +751,7 @@ r_new_pnode(guint8 *key)
 }
 
 
-void
+static void
 r_free_pnode_only(RParserNode *parser)
 {
   if (parser->param)
@@ -763,7 +763,7 @@ r_free_pnode_only(RParserNode *parser)
   g_free(parser);
 }
 
-void
+static void
 r_free_pnode(RNode *node, void (*free_fn)(gpointer data))
 {
   r_free_pnode_only(node->parser);
@@ -778,7 +778,7 @@ r_free_pnode(RNode *node, void (*free_fn)(gpointer data))
  **************************************************************/
 
 
-gint
+static gint
 r_node_cmp(const void *ap, const void *bp)
 {
   RNode *a = *(RNode * const *) ap;
@@ -791,7 +791,7 @@ r_node_cmp(const void *ap, const void *bp)
   return 0;
 }
 
-void
+static void
 r_add_child(RNode *parent, RNode *child)
 {
   parent->children = g_realloc(parent->children, (sizeof(RNode *) * (parent->num_children + 1)));
@@ -838,7 +838,7 @@ r_add_child_check(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc va
     }
 }
 
-void
+static void
 r_add_pchild(RNode *parent, RNode *child)
 {
   parent->pchildren = realloc(parent->pchildren, (sizeof(RNode *) * (parent->num_pchildren + 1)));
@@ -846,7 +846,7 @@ r_add_pchild(RNode *parent, RNode *child)
   parent->pchildren[(parent->num_pchildren)++] = child;
 }
 
-gboolean
+static gboolean
 r_equal_pnode(RParserNode *a, RParserNode *b)
 {
   return ((a->parse == b->parse) &&
@@ -856,7 +856,7 @@ r_equal_pnode(RParserNode *a, RParserNode *b)
       );
 }
 
-RNode *
+static RNode *
 r_find_pchild(RNode *parent, RParserNode *parser_node)
 {
   RNode *node = NULL;
@@ -874,7 +874,7 @@ r_find_pchild(RNode *parent, RParserNode *parser_node)
   return node;
 }
 
-RNode *
+static RNode *
 r_find_child_by_first_character(RNode *root, char key)
 {
   register gint l, u, idx;

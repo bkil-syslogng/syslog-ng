@@ -147,7 +147,7 @@ stats_format_and_prune_cluster(StatsCluster *sc, gpointer user_data)
   return stats_prune_counter(sc, st);
 }
 
-void
+static void
 stats_publish_and_prune_counters(void)
 {
   StatsTimerState st;
@@ -219,7 +219,7 @@ stats_timer_elapsed(gpointer st)
   stats_timer_rearm(&stats_timer);
 }
 
-void
+static void
 stats_timer_reinit(void)
 {
   gint freq;
