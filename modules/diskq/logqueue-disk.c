@@ -146,7 +146,7 @@ _rewind_backlog(LogQueue *s, guint rewind_count)
   g_static_mutex_unlock(&self->super.lock);
 }
 
-void
+static void
 _backlog_all(LogQueue *s)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
