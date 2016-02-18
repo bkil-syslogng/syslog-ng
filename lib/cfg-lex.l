@@ -32,6 +32,10 @@
 #include <string.h>
 #include <strings.h>
 
+int _cfg_lexer_get_column(yyscan_t yyscanner);
+void _cfg_lexer_set_column (int  column_no , yyscan_t yyscanner);
+void cfg_lexer_unput_string(CfgLexer *self, const char *str);
+
 static gint
 yy_input_run_backtick_substitution(CfgLexer *self, gchar *buf, gsize buf_size)
 {

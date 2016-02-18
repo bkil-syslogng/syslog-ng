@@ -45,6 +45,8 @@
 #include "misc-funcs.c"
 #include "tf-template.c"
 
+gboolean basicfuncs_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static Plugin basicfuncs_plugins[] =
 {
   /* cond-funcs */
