@@ -55,16 +55,17 @@ static void
 test_kmsg_single_line(void)
 {
   const gchar cmsg[] = "5,2,1;Linux version 3.5-trunk-amd64 (Debian 3.5.2-1~experimental.1) (debian-kernel@lists.debian.org) (gcc version 4.6.3 (Debian 4.6.3-1) ) #1 SMP Mon Aug 20 04:17:46 UTC 2012\n";
-  gchar *msg = g_strdup(cmsg);
   LogMessage *parsed_message;
 
-  testcase_begin("Testing single-line /dev/kmsg parsing; msg='%s'", msg);
+  testcase_begin("Testing single-line /dev/kmsg parsing; msg='%s'", cmsg);
 
-  parsed_message = kmsg_parse_message(msg);
+  parsed_message = kmsg_parse_message(cmsg);
 
   assert_guint16(parsed_message->pri, 5, "Unexpected message priority");
   assert_log_message_value(parsed_message, LM_V_MSGID, "2");
-  msg[sizeof(msg) - 2] = '\0';
+
+  gchar *msg = g_strdup(cmsg);
+  msg[sizeof(cmsg) - 2] = '\0';
   assert_log_message_value(parsed_message, LM_V_MESSAGE, msg + 6);
   g_free(msg);
   assert_log_kmsg_value(parsed_message, ".linux.timestamp", "1");
