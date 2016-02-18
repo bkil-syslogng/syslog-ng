@@ -25,6 +25,8 @@
 #include "graphite-output.h"
 #include "cfg.h"
 
+gboolean graphite_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static Plugin graphite_plugins[] =
 {
   TEMPLATE_FUNCTION_PLUGIN(tf_graphite, "graphite_output"),

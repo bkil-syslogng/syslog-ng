@@ -24,6 +24,8 @@
 #include "plugin-types.h"
 #include "format-welf.h"
 
+gboolean kvformat_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser kv_parser_parser;
 
 static Plugin kvformat_plugins[] =

@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean disk_buffer_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser diskq_parser;
 
 static Plugin diskq_plugins[] =
