@@ -52,7 +52,7 @@ python_config_free(ModuleConfig *s)
   module_config_free_method(s);
 }
 
-PythonConfig *
+static PythonConfig *
 python_config_new(void)
 {
   PythonConfig *self = g_new0(PythonConfig, 1);
