@@ -54,7 +54,8 @@ assert_log_kmsg_value(LogMessage *message, const gchar *key,
 void
 test_kmsg_single_line(void)
 {
-  gchar msg[] = "5,2,1;Linux version 3.5-trunk-amd64 (Debian 3.5.2-1~experimental.1) (debian-kernel@lists.debian.org) (gcc version 4.6.3 (Debian 4.6.3-1) ) #1 SMP Mon Aug 20 04:17:46 UTC 2012\n";
+  const gchar cmsg[] = "5,2,1;Linux version 3.5-trunk-amd64 (Debian 3.5.2-1~experimental.1) (debian-kernel@lists.debian.org) (gcc version 4.6.3 (Debian 4.6.3-1) ) #1 SMP Mon Aug 20 04:17:46 UTC 2012\n";
+  gchar *msg = g_strdup(cmsg);
   LogMessage *parsed_message;
 
   testcase_begin("Testing single-line /dev/kmsg parsing; msg='%s'", msg);
@@ -65,6 +66,7 @@ test_kmsg_single_line(void)
   assert_log_message_value(parsed_message, LM_V_MSGID, "2");
   msg[sizeof(msg) - 2] = '\0';
   assert_log_message_value(parsed_message, LM_V_MESSAGE, msg + 6);
+  g_free(msg);
   assert_log_kmsg_value(parsed_message, ".linux.timestamp", "1");
 
   log_msg_unref(parsed_message);
@@ -75,7 +77,7 @@ test_kmsg_single_line(void)
 void
 test_kmsg_multi_line(void)
 {
-  gchar msg[] = "6,202,98513;pci_root PNP0A08:00: host bridge window [io  0x0000-0x0cf7]\n" \
+  const gchar msg[] = "6,202,98513;pci_root PNP0A08:00: host bridge window [io  0x0000-0x0cf7]\n" \
     " SUBSYSTEM=acpi\n" \
     " DEVICE=+acpi:PNP0A08:00\n";
   LogMessage *parsed_message;
@@ -99,7 +101,7 @@ test_kmsg_multi_line(void)
 void
 test_kmsg_with_extra_fields(void)
 {
-  gchar msg[] = "5,2,0,some extra field,3,4,5;And this is the real message\n";
+  const gchar msg[] = "5,2,0,some extra field,3,4,5;And this is the real message\n";
   LogMessage *parsed_message;
 
   testcase_begin("Testing /dev/kmsg parsing, with extra fields; msg='%s'", msg);
@@ -167,7 +169,7 @@ init_and_load_kmsgformat_module()
 {
   configuration = cfg_new(VERSION_VALUE);
   plugin_load_module("linux-kmsg-format", configuration, NULL);
-  parse_options.format = "linux-kmsg";
+  parse_options.format = g_strdup("linux-kmsg");
 
   msg_format_options_defaults(&parse_options);
   msg_format_options_init(&parse_options, configuration);

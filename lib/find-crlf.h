@@ -26,6 +26,6 @@
 
 #include "syslog-ng.h"
 
-gchar *find_cr_or_lf(gchar *s, gsize n);
+const gchar *find_cr_or_lf(const gchar *s, gsize n);
 
 #endif

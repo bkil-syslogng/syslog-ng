@@ -30,13 +30,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-void
-testcase_update_sdata(const gchar *msg, const gchar *expected_sd_str, gchar *elem_name1, ...)
+static void
+testcase_update_sdata(const gchar *msg, const gchar *expected_sd_str, const gchar *elem_name1, ...)
 {
   LogMessage *logmsg;
   GString *sd_str = g_string_new("");
   va_list va;
-  gchar *elem, *param, *value;
+  const gchar *elem, *param, *value;
 
   parse_options.flags |= LP_SYSLOG_PROTOCOL;
 

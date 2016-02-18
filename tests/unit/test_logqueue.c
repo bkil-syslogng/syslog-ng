@@ -103,7 +103,7 @@ gpointer
 threaded_feed(gpointer args)
 {
   LogQueue *q = args;
-  char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
+  const char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
   gint msg_len = strlen(msg_str);
   gint i;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;

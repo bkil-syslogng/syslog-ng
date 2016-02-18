@@ -92,7 +92,7 @@ simulate_log_readers_effect_on_timezone_offset(LogMessage *message)
 }
 
 LogMessage *
-parse_log_message(gchar *raw_message_str, gint parse_flags, gchar *bad_hostname_re)
+parse_log_message(const gchar *raw_message_str, gint parse_flags, const gchar *bad_hostname_re)
 {
   LogMessage *message;
   GSockAddr *addr = g_sockaddr_inet_new("10.10.10.10", 1010);

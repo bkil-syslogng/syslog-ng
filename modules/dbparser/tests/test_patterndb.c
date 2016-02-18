@@ -262,7 +262,8 @@ assert_msg_matches_and_output_message_has_tag(const gchar *pattern, gint ndx, co
   assert_msg_matches_and_output_message_has_tag_with_timeout(pattern, 0, ndx, tag, set);
 }
 
-gchar *pdb_conflicting_rules_with_different_parsers = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_conflicting_rules_with_different_parsers =\
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog1</pattern>\
@@ -298,7 +299,8 @@ test_conflicting_rules_with_different_parsers(void)
   _destroy_pattern_db();
 }
 
-gchar *pdb_conflicting_rules_with_the_same_parsers = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_conflicting_rules_with_the_same_parsers = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog1</pattern>\
@@ -338,7 +340,8 @@ test_conflicting_rules_with_the_same_parsers(void)
 /* pdb skeleton used to test patterndb rule actions. E.g. whenever a rule
  * matches, certain actions described in the rule need to be performed.
  * This tests those */
-gchar *pdb_ruletest_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_ruletest_skeleton = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
     <pattern>prog1</pattern>\
@@ -457,7 +460,8 @@ test_patterndb_rule(void)
   _destroy_pattern_db();
 }
 
-gchar *pdb_inheritance_enabled_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_inheritance_enabled_skeleton = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog2</pattern>\
@@ -498,7 +502,8 @@ test_patterndb_message_property_inheritance_enabled()
   _destroy_pattern_db();
 }
 
-gchar *pdb_inheritance_disabled_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_inheritance_disabled_skeleton = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog2</pattern>\
@@ -539,7 +544,8 @@ test_patterndb_message_property_inheritance_disabled()
   _destroy_pattern_db();
 }
 
-gchar *pdb_inheritance_context_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_inheritance_context_skeleton =
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog2</pattern>\
@@ -592,7 +598,8 @@ test_patterndb_message_property_inheritance(void)
   test_patterndb_message_property_inheritance_context();
 }
 
-gchar *pdb_msg_count_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *pdb_msg_count_skeleton = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog1</pattern>\
@@ -659,7 +666,8 @@ test_patterndb_context_length()
   _destroy_pattern_db();
 }
 
-gchar *tag_outside_of_rule_skeleton = "<patterndb version='3' pub_date='2010-02-22'>\
+const gchar *tag_outside_of_rule_skeleton = \
+    "<patterndb version='3' pub_date='2010-02-22'>\
  <ruleset name='testset' id='1'>\
   <patterns>\
    <pattern>prog1</pattern>\

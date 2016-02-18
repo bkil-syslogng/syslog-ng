@@ -270,7 +270,7 @@ test_journald_helper()
 }
 
 MockEntry *
-__create_real_entry(Journald *journal, gchar *cursor_name)
+__create_real_entry(Journald *journal, const gchar *cursor_name)
 {
   MockEntry *entry = mock_entry_new(cursor_name);
   mock_entry_add_data(entry, "PRIORITY=6");
@@ -303,7 +303,7 @@ __create_real_entry(Journald *journal, gchar *cursor_name)
 }
 
 MockEntry *
-__create_dummy_entry(Journald *journal, gchar *cursor_name)
+__create_dummy_entry(Journald *journal, const gchar *cursor_name)
 {
   MockEntry *entry = mock_entry_new(cursor_name);
   mock_entry_add_data(entry, "MESSAGE=Dummy message");

@@ -37,7 +37,8 @@ do { \
 
 
 
-gchar *pdb_parser_skeleton_prefix ="<?xml version='1.0' encoding='UTF-8'?>\
+const gchar *pdb_parser_skeleton_prefix = \
+    "<?xml version='1.0' encoding='UTF-8'?>\
           <patterndb version='3' pub_date='2010-02-22'>\
             <ruleset name='test1_program' id='480de478-d4a6-4a7f-bea4-0c0245d361e1'>\
                 <pattern>test</pattern>\
@@ -45,7 +46,8 @@ gchar *pdb_parser_skeleton_prefix ="<?xml version='1.0' encoding='UTF-8'?>\
                         <patterns>\
                          <pattern>";
 
-gchar *pdb_parser_skeleton_postfix =  "</pattern>\
+const gchar *pdb_parser_skeleton_postfix =  \
+    "</pattern>\
                       </patterns>\
                     </rule>\
             </ruleset>\
@@ -77,7 +79,7 @@ test_pattern(const gchar *pattern, const gchar *rule, gboolean match)
 }
 
 void
-test_parser(gchar **test)
+test_parser(const gchar **test)
 {
   GString *str;
   gint index = 1;
@@ -97,7 +99,7 @@ test_parser(gchar **test)
   _destroy_pattern_db();
 }
 
-gchar * test1 [] = {
+const gchar * test1 [] = {
 "@ANYSTRING:TEST@",
 "ab ba ab",
 "ab ba ab",
@@ -110,7 +112,7 @@ NULL,
 NULL
 };
 
-gchar * test2 [] = {
+const gchar * test2 [] = {
 "@DOUBLE:TEST@",
 "1234",
 "1234.567",
@@ -120,21 +122,21 @@ NULL, // not match
 "ab1234",NULL
 };
 
-gchar * test3 [] = {
+const gchar * test3 [] = {
 "@ESTRING:TEST:endmark@",
 "ab ba endmark",
 NULL,
 "ab ba",NULL
 };
 
-gchar * test4 [] = {
+const gchar * test4 [] = {
 "@ESTRING:TEST:&gt;@",
 "ab ba > ab",
 NULL,
 "ab ba",NULL
 };
 
-gchar * test5 [] = {
+const gchar * test5 [] = {
 "@FLOAT:TEST@",
 "1234",
 "1234.567",
@@ -144,7 +146,7 @@ NULL, // not match
 "ab1234",NULL
 };
 
-gchar * test6 [] = {
+const gchar * test6 [] = {
 "@SET:TEST: 	@",
 " a ",
 "  a ",
@@ -154,7 +156,7 @@ NULL, // not match
 "ab1234",NULL
 };
 
-gchar * test7 [] = {
+const gchar * test7 [] = {
 "@IPv4:TEST@",
 "1.2.3.4",
 "0.0.0.0",
@@ -167,7 +169,7 @@ NULL,
 "1,2,3,4",NULL
 };
 
-gchar * test8 [] = {
+const gchar * test8 [] = {
 "@IPv6:TEST@",
 "2001:0db8:0000:0000:0000:0000:1428:57ab",
 "2001:0db8:0000:0000:0000::1428:57ab",
@@ -179,7 +181,7 @@ NULL,
 "2001:0db8::34d2::1428:57ab",NULL
 };
 
-gchar * test9 [] = {
+const gchar * test9 [] = {
 "@IPvANY:TEST@",
 "1.2.3.4",
 "0.0.0.0",
@@ -199,7 +201,7 @@ NULL,
 "2001:0db8::34d2::1428:57ab",NULL
 };
 
-gchar * test10 [] = {
+const gchar * test10 [] = {
 "@NUMBER:TEST@",
 "1234",
 "1.2",
@@ -210,7 +212,7 @@ NULL,
 NULL
 };
 
-gchar * test11 [] = {
+const gchar * test11 [] = {
 "@QSTRING:TEST:&lt;&gt;@",
 "<aa bb>",
 "< aabb >",
@@ -219,7 +221,7 @@ NULL,
 "<aabb",NULL
 };
 
-gchar * test12 [] = {
+const gchar * test12 [] = {
 "@STRING:TEST@",
 "aabb",
 "aa bb",
@@ -230,7 +232,7 @@ gchar * test12 [] = {
 NULL,NULL
 };
 
-gchar **parsers[] = {test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12, NULL};
+const gchar **parsers[] = {test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12, NULL};
 
 void
 test_patterndb_parsers()

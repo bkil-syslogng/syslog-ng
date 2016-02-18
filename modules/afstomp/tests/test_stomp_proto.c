@@ -25,7 +25,7 @@
 #include "testutils.h"
 
 void
-assert_stomp_header(stomp_frame* frame, char* key, char* value)
+assert_stomp_header(stomp_frame* frame, const char* key, const char* value)
 {
   char* myvalue = g_hash_table_lookup(frame->headers, key);
 
@@ -33,13 +33,13 @@ assert_stomp_header(stomp_frame* frame, char* key, char* value)
 }
 
 void
-assert_stomp_command(stomp_frame* frame, char* command)
+assert_stomp_command(stomp_frame* frame, const char* command)
 {
   assert_string(frame->command, command, "Stomp command assertion failed");
 }
 
 void
-assert_stomp_body(stomp_frame* frame, char* body)
+assert_stomp_body(stomp_frame* frame, const char* body)
 {
   assert_string(frame->body, body, "Stomp body assertion failed");
 }

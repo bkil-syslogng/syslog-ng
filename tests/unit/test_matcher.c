@@ -80,7 +80,7 @@ testcase_match(const gchar *log, const gchar *pattern, gboolean expected_result,
 }
 
 int
-testcase_replace(const gchar *log, const gchar *re, gchar *replacement, const gchar *expected_result, LogMatcher *m)
+testcase_replace(const gchar *log, const gchar *re, const gchar *replacement, const gchar *expected_result, LogMatcher *m)
 {
   LogMessage *msg;
   LogTemplate *r;

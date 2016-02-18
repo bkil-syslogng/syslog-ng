@@ -117,14 +117,14 @@ test_search_value(RNode *root, gchar *key, gchar *expected_value)
     }
 }
 
-void
-test_search(RNode *root, gchar *key, gboolean expect)
+static void
+test_search(RNode *root, const gchar *key, gboolean expect)
 {
   test_search_value(root, key, expect ? key : NULL);
 }
 
-void
-test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
+static void
+test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
 {
   RNode *ret;
   va_list args;
@@ -158,7 +158,7 @@ test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
   else if (ret && name1)
     {
       gint i = 1;
-      gchar *name, *value;
+      const gchar *name, *value;
 
       name = name1;
       value = va_arg(args, gchar *);
