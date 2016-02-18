@@ -26,6 +26,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean linux_kmsg_format_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static MsgFormatHandler linux_kmsg_handler =
 {
   .parse = &linux_kmsg_format_handler

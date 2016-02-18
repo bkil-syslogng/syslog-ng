@@ -25,6 +25,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean afprog_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser afprog_parser;
 
 static Plugin afprog_plugins[] =

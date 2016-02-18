@@ -29,6 +29,8 @@
 #include "plugin-types.h"
 #include <openssl/evp.h>
 
+gboolean cryptofuncs_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static void
 tf_uuid(LogMessage *msg, gint argc, GString *argv[], GString *result)
 {

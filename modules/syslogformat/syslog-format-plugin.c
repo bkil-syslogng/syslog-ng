@@ -27,6 +27,9 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean
+syslogformat_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static MsgFormatHandler syslog_handler =
 {
   .parse = &syslog_format_handler

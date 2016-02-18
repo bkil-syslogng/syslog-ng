@@ -27,6 +27,8 @@
 #include "tlscontext.h"
 #include "plugin-types.h"
 
+gboolean afsocket_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static Plugin afsocket_plugins[] =
 {
   {
