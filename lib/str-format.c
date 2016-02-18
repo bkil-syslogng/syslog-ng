@@ -31,7 +31,7 @@ static gchar digits[] = "0123456789abcdef";
 
 /* format 64 bit ints */
 
-static inline gint
+static inline gsize
 format_uint64_base10_rev(gchar *result, gsize result_len, gint sign, guint64 value)
 {
   gchar *p;
@@ -61,7 +61,7 @@ format_uint64_base10_rev(gchar *result, gsize result_len, gint sign, guint64 val
   return p - result;
 }
 
-static inline gint
+static inline gsize
 format_uint64_base16_rev(gchar *result, gsize result_len, guint64 value)
 {
   gchar *p;
@@ -77,7 +77,7 @@ format_uint64_base16_rev(gchar *result, gsize result_len, guint64 value)
   return p - result;
 }
 
-static inline gint
+static inline gsize
 format_uint64_base8_rev(gchar *result, gsize result_len, guint64 value)
 {
   gchar *p;
@@ -95,11 +95,11 @@ format_uint64_base8_rev(gchar *result, gsize result_len, guint64 value)
   return p - result;
 }
 
-static gint
-format_padded_int64(GString *result, gint field_len, gchar pad_char, gint sign, gint base, guint64 value)
+static gsize
+format_padded_int64(GString *result, gsize field_len, gchar pad_char, gint sign, gint base, guint64 value)
 {
   gchar num[64];
-  gint len, i, pos;
+  gsize len, i, pos;
 
   if (base == 10)
     len = format_uint64_base10_rev(num, sizeof(num), sign, value);
@@ -132,21 +132,21 @@ format_padded_int64(GString *result, gint field_len, gchar pad_char, gint sign, 
   return field_len;
 }
 
-gint
-format_uint64_padded(GString *result, gint field_len, gchar pad_char, gint base, guint64 value)
+gsize
+format_uint64_padded(GString *result, gsize field_len, gchar pad_char, gint base, guint64 value)
 {
   return format_padded_int64(result, field_len, pad_char, 0, base, value);
 }
 
-gint
-format_int64_padded(GString *result, gint field_len, gchar pad_char, gint base, gint64 value)
+gsize
+format_int64_padded(GString *result, gsize field_len, gchar pad_char, gint base, gint64 value)
 {
   return format_padded_int64(result, field_len, pad_char, 1, base, value);
 }
 
 /* format 32 bit ints */
 
-static inline gint
+static inline gsize
 format_uint32_base10_rev(gchar *result, gsize result_len, gint sign, guint32 value)
 {
   gchar *p;
@@ -176,7 +176,7 @@ format_uint32_base10_rev(gchar *result, gsize result_len, gint sign, guint32 val
   return p - result;
 }
 
-static inline gint
+static inline gsize
 format_uint32_base16_rev(gchar *result, gsize result_len, guint32 value)
 {
   gchar *p;
@@ -194,7 +194,7 @@ format_uint32_base16_rev(gchar *result, gsize result_len, guint32 value)
   return p - result;
 }
 
-static inline gint
+static inline gsize
 format_uint32_base8_rev(gchar *result, gsize result_len, guint32 value)
 {
   gchar *p;
@@ -212,11 +212,11 @@ format_uint32_base8_rev(gchar *result, gsize result_len, guint32 value)
   return p - result;
 }
 
-static gint
-format_padded_int32(GString *result, gint field_len, gchar pad_char, gint sign, gint base, guint32 value)
+static gsize
+format_padded_int32(GString *result, gsize field_len, gchar pad_char, gint sign, gint base, guint32 value)
 {
   gchar num[32];
-  gint len, i, pos;
+  gsize len, i, pos;
 
   if (base == 10)
     len = format_uint32_base10_rev(num, sizeof(num), sign, value);
@@ -249,14 +249,14 @@ format_padded_int32(GString *result, gint field_len, gchar pad_char, gint sign, 
   return field_len;
 }
 
-gint
-format_uint32_padded(GString *result, gint field_len, gchar pad_char, gint base, guint32 value)
+gsize
+format_uint32_padded(GString *result, gsize field_len, gchar pad_char, gint base, guint32 value)
 {
   return format_padded_int32(result, field_len, pad_char, 0, base, value);
 }
 
-gint
-format_int32_padded(GString *result, gint field_len, gchar pad_char, gint base, gint32 value)
+gsize
+format_int32_padded(GString *result, gsize field_len, gchar pad_char, gint base, gint32 value)
 {
   return format_padded_int32(result, field_len, pad_char, 1, base, value);
 }
@@ -264,7 +264,7 @@ format_int32_padded(GString *result, gint field_len, gchar pad_char, gint base, 
 gchar *
 format_hex_string_with_delimiter(gpointer data, gsize data_len, gchar *result, gsize result_len, gchar delimiter)
 {
-  gint i;
+  gsize i;
   gint pos = 0;
   guchar *str = (guchar *) data;
 
@@ -293,7 +293,7 @@ format_hex_string(gpointer data, gsize data_len, gchar *result, gsize result_len
 /* parse 32 bit ints */
 
 static gboolean
-scan_uint32(const gchar **buf, gint *left, gint field_width, guint32 *num)
+scan_uint32(const gchar **buf, gint *left, gsize field_width, guint32 *num)
 {
   guint32 result;
 
@@ -316,7 +316,7 @@ scan_uint32(const gchar **buf, gint *left, gint field_width, guint32 *num)
 }
 
 static gboolean
-scan_int(const gchar **buf, gint *left, gint field_width, gint *num)
+scan_int(const gchar **buf, gint *left, gsize field_width, gint *num)
 {
   guint32 value;
 

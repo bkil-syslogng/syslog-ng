@@ -29,7 +29,7 @@
 
 typedef struct _RingBuffer
 {
-  gpointer buffer;
+  char *buffer;
   guint32 head;
   guint32 tail;
   guint32 count;

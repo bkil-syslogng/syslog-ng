@@ -68,7 +68,7 @@ log_proto_buffered_server_convert_from_raw(LogProtoBufferedServer *self, const g
   gsize avail_in = raw_buffer_len;
   gsize avail_out;
   gchar *out;
-  gint  ret = -1;
+  gssize ret = -1;
   gboolean success = FALSE;
   LogProtoBufferedServerState *state = log_proto_buffered_server_get_state(self);
 
@@ -78,7 +78,7 @@ log_proto_buffered_server_convert_from_raw(LogProtoBufferedServer *self, const g
       out = (gchar *) self->buffer + state->pending_buffer_end;
 
       ret = g_iconv(self->convert, (gchar **) &raw_buffer, &avail_in, (gchar **) &out, &avail_out);
-      if (ret == (gsize) -1)
+      if (ret == -1)
         {
           switch (errno)
             {
@@ -146,7 +146,7 @@ log_proto_buffered_server_convert_from_raw(LogProtoBufferedServer *self, const g
             default:
               msg_notice("Invalid byte sequence or other error while converting input, skipping character",
                          evt_tag_str("encoding", self->super.options->encoding),
-                         evt_tag_printf("char", "0x%02x", *(guchar *) raw_buffer),
+                         evt_tag_printf("char", "0x%02x", *(const guchar *) raw_buffer),
                          NULL);
               goto error;
             }

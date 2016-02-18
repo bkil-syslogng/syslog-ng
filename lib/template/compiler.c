@@ -29,7 +29,7 @@
 #include "plugin.h"
 
 static void
-log_template_add_macro_elem(LogTemplateCompiler *self, guint macro, gchar *default_value)
+log_template_add_macro_elem(LogTemplateCompiler *self, gsize macro, gchar *default_value)
 {
   LogTemplateElem *e;
 
@@ -228,7 +228,7 @@ is_macro_name(gchar c)
 static void
 log_template_compiler_add_elem(LogTemplateCompiler *self, gchar *start, gint macro_len, gchar *default_value)
 {
-  gint macro = log_macro_lookup(start, macro_len);
+  gsize macro = log_macro_lookup(start, macro_len);
   if (macro == M_NONE)
     {
       log_template_add_value_elem(self, start, macro_len, default_value);

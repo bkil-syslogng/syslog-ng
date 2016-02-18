@@ -903,7 +903,7 @@ value_pairs_init_set(ValuePairSpec *set)
 
       name = set[i].alt_name ? set[i].alt_name : set[i].name;
 
-      if ((id = log_macro_lookup(name, strlen(name))))
+      if ((id = log_macro_lookup((gchar *)name, strlen(name))))
         {
           set[i].type = VPT_MACRO;
           set[i].id = id;

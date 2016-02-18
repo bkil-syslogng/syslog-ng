@@ -27,11 +27,11 @@
 
 #include "syslog-ng.h"
 
-gint format_uint32_padded(GString *result, gint field_len, gchar pad_char, gint base, guint32 value);
-gint format_int32_padded(GString *result, gint field_len, gchar pad_char, gint base, gint32 value);
+gsize format_uint32_padded(GString *result, gsize field_len, gchar pad_char, gint base, guint32 value);
+gsize format_int32_padded(GString *result, gsize field_len, gchar pad_char, gint base, gint32 value);
 
-gint format_uint64_padded(GString *result, gint field_len, gchar pad_char, gint base, guint64 value);
-gint format_int64_padded(GString *result, gint field_len, gchar pad_char, gint base, gint64 value);
+gsize format_uint64_padded(GString *result, gsize field_len, gchar pad_char, gint base, guint64 value);
+gsize format_int64_padded(GString *result, gsize field_len, gchar pad_char, gint base, gint64 value);
 
 gchar *format_hex_string(gpointer str, gsize str_len, gchar *result, gsize result_len);
 gchar *format_hex_string_with_delimiter(gpointer str, gsize str_len, gchar *result, gsize result_len, gchar delimiter);
