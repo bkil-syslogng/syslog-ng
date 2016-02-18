@@ -34,6 +34,8 @@
 #include "plugin-types.h"
 #include "logthrdestdrv.h"
 
+gboolean redis_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 typedef struct
 {
   LogThrDestDriver super;

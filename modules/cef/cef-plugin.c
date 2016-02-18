@@ -23,6 +23,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean cef_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static Plugin cef_plugins[] =
 {
   TEMPLATE_FUNCTION_PLUGIN(tf_cef, "format-cef-extension"),

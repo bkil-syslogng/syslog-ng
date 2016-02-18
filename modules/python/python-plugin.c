@@ -32,6 +32,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean python_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED);
+
 extern CfgParser python_parser;
 
 static Plugin python_plugins[] =

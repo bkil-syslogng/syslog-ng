@@ -27,6 +27,8 @@
 #include "plugin-types.h"
 #include "journald-subsystem.h"
 
+gboolean systemd_journal_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser systemd_journal_parser;
 
 static Plugin systemd_journal_plugins[] =
