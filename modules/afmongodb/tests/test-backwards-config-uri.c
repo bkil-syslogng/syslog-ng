@@ -151,7 +151,7 @@ _run_test(const gchar *mongo_config)
 
   if (!ok)
     {
-      msg_error("Syntax error in configuration", NULL, NULL);
+      msg_error("Syntax error in configuration", evt_tag_str("mongo_config", mongo_config), NULL);
       cfg_free(test_cfg);
       return FALSE;
     }
@@ -165,7 +165,7 @@ _run_test(const gchar *mongo_config)
   msg_trace("after cfg_init()", NULL, NULL);
 
   if (!ok)
-    msg_error("Failed to initialize configuration", NULL, NULL);
+    msg_error("Failed to initialize configuration", evt_tag_str("mongo_config", mongo_config), NULL);
 
   sleep(1);
   msg_trace("before app_post_config_loaded()", NULL, NULL);
@@ -189,7 +189,7 @@ _run_test(const gchar *mongo_config)
 
   if (!ok2)
     {
-      msg_error("Failed to deinitialize configuration", NULL, NULL);
+      msg_error("Failed to deinitialize configuration", evt_tag_str("mongo_config", mongo_config), NULL);
     }
 
   return ok && ok2;
@@ -230,6 +230,8 @@ _error(const gchar *mongo_config, const gchar *error)
   testcase_begin("%s(%s,%s)", __FUNCTION__, mongo_config, error);
 
   gboolean ok = !_run_test(mongo_config);
+  if (!ok)
+    msg_error("_run_test() accepted, but it should have failed", NULL, NULL);
   ok &= EXPECT_MSG(error, "mismatch");
   if (!ok)
     TEST_FAILED;
