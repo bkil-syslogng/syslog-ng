@@ -111,6 +111,12 @@ void msg_add_option_group(GOptionContext *ctx);
             msg_warning(desc, ##tags );	\
         } while (0)
 
+#define msg_error_and_stderr(format, ...) \
+  { \
+    fprintf(stderr, format "\n", ##__VA_ARGS__); \
+    msg_error("", evt_tag_printf("stderr", format, ##__VA_ARGS__), NULL); \
+  } while (0)
+
 void msg_post_message(LogMessage *msg);
 void msg_send_formatted_message(int prio, const char *msg);
 
