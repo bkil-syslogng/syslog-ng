@@ -249,16 +249,25 @@ main(int argc, char **argv)
           "mongodb://127.0.0.1:27017/syslog",
           "syslog", "messages");
 
-  _error("uri('mongodb://127.0.0.1:27017/syslog')",
-         "Initializing MongoDB destination; uri='mongodb://127.0.0.1:27017/syslog', db='syslog', collection='messages', driver='d_mongo#0'");
-
   _expect("",
           "mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
           "syslog", "messages");
-/*
-  _error("uri('syslog-ng')",
-         "Error parsing MongoDB URI; uri='syslog-ng', driver='d_mongo#0'");
-*/
+
+  _error("uri('mongodb://127.0.0.1:27017/')",
+         "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'");
+
+  _error("uri('INVALID-URI')",
+         "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'");
+
+  _error("INVALID-KEYWORD()",
+         "Error parsing afmongodb, inner-dest plugin INVALID-KEYWORD not found in <string> at line 1, column 31:");
+
+  _error("database())",
+         "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or LL_STRING in <string> at line 1, column 40:");
+
+  _error("database('syslog') uri('mongodb://127.0.0.1:27017/syslog')",
+         "Error: either specify a MongoDB URI (and optional collection) or only legacy options; driver='d_mongo#0'");
+
   _teardown();
   return (int) _test_ret_num;
 }
