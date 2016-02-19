@@ -246,8 +246,7 @@ dns_cache_check_hosts(glong t)
         {
           msg_error("Error loading dns cache hosts file",
                     evt_tag_str("filename", dns_cache_hosts),
-                    evt_tag_errno("error", errno),
-                    NULL);
+                    evt_tag_errno("error", errno));
         }
 
     }

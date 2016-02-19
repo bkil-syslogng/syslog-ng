@@ -156,7 +156,7 @@ afmongodb_dd_set_host(LogDriver *d, const gchar *host)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once("WARNING: Using host() option is deprecated in mongodb driver, please use servers() instead", NULL);
+  msg_warning_once("WARNING: Using host() option is deprecated in mongodb driver, please use servers() instead");
 
   g_free(self->address);
   self->address = g_strdup(host);
@@ -168,7 +168,7 @@ afmongodb_dd_set_port(LogDriver *d, gint port)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once("WARNING: Using port() option is deprecated in mongodb driver, please use servers() instead", NULL);
+  msg_warning_once("WARNING: Using port() option is deprecated in mongodb driver, please use servers() instead");
 
   self->port = port;
   self->is_legacy = TRUE;
@@ -326,8 +326,8 @@ static gboolean
 afmongodb_dd_create_uri(MongoDBDestDriver *self)
 {
   if (self->uri_str)
-    msg_debug("create_uri", evt_tag_str ("uri_str", self->uri_str->str), NULL);
-  msg_debug("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
+    msg_debug("create_uri", evt_tag_str ("uri_str", self->uri_str->str));
+  msg_debug("create_uri", evt_tag_int("is_legacy", self->is_legacy));
   if ((!self->uri_str) && (!self->is_legacy))
     {
       self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
@@ -335,7 +335,7 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
   else if (self->uri_str && self->is_legacy)
     {
       msg_error ("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
-                 evt_tag_str ("driver", self->super.super.super.id), NULL);
+                 evt_tag_str ("driver", self->super.super.super.id));
       return FALSE;
     }
   else if (self->uri_str)
@@ -352,7 +352,7 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
 
     if (!self->recovery_cache)
       {
-        msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id), NULL);
+        msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id));
         return FALSE;
       }
 
@@ -364,8 +364,7 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
   }
 
-  msg_debug(self->uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
-            NULL);
+  msg_debug(self->uri_str->str, evt_tag_str ("driver", self->super.super.super.id));
 
   return TRUE;
 }
@@ -381,7 +380,7 @@ afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
   if (!self->client)
     {
       msg_error("Error connecting to MongoDB",
-                evt_tag_str ("driver", self->super.super.super.id), NULL);
+                evt_tag_str ("driver", self->super.super.super.id));
       return FALSE;
     }
 
@@ -391,7 +390,7 @@ afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
     {
       msg_error("Error getting specified MongoDB collection",
                 evt_tag_str ("collection", self->coll),
-                evt_tag_str ("driver", self->super.super.super.id), NULL);
+                evt_tag_str ("driver", self->super.super.super.id));
       return FALSE;
     }
 
@@ -571,8 +570,7 @@ afmongodb_worker_retry_over_message(LogThrDestDriver *s, LogMessage *msg)
             evt_tag_int("number_of_retries", s->retries.max),
             evt_tag_value_pairs("message", self->vp, msg,
                                 self->super.seq_num,
-                                LTZ_SEND, &self->template_options),
-            NULL);
+                                LTZ_SEND, &self->template_options));
 }
 
 static worker_insert_result_t
@@ -604,8 +602,7 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
                     evt_tag_value_pairs("message", self->vp, msg,
                                         self->super.seq_num,
                                         LTZ_SEND, &self->template_options),
-                    evt_tag_str("driver", self->super.super.super.id),
-                    NULL);
+                    evt_tag_str("driver", self->super.super.super.id));
         }
       return WORKER_INSERT_RESULT_DROP;
     }
@@ -616,8 +613,7 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
                 evt_tag_value_pairs("message", self->vp, msg,
                                     self->super.seq_num,
                                     LTZ_SEND, &self->template_options),
-                evt_tag_str("driver", self->super.super.super.id),
-                NULL);
+                evt_tag_str("driver", self->super.super.super.id));
 
       success = mongoc_collection_insert (self->coll_obj, MONGOC_INSERT_NONE,
                                           (const bson_t *) self->bson,
@@ -628,8 +624,7 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
           msg_error("Network error while inserting into MongoDB",
                     evt_tag_int("time_reopen", self->super.time_reopen),
                     evt_tag_str("reason", error.message),
-                    evt_tag_str("driver", self->super.super.super.id),
-                    NULL);
+                    evt_tag_str("driver", self->super.super.super.id));
         }
     }
 
@@ -671,7 +666,7 @@ afmongodb_dd_check_auth_options(MongoDBDestDriver *self)
     {
       if (!self->user || !self->password)
         {
-          msg_error("Neither the username, nor the password can be empty", NULL);
+          msg_error("Neither the username, nor the password can be empty");
           return FALSE;
         }
     }
@@ -727,16 +722,14 @@ afmongodb_dd_init(LogPipe *s)
                 {
                   msg_warning("Cannot parse MongoDB server address, ignoring",
                               evt_tag_str("address", l->data),
-                              evt_tag_str("driver", self->super.super.super.id),
-                              NULL);
+                              evt_tag_str("driver", self->super.super.super.id));
                   continue;
                 }
               afmongodb_dd_append_host (&self->recovery_cache, host, port);
               msg_verbose("Added MongoDB server seed",
                           evt_tag_str("host", host),
                           evt_tag_int("port", port),
-                          evt_tag_str("driver", self->super.super.super.id),
-                          NULL);
+                          evt_tag_str("driver", self->super.super.super.id));
               g_free(host);
             }
         }
@@ -757,8 +750,7 @@ afmongodb_dd_init(LogPipe *s)
         {
           msg_error("Cannot parse the primary host",
                     evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
-                    evt_tag_str("driver", self->super.super.super.id),
-                    NULL);
+                    evt_tag_str("driver", self->super.super.super.id));
           return FALSE;
         }
     }
@@ -768,7 +760,7 @@ afmongodb_dd_init(LogPipe *s)
         {
           msg_error("Cannot parse address",
                     evt_tag_str ("primary", g_list_nth_data (self->servers, 0)),
-                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+                    evt_tag_str ("driver", self->super.super.super.id));
           return FALSE;
         }
       afmongodb_dd_append_host (&self->recovery_cache, self->address,
@@ -785,8 +777,7 @@ afmongodb_dd_init(LogPipe *s)
     {
       msg_error("Error parsing MongoDB URI",
                 evt_tag_str ("uri", self->uri_str->str),
-                evt_tag_str ("driver", self->super.super.super.id),
-                NULL);
+                evt_tag_str ("driver", self->super.super.super.id));
       return FALSE;
     }
 
@@ -795,8 +786,7 @@ afmongodb_dd_init(LogPipe *s)
     {
       msg_error("Missing DB name from MongoDB URI",
                 evt_tag_str ("uri", self->uri_str->str),
-                evt_tag_str ("driver", self->super.super.super.id),
-                NULL);
+                evt_tag_str ("driver", self->super.super.super.id));
       return FALSE;
     }
 
@@ -804,8 +794,7 @@ afmongodb_dd_init(LogPipe *s)
               evt_tag_str ("uri", self->uri_str->str),
               evt_tag_str ("db", self->const_db),
               evt_tag_str ("collection", self->coll),
-              evt_tag_str ("driver", self->super.super.super.id),
-              NULL);
+              evt_tag_str ("driver", self->super.super.super.id));
 
   return log_threaded_dest_driver_start(s);
 }
