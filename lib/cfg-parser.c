@@ -25,6 +25,7 @@
 #include "cfg-parser.h"
 #include "cfg-lexer.h"
 #include "cfg-grammar.h"
+#include "messages.h"
 
 #include <string.h>
 
@@ -186,16 +187,20 @@ _underline_source(YYLTYPE *yylloc, gchar *buf)
 
   if (buf[0])
     {
-      fprintf(stderr, "\n%s", buf);
-      if (buf[strlen(buf) - 1] != '\n')
-        fprintf(stderr, "\n");
+      if (buf[strlen(buf) - 1] == '\n')
+        buf[strlen(buf) - 1] = ' ';
+      msg_error_and_stderr("%s", buf);
+
+      GString *blank = g_string_sized_new(strlen(buf));
       for (i = 0; buf[i] && i < yylloc->first_column - 1; i++)
         {
-          fprintf(stderr, "%c", buf[i] == '\t' ? '\t' : ' ');
+          g_string_append_c(blank, buf[i] == '\t' ? '\t' : ' ');
         }
       for (i = yylloc->first_column; (i == yylloc->first_column) || (i < yylloc->last_column); i++)
-        fprintf(stderr, "^");
-      fprintf(stderr, "\n");
+        g_string_append_c(blank, '^');
+      msg_error_and_stderr("%s", blank->str);
+
+      g_string_free(blank, TRUE);
     }
 }
 
@@ -249,7 +254,7 @@ report_syntax_error(CfgLexer *lexer, YYLTYPE *yylloc, const char *what, const ch
   CfgIncludeLevel *level = yylloc->level, *from;
   gint file_pos;
 
-  fprintf(stderr, "Error parsing %s, %s in %n%s at line %d, column %d:\n",
+  msg_error_and_stderr("Error parsing %s, %s in %n%s at line %d, column %d:",
           what,
           msg,
           &file_pos,
@@ -260,7 +265,9 @@ report_syntax_error(CfgLexer *lexer, YYLTYPE *yylloc, const char *what, const ch
   from = level - 1;
   while (from >= lexer->include_stack)
     {
-      fprintf(stderr, "%*sincluded from %s line %d, column %d\n", MAX(file_pos - 14, 0), "", from->name, from->lloc.first_line, from->lloc.first_column);
+      msg_error_and_stderr("%*sincluded from %s line %d, column %d",
+                           MAX(file_pos - 14, 0), "", from->name,
+                           from->lloc.first_line, from->lloc.first_column);
       from--;
     }
 
@@ -273,8 +280,8 @@ report_syntax_error(CfgLexer *lexer, YYLTYPE *yylloc, const char *what, const ch
       _report_buffer_location(level->buffer.content, yylloc);
     }
 
-  fprintf(stderr, "\nsyslog-ng documentation: http://www.balabit.com/support/documentation/?product=syslog-ng\n"
-                  "mailing list: https://lists.balabit.hu/mailman/listinfo/syslog-ng\n");
+  msg_error_and_stderr("syslog-ng documentation: http://www.balabit.com/support/documentation/?product=syslog-ng");
+  msg_error_and_stderr("syslog-ng mailing list: https://lists.balabit.hu/mailman/listinfo/syslog-ng");
 
 }
 
