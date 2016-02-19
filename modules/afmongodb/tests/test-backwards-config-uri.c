@@ -143,6 +143,7 @@ _run_test(const gchar *mongo_config)
       "};",
       mongo_config);
 
+  start_grabbing_messages();
   gboolean ok = cfg_load_config(test_cfg, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
@@ -158,7 +159,6 @@ _run_test(const gchar *mongo_config)
   const gchar *persist_filename = "";
   test_cfg->state = persist_state_new(persist_filename);
 
-  start_grabbing_messages();
   ok = cfg_init(test_cfg);
   stop_grabbing_messages();
 
