@@ -124,7 +124,7 @@ _run_test(const gchar *mongo_config)
   GlobalConfig *test_cfg = cfg_new(0x0308);
   if (!test_cfg)
     {
-      msg_error("Can't create new configuration", NULL);
+      msg_error("Can't create new configuration");
       return FALSE;
     }
 
@@ -147,7 +147,7 @@ _run_test(const gchar *mongo_config)
   gboolean ok = cfg_load_config(test_cfg, config_string->str,
                                 syntax_only, preprocess_into);
   g_string_free(config_string, TRUE);
-  msg_trace("after cfg_load_config()", NULL);
+  msg_trace("after cfg_load_config()");
 
   if (!ok)
     {
@@ -162,20 +162,20 @@ _run_test(const gchar *mongo_config)
   ok = cfg_init(test_cfg);
   stop_grabbing_messages();
 
-  msg_trace("after cfg_init()", NULL);
+  msg_trace("after cfg_init()");
 
   if (!ok)
     msg_error("Failed to initialize configuration", evt_tag_str("mongo_config", mongo_config));
 
   sleep(1);
-  msg_trace("before app_post_config_loaded()", NULL);
+  msg_trace("before app_post_config_loaded()");
   app_post_config_loaded();
 
   service_management_indicate_readiness();
   service_management_clear_status();
 //  iv_main();
 
-  msg_trace("before cfg_deinit()", NULL);
+  msg_trace("before cfg_deinit()");
   gboolean ok2 = cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL));
@@ -184,7 +184,7 @@ _run_test(const gchar *mongo_config)
       persist_config_free(test_cfg->persist);
       test_cfg->persist = NULL;
     }
-  msg_trace("before cfg_free()", NULL);
+  msg_trace("before cfg_free()");
   cfg_free(test_cfg);
 
   if (!ok2)
@@ -231,7 +231,7 @@ _error(const gchar *mongo_config, const gchar *error)
 
   gboolean ok = !_run_test(mongo_config);
   if (!ok)
-    msg_error("_run_test() accepted, but it should have failed", NULL);
+    msg_error("_run_test() accepted, but it should have failed");
   ok &= EXPECT_MSG(error, "mismatch");
   if (!ok)
     TEST_FAILED;
