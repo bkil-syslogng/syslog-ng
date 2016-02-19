@@ -37,7 +37,7 @@ extern int log_stderr;
 typedef void (*MsgPostFunc)(LogMessage *msg);
 
 void msg_set_context(LogMessage *msg);
-EVTREC *msg_event_create(gint prio, const char *desc, EVTTAG *tag1, ...) __attribute__((nonnull(2)));
+EVTREC *msg_event_create(gint prio, const char *desc, EVTTAG *tag1, ...) __attribute__((nonnull(2))); // __attribute__((sentinel));
 EVTREC *msg_event_create_from_desc(gint prio, const char *desc);
 void msg_event_free(EVTREC *e);
 void msg_event_send(EVTREC *e);
