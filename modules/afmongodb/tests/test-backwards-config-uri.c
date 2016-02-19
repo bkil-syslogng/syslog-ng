@@ -116,21 +116,6 @@ _setup(int argc, char **argv)
   app_post_daemonized();
 }
 
-#define URI_MSG_FMT ("Initializing MongoDB destination; " \
-    "uri='%s', db='%s', collection='%s', driver='d_mongo#0'")
-
-static gboolean
-_expect_uri(const gchar *uri, const gchar *db, const gchar *col)
-{
-  GString *pattern = g_string_sized_new(0);
-  g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
-  gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern->str, "mismatch", NULL);
-  g_string_free(pattern, TRUE);
-  if (!ok)
-    TEST_FAILED;
-  return ok;
-}
-
 static gboolean
 _run_test(const gchar *mongo_config)
 {
@@ -208,6 +193,21 @@ _run_test(const gchar *mongo_config)
     }
 
   return ok && ok2;
+}
+
+#define URI_MSG_FMT ("Initializing MongoDB destination; " \
+    "uri='%s', db='%s', collection='%s', driver='d_mongo#0'")
+
+static gboolean
+_expect_uri(const gchar *uri, const gchar *db, const gchar *col)
+{
+  GString *pattern = g_string_sized_new(0);
+  g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
+  gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern->str, "mismatch", NULL);
+  g_string_free(pattern, TRUE);
+  if (!ok)
+    TEST_FAILED;
+  return ok;
 }
 
 static gboolean
