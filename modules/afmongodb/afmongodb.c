@@ -306,28 +306,124 @@ afmongodb_dd_disconnect(LogThrDestDriver *s)
   self->client = NULL;
 }
 
-static void
+static gboolean
 afmongodb_dd_append_servers(GString *uri_str,
-                            const GList *recovery_cache)
+                            const GList *recovery_cache, gboolean *have_uri)
 {
   const GList *iterator = recovery_cache;
+  *have_uri = FALSE;
+  gboolean have_path = FALSE;
   do
     {
       const MongoDBHostPort *hp = (const MongoDBHostPort *) iterator->data;
-      g_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
+      if (hp->port)
+        {
+          *have_uri = TRUE;
+          if (have_path)
+            {
+              msg_warning("Cannot specify both a domain socket and address", NULL);
+              return FALSE;
+            }
+          g_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
+        }
+      else
+        {
+          have_path = TRUE;
+          if (*have_uri)
+            {
+              msg_warning("Cannot specify both a domain socket and address", NULL);
+              return FALSE;
+            }
+          g_string_append_printf (uri_str, "%s", hp->host);
+        }
       iterator = iterator->next;
       if (iterator)
         g_string_append_printf (uri_str, ",");
     }
   while (iterator);
+  return TRUE;
+}
+
+static gboolean
+_append_servers(MongoDBDestDriver *self)
+{
+  if (self->port != MONGO_CONN_LOCAL)
+    {
+      if (self->address)
+        {
+          gchar *srv = g_strdup_printf ("%s:%d", self->address,
+                                        (self->port) ? self->port : 27017);
+          self->servers = g_list_prepend (self->servers, srv);
+          g_free (self->address);
+        }
+
+      if (self->servers)
+        {
+          GList *l;
+
+          for (l=self->servers; l; l = g_list_next(l))
+            {
+              gchar *host = NULL;
+              gint port = MONGOC_DEFAULT_PORT;
+
+              if (!afmongodb_dd_parse_addr(l->data, &host, &port))
+                {
+                  msg_warning("Cannot parse MongoDB server address, ignoring",
+                              evt_tag_str("address", l->data),
+                              evt_tag_str("driver", self->super.super.super.id),
+                              NULL);
+                  continue;
+                }
+              afmongodb_dd_append_host (&self->recovery_cache, host, port);
+              msg_verbose("Added MongoDB server seed",
+                          evt_tag_str("host", host),
+                          evt_tag_int("port", port),
+                          evt_tag_str("driver", self->super.super.super.id),
+                          NULL);
+              g_free(host);
+            }
+        }
+      else
+        {
+          gchar *localhost = g_strdup_printf("127.0.0.1:%d", self->port);
+          self->servers = g_list_append (NULL, localhost);
+          afmongodb_dd_append_host (&self->recovery_cache, "127.0.0.1", self->port);
+        }
+
+      self->address = NULL;
+      self->port = MONGOC_DEFAULT_PORT;
+      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0),
+                                 &self->address,
+                                 &self->port))
+        {
+          msg_error("Cannot parse the primary host",
+                    evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
+                    evt_tag_str("driver", self->super.super.super.id),
+                    NULL);
+          return FALSE;
+        }
+    }
+  else
+    {
+      if (!self->address)
+        {
+          msg_error("Cannot parse address",
+                    evt_tag_str ("primary", g_list_nth_data (self->servers, 0)),
+                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+          return FALSE;
+        }
+      afmongodb_dd_append_host (&self->recovery_cache, self->address, 0);
+    }
+  return TRUE;
 }
 
 static gboolean
 afmongodb_dd_create_uri(MongoDBDestDriver *self)
 {
   if (self->uri_str)
-    msg_debug("create_uri", evt_tag_str ("uri_str", self->uri_str->str), NULL);
-  msg_debug("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
+    msg_trace("create_uri", evt_tag_str ("uri_str", self->uri_str->str), NULL);
+  msg_trace("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
+
   if ((!self->uri_str) && (!self->is_legacy))
     {
       self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
@@ -340,29 +436,37 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
     }
   else if (self->uri_str)
     return TRUE;
-  else {
-    self->uri_str = g_string_new("mongodb://");
-    if (!self->uri_str)
-      return FALSE;
+  else
+    {
+      _append_servers(self);
 
-    if (self->user || self->password)
-      {
-        g_string_append_printf (self->uri_str, "%s:%s", self->user, self->password);
-      }
-
-    if (!self->recovery_cache)
-      {
-        msg_error ("Error in host server list", evt_tag_str ("driver", self->super.super.super.id), NULL);
+      self->uri_str = g_string_new ("mongodb://");
+      if (!self->uri_str)
         return FALSE;
-      }
 
-    afmongodb_dd_append_servers(self->uri_str, self->recovery_cache);
+      if (self->user || self->password)
+        {
+          g_string_append_printf (self->uri_str, "%s:%s", self->user,
+                                  self->password);
+        }
 
-    g_string_append_printf (self->uri_str, "/%s", self->const_db);
+      if (!self->recovery_cache)
+        {
+          msg_error("Error in host server list",
+                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+          return FALSE;
+        }
 
-    g_string_append_printf (self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
-                            SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
-  }
+      gboolean have_uri;
+      if (!afmongodb_dd_append_servers (self->uri_str, self->recovery_cache, &have_uri))
+        return FALSE;
+
+      if (have_uri)
+        g_string_append_printf (self->uri_str, "/%s", self->db);
+
+      g_string_append_printf (self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
+      SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+    }
 
   msg_debug(self->uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
             NULL);
@@ -704,81 +808,9 @@ afmongodb_dd_init(LogPipe *s)
     return FALSE;
 
   afmongodb_dd_init_value_pairs_dot_to_underscore_transformation(self);
-  if (self->port != MONGO_CONN_LOCAL)
-    {
-      if (self->address)
-        {
-          gchar *srv = g_strdup_printf ("%s:%d", self->address,
-                                        (self->port) ? self->port : 27017);
-          self->servers = g_list_prepend (self->servers, srv);
-          g_free (self->address);
-        }
-
-      if (self->servers)
-        {
-          GList *l;
-
-          for (l=self->servers; l; l = g_list_next(l))
-            {
-              gchar *host = NULL;
-              gint port = MONGOC_DEFAULT_PORT;
-
-              if (!afmongodb_dd_parse_addr(l->data, &host, &port))
-                {
-                  msg_warning("Cannot parse MongoDB server address, ignoring",
-                              evt_tag_str("address", l->data),
-                              evt_tag_str("driver", self->super.super.super.id),
-                              NULL);
-                  continue;
-                }
-              afmongodb_dd_append_host (&self->recovery_cache, host, port);
-              msg_verbose("Added MongoDB server seed",
-                          evt_tag_str("host", host),
-                          evt_tag_int("port", port),
-                          evt_tag_str("driver", self->super.super.super.id),
-                          NULL);
-              g_free(host);
-            }
-        }
-      else
-        {
-          gchar *port = g_strdup_printf ("%d", MONGOC_DEFAULT_PORT);
-          gchar *localhost = g_strconcat ("127.0.0.1", port, NULL);
-          g_free(port);
-          self->servers = g_list_append (NULL, localhost);
-          afmongodb_dd_append_host (&self->recovery_cache, "127.0.0.1", MONGOC_DEFAULT_PORT);
-        }
-
-      self->address = NULL;
-      self->port = MONGOC_DEFAULT_PORT;
-      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0),
-                                 &self->address,
-                                 &self->port))
-        {
-          msg_error("Cannot parse the primary host",
-                    evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
-                    evt_tag_str("driver", self->super.super.super.id),
-                    NULL);
-          return FALSE;
-        }
-    }
-  else
-    {
-      if (!self->address)
-        {
-          msg_error("Cannot parse address",
-                    evt_tag_str ("primary", g_list_nth_data (self->servers, 0)),
-                    evt_tag_str ("driver", self->super.super.super.id), NULL);
-          return FALSE;
-        }
-      afmongodb_dd_append_host (&self->recovery_cache, self->address,
-                                self->port);
-    }
 
   if (!afmongodb_dd_create_uri(self))
-    {
-      return FALSE;
-    }
+    return FALSE;
 
   self->uri_obj = mongoc_uri_new(self->uri_str->str);
   if (!self->uri_obj)
