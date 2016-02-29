@@ -240,33 +240,11 @@ _error(const gchar *mongo_config, const gchar *error)
   return ok;
 }
 
-int
-main(int argc, char **argv)
+#define DEFAULTOPTS "?slaveOk=true&sockettimeoutms=60000"
+
+static void
+_test_legacy(void)
 {
-  _setup(argc, argv);
-
-  _expect("uri('mongodb://127.0.0.1:27017/syslog')",
-          "mongodb://127.0.0.1:27017/syslog",
-          "syslog", "messages");
-
-  _expect("uri('mongodb:///tmp/mongo.sock')",
-          "mongodb:///tmp/mongo.sock",
-          "tmp/mongo.sock", "messages");
-
-  _expect("",
-          "mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
-          "syslog", "messages");
-
-  _error("uri('mongodb://127.0.0.1:27017/')",
-         "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'");
-
-  _error("uri('INVALID-URI')",
-         "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'");
-
-  _error("INVALID-KEYWORD()",
-         "Error parsing afmongodb, inner-dest plugin INVALID-KEYWORD not found in <string> "
-         "at line 1, column 31:");
-
   _error("database())",
          "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
          "LL_STRING in <string> at line 1, column 40:");
@@ -275,33 +253,76 @@ main(int argc, char **argv)
          "Error: either specify a MongoDB URI (and optional collection) or only legacy options; "
          "driver='d_mongo#0'");
 
-  _expect("servers('127.0.0.1:27017', 'localhost:1234')",
-          "mongodb://localhost:1234,127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
+  _expect("servers('127.0.0.2:27018', 'localhost:1234')",
+          "mongodb://localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
+          "syslog", "messages");
+
+  _expect("servers('127.0.0.2')",
+          "mongodb://127.0.0.2:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("host('localhost')",
-          "mongodb://localhost:27017/syslog?slaveOk=true&sockettimeoutms=60000",
+          "mongodb://localhost:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("host('localhost') port(1234)",
-          "mongodb://localhost:1234/syslog?slaveOk=true&sockettimeoutms=60000",
+          "mongodb://localhost:1234/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("port(27017)",
-          "mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000",
+          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("port(1234)",
-          "mongodb://127.0.0.1:1234/syslog?slaveOk=true&sockettimeoutms=60000",
+          "mongodb://127.0.0.1:1234/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("path('/tmp/mongo.sock')",
-          "mongodb:///tmp/mongo.sock?slaveOk=true&sockettimeoutms=60000",
+          "mongodb:///tmp/mongo.sock" DEFAULTOPTS,
           "tmp/mongo.sock", "messages");
 
   _expect("database('syslog-ng')",
-          "mongodb://127.0.0.1:27017/syslog-ng?slaveOk=true&sockettimeoutms=60000",
+          "mongodb://127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
           "syslog-ng", "messages");
+}
+
+static void
+_test_uri(void)
+{
+  _error("INVALID-KEYWORD()",
+         "Error parsing afmongodb, inner-dest plugin INVALID-KEYWORD not found in <string> "
+         "at line 1, column 31:");
+
+  _error("uri('INVALID-URI')",
+         "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'");
+
+  _expect("",
+          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "syslog", "messages");
+
+  _expect("uri('mongodb:///tmp/mongo.sock')",
+          "mongodb:///tmp/mongo.sock",
+          "tmp/mongo.sock", "messages");
+
+  _expect("uri('mongodb://127.0.0.1:27017/syslog')",
+          "mongodb://127.0.0.1:27017/syslog",
+          "syslog", "messages");
+
+  _error("uri('mongodb://127.0.0.1:27017/')",
+         "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'");
+
+  _expect("collection('messages2')",
+          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "syslog", "messages2");
+}
+
+int
+main(int argc, char **argv)
+{
+  _setup(argc, argv);
+
+  _test_legacy();
+  _test_uri();
 
   _teardown();
   return (int) _test_ret_num;
