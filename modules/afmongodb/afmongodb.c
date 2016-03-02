@@ -21,7 +21,6 @@
  *
  */
 
-
 #include "afmongodb.h"
 #include "afmongodb-parser.h"
 #include "messages.h"
@@ -52,7 +51,7 @@ typedef struct
   LogThrDestDriver super;
 
   /* Shared between main/writer; only read by the writer, never
-     written */
+   written */
   gchar *coll;
   GString *uri_str;
 
@@ -85,7 +84,7 @@ typedef struct
 } MongoDBDestDriver;
 
 static gboolean
-afmongodb_dd_parse_addr (const char *str, char **host, gint *port)
+afmongodb_dd_parse_addr(const char *str, char **host, gint *port)
 {
   if (!host || !port)
     return FALSE;
@@ -95,15 +94,15 @@ afmongodb_dd_parse_addr (const char *str, char **host, gint *port)
   if (!uri)
     return FALSE;
 
-  const mongoc_host_list_t *hosts = mongoc_uri_get_hosts (uri);
+  const mongoc_host_list_t *hosts = mongoc_uri_get_hosts(uri);
   if (!hosts || hosts->next)
     {
-      mongoc_uri_destroy (uri);
+      mongoc_uri_destroy(uri);
       return FALSE;
     }
   *port = hosts->port;
-  *host = g_strdup (hosts->host);
-  mongoc_uri_destroy (uri);
+  *host = g_strdup(hosts->host);
+  mongoc_uri_destroy(uri);
   if (!*host)
     return FALSE;
   return TRUE;
@@ -116,7 +115,7 @@ typedef struct
 } MongoDBHostPort;
 
 static gboolean
-afmongodb_dd_append_host (GList **list, const char *host, gint port)
+afmongodb_dd_append_host(GList **list, const char *host, gint port)
 {
   if (!list)
     return FALSE;
@@ -156,7 +155,8 @@ afmongodb_dd_set_host(LogDriver *d, const gchar *host)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once("WARNING: Using host() option is deprecated in mongodb driver, please use servers() instead", NULL);
+  msg_warning_once(
+      "WARNING: Using host() option is deprecated in mongodb driver, please use servers() instead", NULL);
 
   g_free(self->address);
   self->address = g_strdup(host);
@@ -168,7 +168,8 @@ afmongodb_dd_set_port(LogDriver *d, gint port)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once("WARNING: Using port() option is deprecated in mongodb driver, please use servers() instead", NULL);
+  msg_warning_once(
+      "WARNING: Using port() option is deprecated in mongodb driver, please use servers() instead", NULL);
 
   self->port = port;
   self->is_legacy = TRUE;
@@ -198,7 +199,7 @@ afmongodb_dd_set_path(LogDriver *d, const gchar *path)
 LogTemplateOptions *
 afmongodb_dd_get_template_options(LogDriver *s)
 {
-  MongoDBDestDriver *self = (MongoDBDestDriver *) s;
+  MongoDBDestDriver *self = (MongoDBDestDriver *)s;
 
   return &self->template_options;
 }
@@ -210,17 +211,14 @@ afmongodb_dd_check_address(LogDriver *d, gboolean local)
 
   if (local)
     {
-      if ((self->port != 0 ||
-           self->port != MONGO_CONN_LOCAL) &&
-          self->address != NULL)
+      if ((self->port != 0 || self->port != MONGO_CONN_LOCAL) && self->address != NULL)
         return FALSE;
       if (self->servers)
         return FALSE;
     }
   else
     {
-      if (self->port == MONGO_CONN_LOCAL &&
-          self->address != NULL)
+      if (self->port == MONGO_CONN_LOCAL && self->address != NULL)
         return FALSE;
     }
   return TRUE;
@@ -260,7 +258,7 @@ afmongodb_dd_set_value_pairs(LogDriver *d, ValuePairs *vp)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  value_pairs_unref (self->vp);
+  value_pairs_unref(self->vp);
   self->vp = vp;
 }
 
@@ -307,15 +305,14 @@ afmongodb_dd_disconnect(LogThrDestDriver *s)
 }
 
 static gboolean
-afmongodb_dd_append_servers(GString *uri_str,
-                            const GList *recovery_cache, gboolean *have_uri)
+afmongodb_dd_append_servers(GString *uri_str, const GList *recovery_cache, gboolean *have_uri)
 {
   const GList *iterator = recovery_cache;
   *have_uri = FALSE;
   gboolean have_path = FALSE;
   do
     {
-      const MongoDBHostPort *hp = (const MongoDBHostPort *) iterator->data;
+      const MongoDBHostPort *hp = (const MongoDBHostPort *)iterator->data;
       if (hp->port)
         {
           *have_uri = TRUE;
@@ -324,7 +321,7 @@ afmongodb_dd_append_servers(GString *uri_str,
               msg_warning("Cannot specify both a domain socket and address", NULL);
               return FALSE;
             }
-          g_string_append_printf (uri_str, "%s:%hu", hp->host, hp->port);
+          g_string_append_printf(uri_str, "%s:%hu", hp->host, hp->port);
         }
       else
         {
@@ -334,11 +331,11 @@ afmongodb_dd_append_servers(GString *uri_str,
               msg_warning("Cannot specify both a domain socket and address", NULL);
               return FALSE;
             }
-          g_string_append_printf (uri_str, "%s", hp->host);
+          g_string_append_printf(uri_str, "%s", hp->host);
         }
       iterator = iterator->next;
       if (iterator)
-        g_string_append_printf (uri_str, ",");
+        g_string_append_printf(uri_str, ",");
     }
   while (iterator);
   return TRUE;
@@ -351,17 +348,17 @@ _append_servers(MongoDBDestDriver *self)
     {
       if (self->address)
         {
-          gchar *srv = g_strdup_printf ("%s:%d", self->address,
-                                        (self->port) ? self->port : MONGOC_DEFAULT_PORT);
-          self->servers = g_list_prepend (self->servers, srv);
-          g_free (self->address);
+          gchar *srv = g_strdup_printf("%s:%d", self->address,
+                                       (self->port) ? self->port : MONGOC_DEFAULT_PORT);
+          self->servers = g_list_prepend(self->servers, srv);
+          g_free(self->address);
         }
 
       if (self->servers)
         {
           GList *l;
 
-          for (l=self->servers; l; l = g_list_next(l))
+          for (l = self->servers; l; l = g_list_next(l))
             {
               gchar *host = NULL;
               gint port = MONGOC_DEFAULT_PORT;
@@ -374,7 +371,7 @@ _append_servers(MongoDBDestDriver *self)
                               NULL);
                   continue;
                 }
-              afmongodb_dd_append_host (&self->recovery_cache, host, port);
+              afmongodb_dd_append_host(&self->recovery_cache, host, port);
               msg_verbose("Added MongoDB server seed",
                           evt_tag_str("host", host),
                           evt_tag_int("port", port),
@@ -386,15 +383,13 @@ _append_servers(MongoDBDestDriver *self)
       else
         {
           gchar *localhost = g_strdup_printf("127.0.0.1:%d", self->port);
-          self->servers = g_list_append (NULL, localhost);
-          afmongodb_dd_append_host (&self->recovery_cache, localhost, self->port);
+          self->servers = g_list_append(NULL, localhost);
+          afmongodb_dd_append_host(&self->recovery_cache, localhost, self->port);
         }
 
       self->address = NULL;
       self->port = MONGOC_DEFAULT_PORT;
-      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0),
-                                 &self->address,
-                                 &self->port))
+      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0), &self->address, &self->port))
         {
           msg_error("Cannot parse the primary host",
                     evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
@@ -408,8 +403,9 @@ _append_servers(MongoDBDestDriver *self)
       if (!self->address)
         {
           msg_error("Cannot parse address",
-                    evt_tag_str ("primary", g_list_nth_data (self->servers, 0)),
-                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+                    evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
+                    evt_tag_str("driver", self->super.super.super.id),
+                    NULL);
           return FALSE;
         }
       afmongodb_dd_append_host(&self->recovery_cache, self->address, 0);
@@ -421,7 +417,7 @@ static gboolean
 afmongodb_dd_create_uri(MongoDBDestDriver *self)
 {
   if (self->uri_str)
-    msg_trace("create_uri", evt_tag_str ("uri_str", self->uri_str->str), NULL);
+    msg_trace("create_uri", evt_tag_str("uri_str", self->uri_str->str), NULL);
   msg_trace("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
 
   if ((!self->uri_str) && (!self->is_legacy))
@@ -430,8 +426,9 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
     }
   else if (self->uri_str && self->is_legacy)
     {
-      msg_error ("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
-                 evt_tag_str ("driver", self->super.super.super.id), NULL);
+      msg_error("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
+                evt_tag_str("driver", self->super.super.super.id),
+                NULL);
       return FALSE;
     }
   else if (self->uri_str)
@@ -440,36 +437,33 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
     {
       _append_servers(self);
 
-      self->uri_str = g_string_new ("mongodb://");
+      self->uri_str = g_string_new("mongodb://");
       if (!self->uri_str)
         return FALSE;
 
       if (self->user && self->password)
         {
-          g_string_append_printf (self->uri_str, "%s:%s", self->user,
-                                  self->password);
+          g_string_append_printf(self->uri_str, "%s:%s", self->user, self->password);
         }
 
       if (!self->recovery_cache)
         {
-          msg_error("Error in host server list",
-                    evt_tag_str ("driver", self->super.super.super.id), NULL);
+          msg_error("Error in host server list", evt_tag_str("driver", self->super.super.super.id), NULL);
           return FALSE;
         }
 
       gboolean have_uri;
-      if (!afmongodb_dd_append_servers (self->uri_str, self->recovery_cache, &have_uri))
+      if (!afmongodb_dd_append_servers(self->uri_str, self->recovery_cache, &have_uri))
         return FALSE;
 
       if (have_uri)
-        g_string_append_printf (self->uri_str, "/%s", self->db);
+        g_string_append_printf(self->uri_str, "/%s", self->db);
 
-      g_string_append_printf (self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
+      g_string_append_printf(self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
       SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
     }
 
-  msg_debug(self->uri_str->str, evt_tag_str ("driver", self->super.super.super.id),
-            NULL);
+  msg_debug(self->uri_str->str, evt_tag_str("driver", self->super.super.super.id), NULL);
 
   return TRUE;
 }
@@ -480,22 +474,21 @@ afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
   if (reconnect && self->client)
     return TRUE;
 
-  self->client = mongoc_client_new_from_uri (self->uri_obj);
+  self->client = mongoc_client_new_from_uri(self->uri_obj);
 
   if (!self->client)
     {
-      msg_error("Error connecting to MongoDB",
-                evt_tag_str ("driver", self->super.super.super.id), NULL);
+      msg_error("Error connecting to MongoDB", evt_tag_str("driver", self->super.super.super.id), NULL);
       return FALSE;
     }
 
-  self->coll_obj = mongoc_client_get_collection (self->client, self->const_db,
-                                                 self->coll);
+  self->coll_obj = mongoc_client_get_collection(self->client, self->const_db, self->coll);
   if (!self->coll_obj)
     {
       msg_error("Error getting specified MongoDB collection",
-                evt_tag_str ("collection", self->coll),
-                evt_tag_str ("driver", self->super.super.super.id), NULL);
+                evt_tag_str("collection", self->coll),
+                evt_tag_str("driver", self->super.super.super.id),
+                NULL);
       return FALSE;
     }
 
@@ -539,16 +532,15 @@ afmongodb_vp_obj_end(const gchar *name,
     {
       bson_t *d = (bson_t *)*prefix_data;
 
-      bson_append_document (root, name, -1, d);
-      bson_free (d);
+      bson_append_document(root, name, -1, d);
+      bson_free(d);
     }
   return FALSE;
 }
 
 static gboolean
-afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
-                           TypeHint type, const gchar *value, gsize value_len,
-                           gpointer *prefix_data, gpointer user_data)
+afmongodb_vp_process_value(const gchar *name, const gchar *prefix, TypeHint type, const gchar *value,
+                           gsize value_len, gpointer *prefix_data, gpointer user_data)
 {
   bson_t *o;
   MongoDBDestDriver *self = (MongoDBDestDriver *)user_data;
@@ -565,15 +557,14 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gboolean b;
 
-        if (type_cast_to_boolean (value, &b, NULL))
-          bson_append_bool (o, name, -1, b);
+        if (type_cast_to_boolean(value, &b, NULL))
+          bson_append_bool(o, name, -1, b);
         else
           {
-            gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "boolean");
+            gboolean r = type_cast_drop_helper(self->template_options.on_error, value, "boolean");
 
             if (fallback)
-              bson_append_utf8 (o, name, -1, value, value_len);
+              bson_append_utf8(o, name, -1, value, value_len);
             else
               return r;
           }
@@ -583,15 +574,14 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gint32 i;
 
-        if (type_cast_to_int32 (value, &i, NULL))
-          bson_append_int32 (o, name, -1, i);
+        if (type_cast_to_int32(value, &i, NULL))
+          bson_append_int32(o, name, -1, i);
         else
           {
-            gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "int32");
+            gboolean r = type_cast_drop_helper(self->template_options.on_error, value, "int32");
 
             if (fallback)
-              bson_append_utf8 (o, name, -1, value, value_len);
+              bson_append_utf8(o, name, -1, value, value_len);
             else
               return r;
           }
@@ -601,12 +591,11 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gint64 i;
 
-        if (type_cast_to_int64 (value, &i, NULL))
-          bson_append_int64 (o, name, -1, i);
+        if (type_cast_to_int64(value, &i, NULL))
+          bson_append_int64(o, name, -1, i);
         else
           {
-            gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "int64");
+            gboolean r = type_cast_drop_helper(self->template_options.on_error, value, "int64");
 
             if (fallback)
               bson_append_utf8(o, name, -1, value, value_len);
@@ -620,12 +609,11 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         gdouble d;
 
-        if (type_cast_to_double (value, &d, NULL))
-          bson_append_double (o, name, -1, d);
+        if (type_cast_to_double(value, &d, NULL))
+          bson_append_double(o, name, -1, d);
         else
           {
-            gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "double");
+            gboolean r = type_cast_drop_helper(self->template_options.on_error, value, "double");
             if (fallback)
               bson_append_utf8(o, name, -1, value, value_len);
             else
@@ -638,12 +626,11 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       {
         guint64 i;
 
-        if (type_cast_to_datetime_int (value, &i, NULL))
-          bson_append_date_time (o, name, -1, (gint64)i);
+        if (type_cast_to_datetime_int(value, &i, NULL))
+          bson_append_date_time(o, name, -1, (gint64)i);
         else
           {
-            gboolean r = type_cast_drop_helper(self->template_options.on_error,
-                                               value, "datetime");
+            gboolean r = type_cast_drop_helper(self->template_options.on_error, value, "datetime");
 
             if (fallback)
               bson_append_utf8(o, name, -1, value, value_len);
@@ -655,7 +642,7 @@ afmongodb_vp_process_value(const gchar *name, const gchar *prefix,
       }
     case TYPE_HINT_STRING:
     case TYPE_HINT_LITERAL:
-      bson_append_utf8 (o, name, -1, value, value_len);
+      bson_append_utf8(o, name, -1, value, value_len);
       break;
     default:
       return TRUE;
@@ -669,18 +656,16 @@ afmongodb_worker_retry_over_message(LogThrDestDriver *s, LogMessage *msg)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)s;
 
-  msg_error("Multiple failures while inserting this record into the database, "
-            "message dropped",
-            evt_tag_str("driver", self->super.super.super.id),
-            evt_tag_int("number_of_retries", s->retries.max),
-            evt_tag_value_pairs("message", self->vp, msg,
-                                self->super.seq_num,
-                                LTZ_SEND, &self->template_options),
-            NULL);
+  msg_error(
+      "Multiple failures while inserting this record into the database, "
+      "message dropped",
+      evt_tag_str("driver", self->super.super.super.id), evt_tag_int("number_of_retries", s->retries.max),
+      evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num, LTZ_SEND, &self->template_options),
+      NULL);
 }
 
 static worker_insert_result_t
-afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
+afmongodb_worker_insert(LogThrDestDriver *s, LogMessage *msg)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)s;
   gboolean success;
@@ -689,7 +674,7 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
   if (!afmongodb_dd_connect(self, TRUE))
     return WORKER_INSERT_RESULT_NOT_CONNECTED;
 
-  bson_reinit (self->bson);
+  bson_reinit(self->bson);
 
   success = value_pairs_walk(self->vp,
                              afmongodb_vp_obj_start,
@@ -704,10 +689,10 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
     {
       if (!drop_silently)
         {
-          msg_error("Failed to format message for MongoDB, dropping message",
-                    evt_tag_value_pairs("message", self->vp, msg,
-                                        self->super.seq_num,
-                                        LTZ_SEND, &self->template_options),
+          msg_error(
+                    "Failed to format message for MongoDB, dropping message",
+                    evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num, LTZ_SEND,
+                                        &self->template_options),
                     evt_tag_str("driver", self->super.super.super.id),
                     NULL);
         }
@@ -716,17 +701,15 @@ afmongodb_worker_insert (LogThrDestDriver *s, LogMessage *msg)
   else
     {
       bson_error_t error;
-      msg_debug("Outgoing message to MongoDB destination",
-                evt_tag_value_pairs("message", self->vp, msg,
-                                    self->super.seq_num,
-                                    LTZ_SEND, &self->template_options),
+      msg_debug(
+                "Outgoing message to MongoDB destination",
+                evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num, LTZ_SEND,
+                                    &self->template_options),
                 evt_tag_str("driver", self->super.super.super.id),
                 NULL);
 
-      success = mongoc_collection_insert (self->coll_obj, MONGOC_INSERT_NONE,
-                                          (const bson_t *) self->bson,
-                                          NULL,
-                                          &error);
+      success = mongoc_collection_insert(self->coll_obj, MONGOC_INSERT_NONE, (const bson_t *)self->bson,
+                                         NULL, &error);
       if (!success)
         {
           msg_error("Network error while inserting into MongoDB",
@@ -761,7 +744,7 @@ afmongodb_worker_thread_deinit(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  bson_free (self->bson);
+  bson_free(self->bson);
 }
 
 /*
@@ -787,7 +770,7 @@ afmongodb_dd_init_value_pairs_dot_to_underscore_transformation(MongoDBDestDriver
 {
   ValuePairsTransformSet *vpts;
 
- /* Always replace a leading dot with an underscore. */
+  /* Always replace a leading dot with an underscore. */
   vpts = value_pairs_transform_set_new(".*");
   value_pairs_transform_set_add_func(vpts, value_pairs_new_transform_replace_prefix(".", "_"));
   value_pairs_add_transforms(self->vp, vpts);
@@ -816,8 +799,8 @@ afmongodb_dd_init(LogPipe *s)
   if (!self->uri_obj)
     {
       msg_error("Error parsing MongoDB URI",
-                evt_tag_str ("uri", self->uri_str->str),
-                evt_tag_str ("driver", self->super.super.super.id),
+                evt_tag_str("uri", self->uri_str->str),
+                evt_tag_str("driver", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
@@ -826,29 +809,29 @@ afmongodb_dd_init(LogPipe *s)
   if (!self->const_db || !strlen(self->const_db))
     {
       msg_error("Missing DB name from MongoDB URI",
-                evt_tag_str ("uri", self->uri_str->str),
-                evt_tag_str ("driver", self->super.super.super.id),
+                evt_tag_str("uri", self->uri_str->str),
+                evt_tag_str("driver", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
 
   msg_verbose("Initializing MongoDB destination",
-              evt_tag_str ("uri", self->uri_str->str),
-              evt_tag_str ("db", self->const_db),
-              evt_tag_str ("collection", self->coll),
-              evt_tag_str ("driver", self->super.super.super.id),
+              evt_tag_str("uri", self->uri_str->str),
+              evt_tag_str("db", self->const_db),
+              evt_tag_str("collection", self->coll),
+              evt_tag_str("driver", self->super.super.super.id),
               NULL);
 
   return log_threaded_dest_driver_start(s);
 }
 
 static void
-afmongodb_dd_free_host_port (gpointer data)
+afmongodb_dd_free_host_port(gpointer data)
 {
-  MongoDBHostPort *hp = (MongoDBHostPort *) data;
-  g_free (hp->host);
+  MongoDBHostPort *hp = (MongoDBHostPort *)data;
+  g_free(hp->host);
   hp->host = NULL;
-  g_free (hp);
+  g_free(hp);
 }
 
 static void
@@ -868,8 +851,7 @@ afmongodb_dd_free(LogPipe *d)
   string_list_free(self->servers);
   value_pairs_unref(self->vp);
 
-  g_list_free_full (self->recovery_cache,
-                    (GDestroyNotify) & afmongodb_dd_free_host_port);
+  g_list_free_full(self->recovery_cache, (GDestroyNotify)&afmongodb_dd_free_host_port);
   self->recovery_cache = NULL;
   if (self->uri_obj)
     mongoc_uri_destroy(self->uri_obj);
@@ -884,7 +866,7 @@ afmongodb_dd_queue_method(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  self->last_msg_stamp = cached_g_current_time_sec ();
+  self->last_msg_stamp = cached_g_current_time_sec();
 }
 
 /*
@@ -896,7 +878,7 @@ afmongodb_dd_new(GlobalConfig *cfg)
 {
   MongoDBDestDriver *self = g_new0(MongoDBDestDriver, 1);
 
-  mongoc_init ();
+  mongoc_init();
 
   log_threaded_dest_driver_init_instance(&self->super, cfg);
 
@@ -926,11 +908,11 @@ afmongodb_dd_new(GlobalConfig *cfg)
 extern CfgParser afmongodb_dd_parser;
 
 static Plugin afmongodb_plugin =
-{
-  .type = LL_CONTEXT_DESTINATION,
-  .name = "mongodb",
-  .parser = &afmongodb_parser,
-};
+      {
+          .type = LL_CONTEXT_DESTINATION,
+          .name = "mongodb",
+          .parser = &afmongodb_parser,
+      };
 
 gboolean
 afmongodb_module_init(GlobalConfig *cfg, CfgArgs *args)
@@ -940,11 +922,11 @@ afmongodb_module_init(GlobalConfig *cfg, CfgArgs *args)
 }
 
 const ModuleInfo module_info =
-{
-  .canonical_name = "afmongodb",
-  .version = SYSLOG_NG_VERSION,
-  .description = "The afmongodb module provides MongoDB destination support for syslog-ng.",
-  .core_revision = SYSLOG_NG_SOURCE_REVISION,
-  .plugins = &afmongodb_plugin,
-  .plugins_len = 1,
-};
+      {
+          .canonical_name = "afmongodb",
+          .version = SYSLOG_NG_VERSION,
+          .description = "The afmongodb module provides MongoDB destination support for syslog-ng.",
+          .core_revision = SYSLOG_NG_SOURCE_REVISION,
+          .plugins = &afmongodb_plugin,
+          .plugins_len = 1,
+      };
