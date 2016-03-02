@@ -387,7 +387,7 @@ _append_servers(MongoDBDestDriver *self)
         {
           gchar *localhost = g_strdup_printf("127.0.0.1:%d", self->port);
           self->servers = g_list_append (NULL, localhost);
-          afmongodb_dd_append_host (&self->recovery_cache, "127.0.0.1", self->port);
+          afmongodb_dd_append_host (&self->recovery_cache, localhost, self->port);
         }
 
       self->address = NULL;
@@ -412,7 +412,7 @@ _append_servers(MongoDBDestDriver *self)
                     evt_tag_str ("driver", self->super.super.super.id), NULL);
           return FALSE;
         }
-      afmongodb_dd_append_host (&self->recovery_cache, self->address, 0);
+      afmongodb_dd_append_host(&self->recovery_cache, self->address, 0);
     }
   return TRUE;
 }
@@ -444,7 +444,7 @@ afmongodb_dd_create_uri(MongoDBDestDriver *self)
       if (!self->uri_str)
         return FALSE;
 
-      if (self->user || self->password)
+      if (self->user && self->password)
         {
           g_string_append_printf (self->uri_str, "%s:%s", self->user,
                                   self->password);
