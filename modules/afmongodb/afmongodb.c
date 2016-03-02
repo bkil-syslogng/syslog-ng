@@ -39,7 +39,7 @@
 #include <time.h>
 
 #define SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS 60000
-#define MONGO_CONN_LOCAL MONGOC_DEFAULT_PORT
+#define MONGO_CONN_LOCAL -1
 
 typedef struct
 {
@@ -352,7 +352,7 @@ _append_servers(MongoDBDestDriver *self)
       if (self->address)
         {
           gchar *srv = g_strdup_printf ("%s:%d", self->address,
-                                        (self->port) ? self->port : 27017);
+                                        (self->port) ? self->port : MONGOC_DEFAULT_PORT);
           self->servers = g_list_prepend (self->servers, srv);
           g_free (self->address);
         }
