@@ -195,7 +195,7 @@ _run_test(const gchar *mongo_config)
 }
 
 #define URI_MSG_FMT ("Initializing MongoDB destination; " \
-    "uri='%s', db='%s', collection='%s', driver='d_mongo#0'")
+    "uri='mongodb://%s', db='%s', collection='%s', driver='d_mongo#0'")
 
 static gboolean
 _expect_uri(const gchar *uri, const gchar *db, const gchar *col)
@@ -250,47 +250,47 @@ _test_legacy(void)
          "driver='d_mongo#0'");
 
   _expect("servers('127.0.0.2:27018', 'localhost:1234')",
-          "mongodb://localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
+          "localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("servers('127.0.0.2')",
-          "mongodb://127.0.0.2:27017/syslog" DEFAULTOPTS,
+          "127.0.0.2:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("host('localhost')",
-          "mongodb://localhost:27017/syslog" DEFAULTOPTS,
+          "localhost:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("host('localhost') port(1234)",
-          "mongodb://localhost:1234/syslog" DEFAULTOPTS,
+          "localhost:1234/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("port(27017)",
-          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "127.0.0.1:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("port(1234)",
-          "mongodb://127.0.0.1:1234/syslog" DEFAULTOPTS,
+          "127.0.0.1:1234/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("path('/tmp/mongo.sock')",
-          "mongodb:///tmp/mongo.sock" DEFAULTOPTS,
+          "/tmp/mongo.sock" DEFAULTOPTS,
           "tmp/mongo.sock", "messages");
 
   _expect("database('syslog-ng')",
-          "mongodb://127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
+          "127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
           "syslog-ng", "messages");
 
   _expect("safe_mode(no)",
-          "mongodb://127.0.0.1:27017/syslog",
+          "127.0.0.1:27017/syslog",
           "syslog", "messages");
 
   _expect("username('user') password('password')",
-          "mongodb://user:password@127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "user:password@127.0.0.1:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("safe_mode(yes) collection('messages2')",
-          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "127.0.0.1:27017/syslog" DEFAULTOPTS,
           "syslog", "messages2");
 #else
   _error("database('syslog')",
@@ -335,23 +335,23 @@ _test_uri(void)
          "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'");
 
   _expect("",
-          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "127.0.0.1:27017/syslog" DEFAULTOPTS,
           "syslog", "messages");
 
   _expect("uri('mongodb:///tmp/mongo.sock')",
-          "mongodb:///tmp/mongo.sock",
+          "/tmp/mongo.sock",
           "tmp/mongo.sock", "messages");
 
   _expect("uri('mongodb://127.0.0.1:27017/syslog')",
-          "mongodb://127.0.0.1:27017/syslog",
+          "127.0.0.1:27017/syslog",
           "syslog", "messages");
+
+  _expect("collection('messages2')",
+          "127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "syslog", "messages2");
 
   _error("uri('mongodb://127.0.0.1:27017/')",
          "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'");
-
-  _expect("collection('messages2')",
-          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages2");
 }
 
 int
