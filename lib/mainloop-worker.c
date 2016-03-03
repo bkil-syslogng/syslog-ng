@@ -56,7 +56,7 @@ volatile gboolean main_loop_workers_quit;
 /* number of I/O worker jobs running */
 static gint main_loop_workers_running;
 
-/* the function to be killed when all threads have exited */
+/* the function to be called when all threads have exited */
 static void (*main_loop_workers_sync_func)(void);
 static struct iv_task main_loop_workers_reenable_jobs_task;
 
