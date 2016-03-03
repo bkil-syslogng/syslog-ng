@@ -230,7 +230,8 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
     }
   else if (self->is_legacy)
     {
-      _append_legacy_servers(self);
+      if (!_append_legacy_servers(self))
+        return FALSE;
 
       self->uri_str = g_string_new("mongodb://");
       if (!self->uri_str)
