@@ -521,7 +521,7 @@ afmongodb_dd_new(GlobalConfig *cfg)
   log_template_options_defaults(&self->template_options);
   afmongodb_dd_set_value_pairs(&self->super.super.super, value_pairs_new_default(cfg));
 
-  return (LogDriver *)self;
+  return &self->super.super.super;
 }
 
 extern CfgParser afmongodb_dd_parser;
