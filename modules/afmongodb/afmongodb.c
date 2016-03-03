@@ -103,7 +103,7 @@ _format_persist_name(LogThrDestDriver *d)
 }
 
 static void
-_dd_disconnect(LogThrDestDriver *s)
+_worker_disconnect(LogThrDestDriver *s)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)s;
 
@@ -406,7 +406,7 @@ _init_value_pairs_dot_to_underscore_transformation(MongoDBDestDriver *self)
 }
 
 static gboolean
-_afmongodb_dd_init(LogPipe *s)
+_logpipe_init(LogPipe *s)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
@@ -457,7 +457,7 @@ _afmongodb_dd_init(LogPipe *s)
 }
 
 static void
-_afmongodb_dd_free(LogPipe *d)
+_logpipe_free(LogPipe *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
@@ -480,7 +480,7 @@ _afmongodb_dd_free(LogPipe *d)
 }
 
 static void
-_afmongodb_dd_queue_method(LogThrDestDriver *d)
+_logthrdest_queue_method(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
@@ -500,13 +500,13 @@ afmongodb_dd_new(GlobalConfig *cfg)
 
   log_threaded_dest_driver_init_instance(&self->super, cfg);
 
-  self->super.super.super.super.init = _afmongodb_dd_init;
-  self->super.super.super.super.free_fn = _afmongodb_dd_free;
-  self->super.queue_method = _afmongodb_dd_queue_method;
+  self->super.super.super.super.init = _logpipe_init;
+  self->super.super.super.super.free_fn = _logpipe_free;
+  self->super.queue_method = _logthrdest_queue_method;
 
   self->super.worker.thread_init = _worker_thread_init;
   self->super.worker.thread_deinit = _worker_thread_deinit;
-  self->super.worker.disconnect = _dd_disconnect;
+  self->super.worker.disconnect = _worker_disconnect;
   self->super.worker.insert = _worker_insert;
   self->super.format.stats_instance = _format_stats_instance;
   self->super.format.persist_name = _format_persist_name;
