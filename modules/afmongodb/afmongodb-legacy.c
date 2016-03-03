@@ -54,20 +54,6 @@ afmongodb_dd_check_address(LogDriver *d, gboolean local)
   return TRUE;
 }
 
-static gboolean
-afmongodb_dd_check_auth_options(MongoDBDestDriver *self)
-{
-  if (self->user || self->password)
-    {
-      if (!self->user || !self->password)
-        {
-          msg_error("Neither the username, nor the password can be empty", NULL);
-          return FALSE;
-        }
-    }
-  return TRUE;
-}
-
 void
 afmongodb_dd_set_user(LogDriver *d, const gchar *user)
 {
@@ -152,6 +138,7 @@ afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state)
   self->safe_mode = state;
   self->is_legacy = TRUE;
 }
+
 
 static gboolean
 afmongodb_dd_parse_addr(const char *str, char **host, gint *port)
@@ -305,6 +292,20 @@ afmongodb_dd_append_servers(GString *uri_str, const GList *recovery_cache, gbool
         g_string_append_printf(uri_str, ",");
     }
   while (iterator);
+  return TRUE;
+}
+
+static gboolean
+afmongodb_dd_check_auth_options(MongoDBDestDriver *self)
+{
+  if (self->user || self->password)
+    {
+      if (!self->user || !self->password)
+        {
+          msg_error("Neither the username, nor the password can be empty", NULL);
+          return FALSE;
+        }
+    }
   return TRUE;
 }
 
