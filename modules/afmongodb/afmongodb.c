@@ -35,7 +35,7 @@
 
 #include "afmongodb-private.h"
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-#include "afmongodb-legacy-private.h"
+#include "afmongodb-legacy-uri.h"
 #endif
 
 /*

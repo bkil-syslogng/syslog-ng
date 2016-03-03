@@ -20,17 +20,13 @@
  *
  */
 
-#ifndef AFMONGODB_LEGACY_PRIVATE_H_
-#define AFMONGODB_LEGACY_PRIVATE_H_
+#ifndef AFMONGODB_LEGACY_URI_H_
+#define AFMONGODB_LEGACY_URI_H_
 
 #include "afmongodb-private.h"
 
-#define MONGO_CONN_LOCAL -1
-
-typedef struct
-{
-  char *host;
-  gint port;
-} MongoDBHostPort;
+void afmongodb_dd_init_legacy(MongoDBDestDriver *self);
+void afmongodb_dd_free_legacy(MongoDBDestDriver *self);
+gboolean afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self);
 
 #endif
