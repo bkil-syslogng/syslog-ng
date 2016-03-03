@@ -198,7 +198,7 @@ _run_test(const gchar *mongo_config)
     "uri='mongodb://%s', db='%s', collection='%s', driver='d_mongo#0'")
 
 static gboolean
-_expect_uri(const gchar *uri, const gchar *db, const gchar *col)
+_expect_uri_in_log(const gchar *uri, const gchar *db, const gchar *col)
 {
   GString *pattern = g_string_sized_new(0);
   g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
@@ -210,12 +210,12 @@ _expect_uri(const gchar *uri, const gchar *db, const gchar *col)
 }
 
 static gboolean
-_expect(const gchar *mongo_config, const gchar *expected_uri, const gchar *db, const gchar *coll)
+_run_and_expect_uri(const gchar *mongo_config, const gchar *expected_uri, const gchar *db, const gchar *coll)
 {
   testcase_begin("%s(%s,%s,%s,%s)", __FUNCTION__, mongo_config, expected_uri, db, coll);
 
   gboolean ok = _run_test(mongo_config);
-  ok &= _expect_uri(expected_uri, db, coll);
+  ok &= _expect_uri_in_log(expected_uri, db, coll);
   if (!ok)
     TEST_FAILED;
 
@@ -224,7 +224,7 @@ _expect(const gchar *mongo_config, const gchar *expected_uri, const gchar *db, c
 }
 
 static gboolean
-_error(const gchar *mongo_config, const gchar *error)
+_run_and_expect_error(const gchar *mongo_config, const gchar *error)
 {
   testcase_begin("%s(%s,%s)", __FUNCTION__, mongo_config, error);
 
@@ -241,117 +241,229 @@ _error(const gchar *mongo_config, const gchar *error)
 
 #define DEFAULTOPTS "?slaveOk=true&sockettimeoutms=60000"
 
+typedef struct _URITestCase
+{
+  const char *mongo_config;
+  const char *expected_uri;
+  const char *expected_db;
+  const char *expected_collection;
+} URITestCase;
+
+typedef struct _ErrorTestCase
+{
+  const char *mongo_config;
+  const char *expected_error_message;
+} ErrorTestCase;
+
+static gboolean
+_correct_uri_cases(const URITestCase uri_tests[])
+{
+  gboolean ok = TRUE;
+  const URITestCase *test = uri_tests;
+  while (test->mongo_config)
+    {
+      ok &= _run_and_expect_uri(test->mongo_config, test->expected_uri, test->expected_db, test->expected_collection);
+      test++;
+    }
+  return ok;
+}
+
+static gboolean
+_error_case(const ErrorTestCase uri_test)
+{
+  return _run_and_expect_error(uri_test.mongo_config, uri_test.expected_error_message);
+}
+
+static gboolean
+_error_cases(const ErrorTestCase uri_tests[])
+{
+  gboolean ok = TRUE;
+  const ErrorTestCase *test = uri_tests;
+  while (test->mongo_config)
+    {
+      ok &= _error_case(*test++);
+    }
+  return ok;
+}
+
+#define INVALID_KEYWORD(word) ( \
+    "Error parsing afmongodb, inner-dest plugin " \
+    word \
+    " not found in <string> at line 1, column 31:")
+
 static void
 _test_legacy(void)
 {
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  _error("safe_mode(yes) uri('mongodb://127.0.0.1:27017/syslog')",
-         "Error: either specify a MongoDB URI (and optional collection) or only legacy options; "
-         "driver='d_mongo#0'");
+  _error_case((const ErrorTestCase)
+          {
+              "safe_mode(yes) uri('mongodb://127.0.0.1:27017/syslog')",
+              "Error: either specify a MongoDB URI (and optional collection) or only legacy options; "
+                  "driver='d_mongo#0'"
+          });
 
-  _expect("servers('127.0.0.2:27018', 'localhost:1234')",
-          "localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("servers('127.0.0.2')",
-          "127.0.0.2:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("host('localhost')",
-          "localhost:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("host('localhost') port(1234)",
-          "localhost:1234/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("port(27017)",
-          "127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("port(1234)",
-          "127.0.0.1:1234/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("path('/tmp/mongo.sock')",
-          "/tmp/mongo.sock" DEFAULTOPTS,
-          "tmp/mongo.sock", "messages");
-
-  _expect("database('syslog-ng')",
-          "127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
-          "syslog-ng", "messages");
-
-  _expect("safe_mode(no)",
-          "127.0.0.1:27017/syslog",
-          "syslog", "messages");
-
-  _expect("username('user') password('password')",
-          "user:password@127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("safe_mode(yes) collection('messages2')",
-          "127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages2");
+  _correct_uri_cases((const URITestCase[])
+          {
+                {
+                    "servers('127.0.0.2:27018', 'localhost:1234')",
+                    "localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "servers('127.0.0.2')",
+                    "127.0.0.2:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "host('localhost')",
+                    "localhost:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "host('localhost') port(1234)",
+                    "localhost:1234/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "port(27017)",
+                    "127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "port(1234)",
+                    "127.0.0.1:1234/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "path('/tmp/mongo.sock')",
+                    "/tmp/mongo.sock" DEFAULTOPTS,
+                    "tmp/mongo.sock",
+                    "messages" },
+                {
+                    "database('syslog-ng')",
+                    "127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
+                    "syslog-ng",
+                    "messages"
+                },
+                {
+                    "safe_mode(no)",
+                    "127.0.0.1:27017/syslog",
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "username('user') password('password')",
+                    "user:password@127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "safe_mode(yes) collection('messages2')",
+                    "127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages2"
+                },
+                { }
+          });
 #else
-  _error("database('syslog')",
-         "Error parsing afmongodb, inner-dest plugin database not found in <string> "
-         "at line 1, column 31:");
-  _error("username('user')",
-         "Error parsing afmongodb, inner-dest plugin username not found in <string> "
-         "at line 1, column 31:");
-  _error("password('password')",
-         "Error parsing afmongodb, inner-dest plugin password not found in <string> "
-         "at line 1, column 31:");
-  _error("safe_mode(yes)",
-         "Error parsing afmongodb, inner-dest plugin safe_mode not found in <string> "
-         "at line 1, column 31:");
-  _error("host('localhost')",
-         "Error parsing afmongodb, inner-dest plugin host not found in <string> "
-         "at line 1, column 31:");
-  _error("port(1234)",
-         "Error parsing afmongodb, inner-dest plugin port not found in <string> "
-         "at line 1, column 31:");
-  _error("path('/tmp/syslog.sock')",
-         "Error parsing afmongodb, inner-dest plugin path not found in <string> "
-         "at line 1, column 31:");
-  _error("servers('localhost:1234')",
-         "Error parsing afmongodb, inner-dest plugin servers not found in <string> "
-         "at line 1, column 31:");
+  _error_cases((const ErrorTestCase[])
+          {
+                {
+                    "database('syslog')",
+                    INVALID_KEYWORD("database")
+                },
+                {
+                    "username('user')",
+                    INVALID_KEYWORD("username")
+                },
+                {
+                    "password('password')",
+                    INVALID_KEYWORD("password")
+                },
+                {
+                    "safe_mode(yes)",
+                    INVALID_KEYWORD("safe_mode")
+                },
+                {
+                    "host('localhost')",
+                    INVALID_KEYWORD("host")
+                },
+                {
+                    "port(1234)",
+                    INVALID_KEYWORD("port")
+                },
+                {
+                    "path('/tmp/syslog.sock')",
+                    INVALID_KEYWORD("path")
+                },
+                {
+                    "servers('localhost:1234')",
+                    INVALID_KEYWORD("servers")
+                },
+                { }
+          });
 #endif
 }
 
 static void
 _test_uri(void)
 {
-  _error("uri())",
-         "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
-         "LL_STRING in <string> at line 1, column 35:");
+  _error_cases((const ErrorTestCase[])
+          {
+                {
+                    "uri()",
+                    "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
+                        "LL_STRING in <string> at line 1, column 35:"
+                },
+                {
+                    "INVALID-KEYWORD()",
+                    INVALID_KEYWORD("INVALID-KEYWORD")
+                },
+                {
+                    "uri('INVALID-URI')",
+                    "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'"
+                },
+                {
+                    "uri('mongodb://127.0.0.1:27017/')",
+                    "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'"
+                },
+                { }
+          });
 
-  _error("INVALID-KEYWORD()",
-         "Error parsing afmongodb, inner-dest plugin INVALID-KEYWORD not found in <string> "
-         "at line 1, column 31:");
-
-  _error("uri('INVALID-URI')",
-         "Error parsing MongoDB URI; uri='INVALID-URI', driver='d_mongo#0'");
-
-  _expect("",
-          "127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages");
-
-  _expect("uri('mongodb:///tmp/mongo.sock')",
-          "/tmp/mongo.sock",
-          "tmp/mongo.sock", "messages");
-
-  _expect("uri('mongodb://127.0.0.1:27017/syslog')",
-          "127.0.0.1:27017/syslog",
-          "syslog", "messages");
-
-  _expect("collection('messages2')",
-          "127.0.0.1:27017/syslog" DEFAULTOPTS,
-          "syslog", "messages2");
-
-  _error("uri('mongodb://127.0.0.1:27017/')",
-         "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/', driver='d_mongo#0'");
+  _correct_uri_cases((const URITestCase[])
+          {
+                {
+                    "",
+                    "127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "uri('mongodb:///tmp/mongo.sock')",
+                    "/tmp/mongo.sock",
+                    "tmp/mongo.sock",
+                    "messages"
+                },
+                {
+                    "uri('mongodb://127.0.0.1:27017/syslog')",
+                    "127.0.0.1:27017/syslog",
+                    "syslog",
+                    "messages"
+                },
+                {
+                    "collection('messages2')",
+                    "127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages2"
+                },
+                { }
+          });
 }
 
 int
