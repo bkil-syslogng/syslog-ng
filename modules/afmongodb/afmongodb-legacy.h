@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2010-2012 Balabit
- * Copyright (c) 2010-2012 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2010-2016 Balabit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,19 +20,19 @@
  *
  */
 
-#ifndef AFMONGODB_PARSER_H_INCLUDED
-#define AFMONGODB_PARSER_H_INCLUDED
+#ifndef AFMONGODB_LEGACY_H_
+#define AFMONGODB_LEGACY_H_
 
-#include "cfg-parser.h"
-#include "cfg-lexer.h"
-#include "afmongodb.h"
+#include "driver.h"
 
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-#include "afmongodb-legacy.h"
-#endif
-
-extern CfgParser afmongodb_parser;
-
-CFG_PARSER_DECLARE_LEXER_BINDING(afmongodb_, LogDriver **)
+gboolean afmongodb_dd_check_address(LogDriver *d, gboolean local);
+void afmongodb_dd_set_servers(LogDriver *d, GList *servers);
+void afmongodb_dd_set_host(LogDriver *d, const gchar *host);
+void afmongodb_dd_set_port(LogDriver *d, gint port);
+void afmongodb_dd_set_database(LogDriver *d, const gchar *database);
+void afmongodb_dd_set_user(LogDriver *d, const gchar *user);
+void afmongodb_dd_set_password(LogDriver *d, const gchar *password);
+void afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state);
+void afmongodb_dd_set_path(LogDriver *d, const gchar *path);
 
 #endif

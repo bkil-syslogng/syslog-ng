@@ -71,33 +71,77 @@ afmongodb_options
 
 afmongodb_option
 	: KW_URI '(' string ')'		{ afmongodb_dd_set_uri(last_driver, $3); free($3); }
+	| KW_COLLECTION '(' string ')'		{ afmongodb_dd_set_collection(last_driver, $3); free($3); }
 	| KW_SERVERS '(' string_list ')'
           {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
             CHECK_ERROR(afmongodb_dd_check_address(last_driver, FALSE), @3, "Can't mix path() & servers()");
             afmongodb_dd_set_servers(last_driver, $3);
+#else
+            YYERROR;
+#endif
           }
-        | KW_HOST '(' string ')'
+    | KW_HOST '(' string ')'
           {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
             CHECK_ERROR(afmongodb_dd_check_address(last_driver, FALSE), @3, "Can't mix path() & host()");
             afmongodb_dd_set_host(last_driver, $3);
             free($3);
+#else
+            YYERROR;
+#endif
           }
-        | KW_PORT '(' LL_NUMBER ')'
+    | KW_PORT '(' LL_NUMBER ')'
           {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
             CHECK_ERROR(afmongodb_dd_check_address(last_driver, FALSE), @3, "Can't mix path() & port()");
             afmongodb_dd_set_port(last_driver, $3);
+#else
+            YYERROR;
+#endif
           }
-        | KW_PATH '(' string ')'
+    | KW_PATH '(' string ')'
           {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
             CHECK_ERROR(afmongodb_dd_check_address(last_driver, TRUE), @3, "Can't mix path() with host() or server()");
             afmongodb_dd_set_path(last_driver, $3);
             free($3);
+#else
+            YYERROR;
+#endif
           }
-	| KW_DATABASE '(' string ')'		{ afmongodb_dd_set_database(last_driver, $3); free($3); }
-	| KW_COLLECTION '(' string ')'		{ afmongodb_dd_set_collection(last_driver, $3); free($3); }
-	| KW_USERNAME '(' string ')'		{ afmongodb_dd_set_user(last_driver, $3); free($3); }
-	| KW_PASSWORD '(' string ')'		{ afmongodb_dd_set_password(last_driver, $3); free($3); }
-	| KW_SAFE_MODE '(' yesno ')'		{ afmongodb_dd_set_safe_mode(last_driver, !!$3); }
+	| KW_DATABASE '(' string ')'
+          {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+            afmongodb_dd_set_database(last_driver, $3); free($3);
+#else
+            YYERROR;
+#endif
+	      }
+	| KW_USERNAME '(' string ')'
+          {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+            afmongodb_dd_set_user(last_driver, $3); free($3);
+#else
+            YYERROR;
+#endif
+	      }
+	| KW_PASSWORD '(' string ')'
+          {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+            afmongodb_dd_set_password(last_driver, $3); free($3);
+#else
+            YYERROR;
+#endif
+	      }
+	| KW_SAFE_MODE '(' yesno ')'
+          {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+	        afmongodb_dd_set_safe_mode(last_driver, !!$3);
+#else
+            YYERROR;
+#endif
+	      }
 	| value_pair_option			{ afmongodb_dd_set_value_pairs(last_driver, $1); }
 	| dest_driver_option
 	| threaded_dest_driver_option
