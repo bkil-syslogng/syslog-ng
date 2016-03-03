@@ -44,8 +44,10 @@ modules_afmongodb_libafmongodb_la_SOURCES	=	\
 
 if ENABLE_LEGACY_MONGODB_OPTIONS
 modules_afmongodb_libafmongodb_la_SOURCES	+=	\
-	modules/afmongodb/afmongodb-legacy.c			\
-	modules/afmongodb/afmongodb-legacy.h			\
+	modules/afmongodb/afmongodb-legacy-uri.c			\
+	modules/afmongodb/afmongodb-legacy-uri.h			\
+	modules/afmongodb/afmongodb-legacy-grammar.c			\
+	modules/afmongodb/afmongodb-legacy-grammar.h			\
 	modules/afmongodb/afmongodb-legacy-private.h
 endif
 
