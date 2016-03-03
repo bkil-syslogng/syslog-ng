@@ -240,7 +240,7 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
 
       if (self->user && self->password)
         {
-          g_string_append_printf(self->uri_str, "%s:%s", self->user, self->password);
+          g_string_append_printf(self->uri_str, "%s:%s@", self->user, self->password);
         }
 
       if (!self->recovery_cache)
@@ -256,8 +256,9 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
       if (have_uri)
         g_string_append_printf(self->uri_str, "/%s", self->db);
 
-      g_string_append_printf(self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
-      SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+      if (self->safe_mode)
+        g_string_append_printf(self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
+                               SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
     }
 
   return TRUE;
