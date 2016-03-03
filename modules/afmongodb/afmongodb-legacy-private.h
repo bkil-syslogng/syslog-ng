@@ -27,7 +27,7 @@
 
 #define MONGO_CONN_LOCAL -1
 
-typedef struct
+typedef struct _MongoDBHostPort
 {
   char *host;
   gint port;

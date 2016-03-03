@@ -28,7 +28,7 @@
 #include "string-list.h"
 #include "value-pairs/value-pairs.h"
 
-typedef struct
+typedef struct _MongoDBDestDriver
 {
   LogThrDestDriver super;
 
