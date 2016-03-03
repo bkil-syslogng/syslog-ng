@@ -30,16 +30,27 @@ static gboolean
 _parse_addr(const char *str, char **host, gint *port)
 {
   if (!host || !port)
-    return FALSE;
+    {
+      msg_debug("Host or port reference should not be NULL", NULL);
+      return FALSE;
+    }
   char *proto_str = g_strdup_printf("mongodb://%s", str);
   mongoc_uri_t *uri = mongoc_uri_new(proto_str);
-  g_free(proto_str);
   if (!uri)
-    return FALSE;
+    {
+      msg_error("Cannot parse MongoDB URI", evt_tag_str("uri", proto_str), NULL);
+      g_free(proto_str);
+      return FALSE;
+    }
 
   const mongoc_host_list_t *hosts = mongoc_uri_get_hosts(uri);
   if (!hosts || hosts->next)
     {
+      if (hosts)
+        msg_error("No host found in MongoDB URI", evt_tag_str("uri", proto_str), NULL);
+      else
+        msg_error("Multiple hosts found in MongoDB URI", evt_tag_str("uri", proto_str), NULL);
+      g_free(proto_str);
       mongoc_uri_destroy(uri);
       return FALSE;
     }
@@ -47,7 +58,12 @@ _parse_addr(const char *str, char **host, gint *port)
   *host = g_strdup(hosts->host);
   mongoc_uri_destroy(uri);
   if (!*host)
-    return FALSE;
+    {
+      msg_error("NULL hostname", evt_tag_str("uri", proto_str), NULL);
+      g_free(proto_str);
+      return FALSE;
+    }
+  g_free(proto_str);
   return TRUE;
 }
 
