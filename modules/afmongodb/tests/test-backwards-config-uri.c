@@ -245,11 +245,7 @@ static void
 _test_legacy(void)
 {
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  _error("database())",
-         "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
-         "LL_STRING in <string> at line 1, column 40:");
-
-  _error("database('syslog') uri('mongodb://127.0.0.1:27017/syslog')",
+  _error("safe_mode(yes) uri('mongodb://127.0.0.1:27017/syslog')",
          "Error: either specify a MongoDB URI (and optional collection) or only legacy options; "
          "driver='d_mongo#0'");
 
@@ -284,6 +280,18 @@ _test_legacy(void)
   _expect("database('syslog-ng')",
           "mongodb://127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
           "syslog-ng", "messages");
+
+  _expect("safe_mode(no)",
+          "mongodb://127.0.0.1:27017/syslog",
+          "syslog", "messages");
+
+  _expect("username('user') password('password')",
+          "mongodb://user:password@127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "syslog", "messages");
+
+  _expect("safe_mode(yes) collection('messages2')",
+          "mongodb://127.0.0.1:27017/syslog" DEFAULTOPTS,
+          "syslog", "messages2");
 #else
   _error("database('syslog')",
          "Error parsing afmongodb, inner-dest plugin database not found in <string> "
@@ -315,6 +323,10 @@ _test_legacy(void)
 static void
 _test_uri(void)
 {
+  _error("uri())",
+         "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
+         "LL_STRING in <string> at line 1, column 35:");
+
   _error("INVALID-KEYWORD()",
          "Error parsing afmongodb, inner-dest plugin INVALID-KEYWORD not found in <string> "
          "at line 1, column 31:");
