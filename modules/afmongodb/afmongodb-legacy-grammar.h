@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef AFMONGODB_LEGACY_H_
-#define AFMONGODB_LEGACY_H_
+#ifndef AFMONGODB_LEGACY_GRAMMAR_H_
+#define AFMONGODB_LEGACY_GRAMMAR__H_
 
 #include "driver.h"
 
