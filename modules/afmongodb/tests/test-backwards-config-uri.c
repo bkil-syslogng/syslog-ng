@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2013 Balabit
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2016 Balabit
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -245,6 +244,7 @@ _error(const gchar *mongo_config, const gchar *error)
 static void
 _test_legacy(void)
 {
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
   _error("database())",
          "Error parsing afmongodb, syntax error, unexpected \\')\\', expecting LL_IDENTIFIER or "
          "LL_STRING in <string> at line 1, column 40:");
@@ -284,6 +284,11 @@ _test_legacy(void)
   _expect("database('syslog-ng')",
           "mongodb://127.0.0.1:27017/syslog-ng" DEFAULTOPTS,
           "syslog-ng", "messages");
+#else
+  _error("database('syslog')",
+         "Error parsing afmongodb, inner-dest plugin database not found in <string> "
+         "at line 1, column 31:");
+#endif
 }
 
 static void
