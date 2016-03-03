@@ -288,6 +288,27 @@ _test_legacy(void)
   _error("database('syslog')",
          "Error parsing afmongodb, inner-dest plugin database not found in <string> "
          "at line 1, column 31:");
+  _error("username('user')",
+         "Error parsing afmongodb, inner-dest plugin username not found in <string> "
+         "at line 1, column 31:");
+  _error("password('password')",
+         "Error parsing afmongodb, inner-dest plugin password not found in <string> "
+         "at line 1, column 31:");
+  _error("safe_mode(yes)",
+         "Error parsing afmongodb, inner-dest plugin safe_mode not found in <string> "
+         "at line 1, column 31:");
+  _error("host('localhost')",
+         "Error parsing afmongodb, inner-dest plugin host not found in <string> "
+         "at line 1, column 31:");
+  _error("port(1234)",
+         "Error parsing afmongodb, inner-dest plugin port not found in <string> "
+         "at line 1, column 31:");
+  _error("path('/tmp/syslog.sock')",
+         "Error parsing afmongodb, inner-dest plugin path not found in <string> "
+         "at line 1, column 31:");
+  _error("servers('localhost:1234')",
+         "Error parsing afmongodb, inner-dest plugin servers not found in <string> "
+         "at line 1, column 31:");
 #endif
 }
 
