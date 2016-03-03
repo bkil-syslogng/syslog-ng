@@ -93,12 +93,15 @@ _append_legacy_servers(MongoDBDestDriver *self)
 {
   if (self->port != MONGO_CONN_LOCAL)
     {
-      if (self->address)
+      if (self->address || self->port)
         {
-          gchar *srv = g_strdup_printf("%s:%d", self->address,
-                                       (self->port) ? self->port : MONGOC_DEFAULT_PORT);
+          gint port = (self->port) ? self->port : MONGOC_DEFAULT_PORT;
+          const gchar *address = (self->address) ? self->address : DEFAULTHOST;
+          gchar *srv = g_strdup_printf("%s:%d", address, port);
           self->servers = g_list_prepend(self->servers, srv);
           g_free(self->address);
+          self->address = NULL;
+          self->port = MONGOC_DEFAULT_PORT;
         }
 
       if (self->servers)
@@ -129,13 +132,11 @@ _append_legacy_servers(MongoDBDestDriver *self)
         }
       else
         {
-          gchar *localhost = g_strdup_printf(DEFAULTHOST ":%d", self->port);
+          gchar *localhost = g_strdup_printf(DEFAULTHOST ":%d", MONGOC_DEFAULT_PORT);
           self->servers = g_list_append(NULL, localhost);
-          _append_host(&self->recovery_cache, DEFAULTHOST, self->port);
+          _append_host(&self->recovery_cache, DEFAULTHOST, MONGOC_DEFAULT_PORT);
         }
 
-      self->address = NULL;
-      self->port = MONGOC_DEFAULT_PORT;
       if (!_parse_addr(g_list_nth_data(self->servers, 0), &self->address, &self->port))
         {
           msg_error("Cannot parse the primary host",
