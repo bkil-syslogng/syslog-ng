@@ -27,7 +27,7 @@
 #define SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS 60000
 
 static gboolean
-afmongodb_dd_parse_addr(const char *str, char **host, gint *port)
+_parse_addr(const char *str, char **host, gint *port)
 {
   if (!host || !port)
     return FALSE;
@@ -52,7 +52,7 @@ afmongodb_dd_parse_addr(const char *str, char **host, gint *port)
 }
 
 static void
-afmongodb_dd_free_host_port(gpointer data)
+_free_host_port(gpointer data)
 {
   MongoDBHostPort *hp = (MongoDBHostPort *)data;
   g_free(hp->host);
@@ -61,7 +61,7 @@ afmongodb_dd_free_host_port(gpointer data)
 }
 
 static gboolean
-afmongodb_dd_append_host(GList **list, const char *host, gint port)
+_append_host(GList **list, const char *host, gint port)
 {
   if (!list)
     return FALSE;
@@ -94,7 +94,7 @@ _append_legacy_servers(MongoDBDestDriver *self)
               gchar *host = NULL;
               gint port = MONGOC_DEFAULT_PORT;
 
-              if (!afmongodb_dd_parse_addr(l->data, &host, &port))
+              if (!_parse_addr(l->data, &host, &port))
                 {
                   msg_warning("Cannot parse MongoDB server address, ignoring",
                               evt_tag_str("address", l->data),
@@ -102,7 +102,7 @@ _append_legacy_servers(MongoDBDestDriver *self)
                               NULL);
                   continue;
                 }
-              afmongodb_dd_append_host(&self->recovery_cache, host, port);
+              _append_host(&self->recovery_cache, host, port);
               msg_verbose("Added MongoDB server seed",
                           evt_tag_str("host", host),
                           evt_tag_int("port", port),
@@ -115,12 +115,12 @@ _append_legacy_servers(MongoDBDestDriver *self)
         {
           gchar *localhost = g_strdup_printf(DEFAULTHOST ":%d", self->port);
           self->servers = g_list_append(NULL, localhost);
-          afmongodb_dd_append_host(&self->recovery_cache, DEFAULTHOST, self->port);
+          _append_host(&self->recovery_cache, DEFAULTHOST, self->port);
         }
 
       self->address = NULL;
       self->port = MONGOC_DEFAULT_PORT;
-      if (!afmongodb_dd_parse_addr(g_list_nth_data(self->servers, 0), &self->address, &self->port))
+      if (!_parse_addr(g_list_nth_data(self->servers, 0), &self->address, &self->port))
         {
           msg_error("Cannot parse the primary host",
                     evt_tag_str("primary", g_list_nth_data(self->servers, 0)),
@@ -139,13 +139,13 @@ _append_legacy_servers(MongoDBDestDriver *self)
                     NULL);
           return FALSE;
         }
-      afmongodb_dd_append_host(&self->recovery_cache, self->address, 0);
+      _append_host(&self->recovery_cache, self->address, 0);
     }
   return TRUE;
 }
 
 static gboolean
-afmongodb_dd_append_servers(GString *uri_str, const GList *recovery_cache, gboolean *have_uri)
+_append_servers(GString *uri_str, const GList *recovery_cache, gboolean *have_uri)
 {
   const GList *iterator = recovery_cache;
   *have_uri = FALSE;
@@ -182,7 +182,7 @@ afmongodb_dd_append_servers(GString *uri_str, const GList *recovery_cache, gbool
 }
 
 static gboolean
-afmongodb_dd_check_auth_options(MongoDBDestDriver *self)
+_check_auth_options(MongoDBDestDriver *self)
 {
   if (self->user || self->password)
     {
@@ -202,7 +202,7 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
     msg_trace("create_uri", evt_tag_str("uri_str", self->uri_str->str), NULL);
   msg_trace("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
 
-  if (!afmongodb_dd_check_auth_options(self))
+  if (!_check_auth_options(self))
     return FALSE;
 
   if (self->uri_str && self->is_legacy)
@@ -232,7 +232,7 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
         }
 
       gboolean have_uri;
-      if (!afmongodb_dd_append_servers(self->uri_str, self->recovery_cache, &have_uri))
+      if (!_append_servers(self->uri_str, self->recovery_cache, &have_uri))
         return FALSE;
 
       if (have_uri)
@@ -260,7 +260,7 @@ afmongodb_dd_free_legacy(MongoDBDestDriver *self)
   g_free(self->password);
   g_free(self->address);
   string_list_free(self->servers);
-  g_list_free_full(self->recovery_cache, (GDestroyNotify)&afmongodb_dd_free_host_port);
+  g_list_free_full(self->recovery_cache, (GDestroyNotify)&_free_host_port);
   self->recovery_cache = NULL;
 }
 
