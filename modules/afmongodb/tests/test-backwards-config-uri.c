@@ -56,6 +56,12 @@ _main_loop_deinit(void)
 }
 
 static void
+_g_process_finish(void)
+{
+  g_process_unset_argv_space();
+}
+
+static void
 _teardown(void)
 {
   service_management_publish_status("Shutting down...");
@@ -64,6 +70,7 @@ _teardown(void)
 
   app_shutdown();
   z_mem_trace_dump();
+  _g_process_finish();
   g_process_startup_failed(_test_ret_num, TRUE);
 }
 
