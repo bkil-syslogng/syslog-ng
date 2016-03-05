@@ -32,6 +32,13 @@
 #include "plugin-types.h"
 
 #include <time.h>
+#include <openssl/ssl.h>
+#include <openssl/conf.h>
+#include <openssl/stack.h>
+#include <openssl/err.h>
+#include <openssl/engine.h>
+#include <openssl/evp.h>
+#include <openssl/crypto.h>
 
 #include "afmongodb-private.h"
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
@@ -436,6 +443,26 @@ _init_value_pairs_dot_to_underscore_transformation(MongoDBDestDriver *self)
   vpts = value_pairs_transform_set_new(".*");
   value_pairs_transform_set_add_func(vpts, value_pairs_new_transform_replace_prefix(".", "_"));
   value_pairs_add_transforms(self->vp, vpts);
+}
+
+static void
+_ssl_cleanup(void)
+{
+  sk_free((_STACK *)SSL_COMP_get_compression_methods());
+  CONF_modules_free();
+  ERR_remove_state(0);
+  ENGINE_cleanup();
+  CONF_modules_unload(1);
+  ERR_free_strings();
+  EVP_cleanup();
+  CRYPTO_cleanup_all_ex_data();
+}
+
+static void
+_mongoc_cleanup(void)
+{
+  mongoc_cleanup();
+  _ssl_cleanup();
 }
 
 static gboolean
