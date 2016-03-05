@@ -355,21 +355,8 @@ dnl ***************************************************************************
 dnl Set up CFLAGS
 
 if test "x$ac_compiler_gnu" = "xyes"; then
-        CFLAGS="${CFLAGS} -Wall -Wshadow"
         if test "x$enable_debug" = "xyes"; then
-                CFLAGS="${ac_cv_env_CFLAGS_value} -Wall -g \
-                -W -Wextra \
- -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
- -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
- -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
- -Wabi -Waggregate-return -Winvalid-pch \
- -Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
- -Wpointer-arith -Wpointer-sign \
- -Wno-unused-parameter -Wno-missing-field-initializers \
- -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
- -Wvariadic-macros -Wswitch-default"
- # -Wpedantic -Wundef -Wredundant-decls -Wlong-long
- # -Wstrict-prototypes -Winline -Wstack-protector
+                CFLAGS="${CFLAGS} -g"
         else
                 CPPFLAGS="${CPPFLAGS} -DG_DISABLE_ASSERT"
         fi
@@ -1484,6 +1471,7 @@ AM_CONDITIONAL(ENABLE_JAVA, [test "$enable_java" = "yes"])
 AM_CONDITIONAL(ENABLE_JAVA_MODULES, [test "$enable_java_modules" = "yes"])
 AM_CONDITIONAL(ENABLE_MANPAGES, [test "$enable_manpages" != "no"])
 AM_CONDITIONAL(ENABLE_NATIVE, [test "$enable_native" != "no"])
+AM_CONDITIONAL(ENABLE_DEBUG, [test "$enable_debug" = "yes"])
 
 AC_SUBST(timezonedir)
 AC_SUBST(pidfiledir)
