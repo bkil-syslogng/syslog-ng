@@ -168,6 +168,7 @@ app_shutdown(void)
 
   stats_destroy();
   child_manager_deinit();
+  afinter_global_deinit();
   g_list_foreach(application_hooks, (GFunc) g_free, NULL);
   g_list_free(application_hooks);
   dns_cache_thread_deinit();
