@@ -130,7 +130,7 @@ testcase_replace(const gchar *log, const gchar *re, const gchar *replacement, co
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

@@ -49,7 +49,7 @@ testcase(const gchar *msg_, gsize msg_len, gint eom_ofs)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   testcase("a\nb\nc\n",  6,  1);
   testcase("ab\nb\nc\n",  7,  2);

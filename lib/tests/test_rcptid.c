@@ -115,7 +115,7 @@ test_rcptid_is_an_empty_string_when_zero(void)
 }
 
 static void
-rcptid_test_case()
+rcptid_test_case(void)
 {
   test_rcptid_is_persistent_across_persist_backend_reinits();
   test_rcptid_overflows_at_64bits_and_is_reset_to_one();

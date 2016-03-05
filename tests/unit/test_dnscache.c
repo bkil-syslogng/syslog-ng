@@ -166,7 +166,7 @@ test_dns_cache_benchmark(void)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

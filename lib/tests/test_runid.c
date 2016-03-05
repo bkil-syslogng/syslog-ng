@@ -152,7 +152,7 @@ test_run_id_macro__macro_is_empty_if_run_id_is_not_inited(void)
 
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
   test_run_id__first_run__run_id_is_one();

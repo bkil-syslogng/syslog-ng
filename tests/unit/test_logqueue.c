@@ -253,7 +253,7 @@ testcase_with_threads(void)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
   set_tz("MET-1METDST");

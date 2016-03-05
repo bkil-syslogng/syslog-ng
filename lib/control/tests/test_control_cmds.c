@@ -30,7 +30,7 @@
 #include "apphook.h"
 
 static void
-test_log()
+test_log(void)
 {
   GString *command = g_string_sized_new(128);
   GString *reply;
@@ -86,7 +86,7 @@ test_log()
 }
 
 static void
-test_stats()
+test_stats(void)
 {
   GString *reply = NULL;
   GString *command = g_string_sized_new(128);
@@ -113,7 +113,7 @@ test_stats()
 }
 
 static void
-test_reset_stats()
+test_reset_stats(void)
 {
   GString *reply = NULL;
   GString *command = g_string_sized_new(128);

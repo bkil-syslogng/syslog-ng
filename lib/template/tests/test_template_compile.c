@@ -248,7 +248,7 @@ test_colon_dash_in_braces_is_parsed_as_default_value(void)
 }
 
 static void
-test_double_dollars_is_a_literal_dollar()
+test_double_dollars_is_a_literal_dollar(void)
 {
   assert_template_compile("$$VALUE_NAME");
   assert_compiled_template(text = (char *)"$VALUE_NAME", default_value = NULL, macro = M_NONE, type = LTE_MACRO, msg_ref = 0);
@@ -338,7 +338,7 @@ test_value_name_can_be_the_empty_string_when_referenced_using_braces(void)
 }
 
 static void
-test_template_compile_value()
+test_template_compile_value(void)
 {
   TEMPLATE_TESTCASE(test_simple_value);
   TEMPLATE_TESTCASE(test_value_without_braces);
@@ -441,7 +441,8 @@ test_template_compile_negativ_tests(void)
   TEMPLATE_TESTCASE(test_unknown_function);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   msg_init(FALSE);
 

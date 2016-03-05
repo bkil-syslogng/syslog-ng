@@ -33,7 +33,7 @@ test_debugger(void)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
   configuration = cfg_new(VERSION_VALUE);

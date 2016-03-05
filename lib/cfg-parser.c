@@ -31,7 +31,8 @@
 extern int main_debug;
 
 /* defined in the parser */
-int main_parse(CfgLexer *lexer, gpointer *dummy, gpointer arg);
+int
+main_parse(CfgLexer *lexer, gpointer *dummy, gpointer arg);
 
 /*
  * PLEASE: if at all possible avoid adding keywords here, as these

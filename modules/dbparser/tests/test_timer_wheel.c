@@ -136,7 +136,7 @@ test_wheel(gint seed)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   test_wheel(1234567890);
   test_wheel(time(NULL));

@@ -116,7 +116,8 @@ assert_parsing_fails(const gchar *msg)
 }
 
 
-int main()
+int
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

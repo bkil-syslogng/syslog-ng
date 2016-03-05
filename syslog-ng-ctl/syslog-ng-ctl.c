@@ -112,7 +112,7 @@ static GOptionEntry verbose_options[] =
 
 
 static const gchar *
-_stats_command_builder()
+_stats_command_builder(void)
 {
   return stats_options_reset_is_set ? "RESET_STATS\n" : "STATS\n";
 }

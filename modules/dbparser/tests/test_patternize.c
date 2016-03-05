@@ -152,7 +152,7 @@ testcase_frequent_words(const gchar* logs, guint support, const gchar *expected)
 }
 
 static void
-frequent_words_tests()
+frequent_words_tests(void)
 {
 
   /* simple tests */

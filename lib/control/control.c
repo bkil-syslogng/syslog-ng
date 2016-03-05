@@ -137,7 +137,7 @@ ControlCommand default_commands[] = {
 };
 
 static void
-register_default_commands()
+register_default_commands(void)
 {
   int i;
   ControlCommand *cmd;

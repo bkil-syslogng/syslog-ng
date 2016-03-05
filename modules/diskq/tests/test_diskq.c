@@ -248,7 +248,7 @@ threaded_consume(gpointer st)
 
 
 static void
-testcase_with_threads()
+testcase_with_threads(void)
 {
   LogQueue *q;
   GThread *thread_feed[FEEDERS], *thread_consume;
@@ -291,7 +291,7 @@ testcase_with_threads()
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
 #if _AIX
   fprintf(stderr,"On AIX this testcase can't executed, because the overriding of main_loop_io_worker_register_finish_callback does not work\n");

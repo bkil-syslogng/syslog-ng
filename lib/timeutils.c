@@ -151,7 +151,7 @@ cached_g_current_time(GTimeVal *result)
 }
 
 time_t
-cached_g_current_time_sec()
+cached_g_current_time_sec(void)
 {
   GTimeVal now;
 

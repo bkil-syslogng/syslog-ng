@@ -310,7 +310,8 @@ test_cfg_lexer_subst(void)
   SUBST_TESTCASE(test_strings_with_embedded_apostrophe_cause_an_error_when_encoding_in_qstring);
 }
 
-int main()
+int
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

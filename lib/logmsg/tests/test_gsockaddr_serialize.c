@@ -27,7 +27,7 @@
 #include "logmsg/gsockaddr-serialize.h"
 
 static void
-test_empty()
+test_empty(void)
 {
   GString *stream = g_string_new("");
 
@@ -45,7 +45,7 @@ test_empty()
 }
 
 static void
-test_inet()
+test_inet(void)
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
   GSockAddr *read_addr = NULL;
@@ -68,7 +68,7 @@ test_inet()
 }
 
 static void
-test_inet6()
+test_inet6(void)
 {
 #if SYSLOG_NG_ENABLE_IPV6
   GSockAddr *addr = g_sockaddr_inet6_new("::1", 5555);
@@ -93,7 +93,7 @@ test_inet6()
 }
 
 static void
-test_unix()
+test_unix(void)
 {
   GSockAddr *addr = g_sockaddr_unix_new("testpath");
   GSockAddr *read_addr = NULL;
@@ -112,7 +112,7 @@ test_unix()
 }
 
 static void
-test_inet_false()
+test_inet_false(void)
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
   GSockAddr *read_addr = NULL;
@@ -140,7 +140,7 @@ test_inet_false()
 }
 
 static void
-test_inet6_false()
+test_inet6_false(void)
 {
 #if ENABLE_IPV6
   GSockAddr *addr = g_sockaddr_inet6_new("::1", 5555);
@@ -171,7 +171,7 @@ test_inet6_false()
 }
 
 static void
-test_bad_family()
+test_bad_family(void)
 {
   GSockAddr *addr = g_sockaddr_inet_new("127.0.0.1", 5555);
   GSockAddr *read_addr = NULL;
