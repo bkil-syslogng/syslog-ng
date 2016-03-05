@@ -35,7 +35,7 @@ test_format_hex_string__single_byte__perfect(void)
    //Act
    format_hex_string(input, sizeof(input), output, sizeof(output));
    //Assert
-   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string output does not match!", NULL);
+   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string output does not match!");
 }
 
 static void
@@ -47,7 +47,7 @@ test_format_hex_string__two_bytes__perfect(void)
    //Act
    format_hex_string(input, sizeof(input), output, sizeof(output));
    //Assert
-   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string output does not match with two bytes!", NULL);
+   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string output does not match with two bytes!");
 }
 
 static void
@@ -59,7 +59,7 @@ test_format_hex_string_with_delimiter__single_byte__perfect(void)
    //Act
    format_hex_string_with_delimiter(input, sizeof(input), output, sizeof(output), ' ');
    //Assert
-   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string_with_delimiter output does not match!", NULL);
+   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string_with_delimiter output does not match!");
 }
 
 static void
@@ -71,7 +71,7 @@ test_format_hex_string_with_delimiter__two_bytes__perfect(void)
    //Act
    format_hex_string_with_delimiter(input, sizeof(input), output, sizeof(output), ' ');
    //Assert
-   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string_with_delimiter output does not match in case of two bytes!", NULL);
+   assert_nstring(output, sizeof(output), expected_output, sizeof(expected_output), "format_hex_string_with_delimiter output does not match in case of two bytes!");
 }
 
 int

@@ -76,9 +76,9 @@ __attribute__((format(gnu_printf, 5, 0)));
 gboolean assert_string_array_non_fatal(gchar **actual, guint32 actual_length, gchar **expected, guint32 expected_length, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 5, 6)));
 gboolean assert_gboolean_non_fatal(gboolean actual, gboolean expected, const gchar *error_message, ...);
-gboolean assert_null_non_fatal(void *pointer, const gchar *error_message, ...)
+gboolean assert_null_non_fatal(const void *pointer, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 2, 3)));
-gboolean assert_not_null_non_fatal(void *pointer, const gchar *error_message, ...)
+gboolean assert_not_null_non_fatal(const void *pointer, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 2, 3)));
 gboolean assert_no_error_non_fatal(GError *error, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 2, 3)));
@@ -127,8 +127,8 @@ __attribute__((format(gnu_printf, 5, 6)));
 #define expect_true(value, error_message, ...) (expect_gboolean(value, TRUE, error_message, ##__VA_ARGS__) ? 1 : (slng_template_lib_failure = TRUE,0))
 #define expect_false(value, error_message, ...) (expect_gboolean(value, FALSE, error_message, ##__VA_ARGS__) ? 1 : (slng_template_lib_failure = TRUE,0))
 
-#define assert_null(pointer, error_message, ...) (assert_null_non_fatal((void *)pointer, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
-#define assert_not_null(pointer, error_message, ...) (assert_not_null_non_fatal((void *)pointer, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
+#define assert_null(pointer, error_message, ...) (assert_null_non_fatal((const void *)pointer, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
+#define assert_not_null(pointer, error_message, ...) (assert_not_null_non_fatal((const void *)pointer, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 
 #define assert_no_error(error, error_message, ...) (assert_no_error_non_fatal(error, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 #define assert_guint32_set(actual, actual_length, expected, expected_length, error_message, ...) (assert_guint32_set_non_fatal(actual, actual_length, expected, expected_length, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
@@ -137,8 +137,8 @@ __attribute__((format(gnu_printf, 5, 6)));
 #define assert_msg_field_equals(msg, field_name, expected_value, expected_value_len, error_message, ...) (assert_msg_field_equals_non_fatal(msg, field_name, expected_value, expected_value_len, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 
 extern GString *current_testcase_description;
-extern gchar *current_testcase_function;
-extern gchar *current_testcase_file;
+extern const gchar *current_testcase_function;
+extern const gchar *current_testcase_file;
 
 #define testcase_begin(description_template, ...) \
     do { \
@@ -150,7 +150,7 @@ extern gchar *current_testcase_file;
         } \
       current_testcase_description = g_string_sized_new(0); \
       g_string_printf(current_testcase_description, description_template, ##__VA_ARGS__); \
-      current_testcase_function = (gchar *)(__FUNCTION__); \
+      current_testcase_function = (const gchar *)(__FUNCTION__); \
       gchar *file = g_strdup(__FILE__); \
       current_testcase_file = basename(file); \
       g_free(file); \

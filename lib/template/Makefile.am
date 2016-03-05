@@ -1,5 +1,3 @@
-CFLAGS += -Wno-cast-qual
-
 templateincludedir			= ${pkgincludedir}/template
 
 templateinclude_HEADERS = \
@@ -21,5 +19,9 @@ template_sources = \
 	lib/template/compiler.c			\
 	lib/template/user-function.c		\
 	lib/template/escaping.c
+
+template_CFLAGS = \
+	$(AM_CFLAGS) \
+	-Wno-error=cast-qual
 
 include lib/template/tests/Makefile.am

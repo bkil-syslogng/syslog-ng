@@ -36,4 +36,6 @@ void append_unsafe_utf8_as_escaped_text(GString *escaped_string, const gchar *st
 gchar *convert_unsafe_utf8_to_escaped_text(const gchar *str, gssize str_len,
                                            const gchar *unsafe_chars);
 
+#define _g_utf8_next_char_const(p) (const gchar *)((p) + g_utf8_skip[*(const guchar *)(p)])
+
 #endif

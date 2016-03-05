@@ -1,5 +1,3 @@
-CFLAGS += -Wno-bad-function-cast
-
 logmsgincludedir = ${pkgincludedir}/logmsg
 
 logmsginclude_HEADERS =     \
@@ -22,6 +20,5 @@ logmsg_sources =             \
  lib/logmsg/sdata-serialize.c     \
  lib/logmsg/tags-serialize.c      \
  lib/logmsg/timestamp-serialize.c
-
 
 include lib/logmsg/tests/Makefile.am

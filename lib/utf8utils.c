@@ -45,8 +45,6 @@ _append_unichar(GString *string, gunichar wc)
     g_string_append_unichar(string, wc);
 }
 
-#define _g_utf8_next_char_const(p) (const gchar *)((p) + g_utf8_skip[*(const guchar *)(p)])
-
 /**
  * This function escapes an unsanitized input (e.g. that can contain binary
  * characters, and produces an escaped format that can be deescaped in need,

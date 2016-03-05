@@ -10,8 +10,10 @@ lib_control_tests_test_control_cmds_LDADD	= $(TEST_LDADD)
 lib_control_tests_test_control_cmds_SOURCES	= 		\
 	lib/control/tests/test_control_cmds.c
 
-lib_control_tests_test_control_connection_CFLAGS	= $(TEST_CFLAGS) \
-	-I${top_srcdir}/lib/control/tests
+lib_control_tests_test_control_connection_CFLAGS	=	\
+	$(TEST_CFLAGS) \
+	-I${top_srcdir}/lib/control/tests	\
+	-Wno-error=sign-compare
 lib_control_tests_test_control_connection_LDADD	= $(TEST_LDADD)
 lib_control_tests_test_control_connection_SOURCES	= 		\
 	lib/control/tests/test_control_connection.c

@@ -35,8 +35,8 @@
 struct timeval start_time_val;
 
 GString *current_testcase_description = NULL;
-gchar *current_testcase_function = NULL;
-gchar *current_testcase_file = NULL;
+const gchar *current_testcase_function = NULL;
+const gchar *current_testcase_file = NULL;
 GList *internal_messages = NULL;
 
 extern int
@@ -411,7 +411,7 @@ assert_gboolean_non_fatal(gboolean actual, gboolean expected, const gchar *error
 }
 
 gboolean
-assert_null_non_fatal(void *pointer, const gchar *error_message, ...)
+assert_null_non_fatal(const void *pointer, const gchar *error_message, ...)
 {
   va_list args;
 
@@ -426,7 +426,7 @@ assert_null_non_fatal(void *pointer, const gchar *error_message, ...)
 }
 
 gboolean
-assert_not_null_non_fatal(void *pointer, const gchar *error_message, ...)
+assert_not_null_non_fatal(const void *pointer, const gchar *error_message, ...)
 {
   va_list args;
 

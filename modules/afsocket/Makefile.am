@@ -43,6 +43,10 @@ modules_afsocket_libafsocket_la_CPPFLAGS	=	\
 	-I${top_srcdir}/modules/afsocket		\
 	-I${top_builddir}/modules/afsocket
 
+modules_afsocket_libafsocket_la_CFLAGS	=	\
+	$(AM_CFLAGS) \
+	-Wno-error=sign-compare -Wno-error=bad-function-cast # HACK
+
 modules_afsocket_libafsocket_la_LIBADD	=	\
 	$(MODULE_DEPS_LIBS) $(OPENSSL_LIBS)	\
 	$(ZLIB_LIBS) $(LIBNET_LIBS)	\

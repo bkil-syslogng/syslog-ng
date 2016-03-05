@@ -5,6 +5,9 @@ modules_cryptofuncs_libcryptofuncs_la_SOURCES		=	\
 	modules/cryptofuncs/cryptofuncs.c
 modules_cryptofuncs_libcryptofuncs_la_LIBADD		=	\
 	$(MODULE_DEPS_LIBS) $(OPENSSL_LIBS)
+modules_cryptofuncs_libcryptofuncs_la_CFLAGS		=	\
+	$(AM_CFLAGS) $(OPENSSL_CFLAGS) \
+	-Wno-error=sign-compare
 modules_cryptofuncs_libcryptofuncs_la_LDFLAGS		=	\
 	$(MODULE_LDFLAGS) $(OPENSSL_CFLAGS)
 modules_cryptofuncs_libcryptofuncs_la_DEPENDENCIES	=	\

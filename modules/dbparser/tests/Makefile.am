@@ -21,7 +21,8 @@ modules_dbparser_tests_test_timer_wheel_LDFLAGS	=	\
 
 modules_dbparser_tests_test_patternize_CFLAGS	=	\
 	$(TEST_CFLAGS)					\
-	-I$(top_srcdir)/modules/dbparser
+	-I$(top_srcdir)/modules/dbparser	\
+	-Wno-error=sign-compare -Wno-error=cast-qual
 modules_dbparser_tests_test_patternize_LDADD	=	\
 	$(TEST_LDADD)					\
 	$(top_builddir)/modules/dbparser/libsyslog-ng-patterndb.la
@@ -35,7 +36,8 @@ modules_dbparser_tests_test_patterndb_SOURCES	=	\
 
 modules_dbparser_tests_test_patterndb_CFLAGS	=	\
 	$(TEST_CFLAGS)					\
-	-I$(top_srcdir)/modules/dbparser
+	-I$(top_srcdir)/modules/dbparser	\
+	-Wno-error=sign-compare
 modules_dbparser_tests_test_patterndb_LDADD	=	\
 	$(TEST_LDADD)					\
 	$(top_builddir)/modules/dbparser/libsyslog-ng-patterndb.la
@@ -45,7 +47,8 @@ modules_dbparser_tests_test_patterndb_LDFLAGS	=	\
 modules_dbparser_tests_test_radix_CFLAGS	=	\
 	$(TEST_CFLAGS)					\
 	-I$(top_srcdir)/modules/dbparser		\
-	@CFLAGS_NOWARN_POINTER_SIGN@
+	@CFLAGS_NOWARN_POINTER_SIGN@	\
+	-Wno-error=sign-compare -Wno-error=format
 modules_dbparser_tests_test_radix_LDADD		=	\
 	$(TEST_LDADD)					\
 	$(top_builddir)/modules/dbparser/libsyslog-ng-patterndb.la
@@ -55,7 +58,8 @@ modules_dbparser_tests_test_radix_LDFLAGS	=	\
 modules_dbparser_tests_test_parsers_CFLAGS	=	\
 	$(TEST_CFLAGS)					\
 	-I$(top_srcdir)/modules/dbparser		\
-	@CFLAGS_NOWARN_POINTER_SIGN@
+	@CFLAGS_NOWARN_POINTER_SIGN@	\
+	-Wno-error=sign-compare
 modules_dbparser_tests_test_parsers_LDADD		=	\
 	$(TEST_LDADD)					\
 	$(top_builddir)/modules/dbparser/libsyslog-ng-patterndb.la

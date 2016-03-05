@@ -3,6 +3,9 @@ module_LTLIBRARIES				+= modules/basicfuncs/libbasicfuncs.la
 modules_basicfuncs_libbasicfuncs_la_SOURCES	=	\
 	modules/basicfuncs/basic-funcs.c
 
+modules_basicfuncs_libbasicfuncs_la_CFLAGS	=	\
+	$(AM_CFLAGS)					\
+	-Wno-error=sign-compare
 modules_basicfuncs_libbasicfuncs_la_CPPFLAGS	=	\
 	$(AM_CPPFLAGS)					\
 	-I$(top_srcdir)/modules/basicfuncs

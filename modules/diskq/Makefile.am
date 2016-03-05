@@ -14,6 +14,9 @@ modules_diskq_libsyslog_ng_disk_buffer_la_SOURCES = \
   modules/diskq/qdisk.h \
   modules/diskq/qdisk.c
 
+modules_diskq_libsyslog_ng_disk_buffer_la_CFLAGS = \
+	$(AM_CFLAGS)	\
+	-Wno-error=sign-compare -Wno-error=format-nonliteral -Wno-error=bad-function-cast
 modules_diskq_libsyslog_ng_disk_buffer_la_CPPFLAGS = \
   $(AM_CPPFLAGS) \
   -I$(top_srcdir)/modules/diskq
@@ -39,6 +42,9 @@ EXTRA_DIST += modules/diskq/diskq-grammar.ym
 
 LIBSYSLOG_NG_DISK_BUFFER = $(top_builddir)/modules/diskq/libsyslog-ng-disk-buffer.la
 
+modules_diskq_libdisk_buffer_la_CFLAGS =	\
+	$(AM_CPPFLAGS)	\
+	-Wno-error=cast-qual
 modules_diskq_libdisk_buffer_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/modules/diskq -I$(top_builddir)/modules/diskq
 modules_diskq_libdisk_buffer_la_LIBADD = $(MODULE_DEPS_LIBS) $(LIBSYSLOG_NG_DISK_BUFFER)
 modules_diskq_libdisk_buffer_la_LDFLAGS = $(MODULE_LDFLAGS)

@@ -21,7 +21,7 @@ modules_native_libsyslog_ng_native_connector_a_CPPFLAGS = \
 
 modules_native_libsyslog_ng_native_connector_a_CFLAGS = \
   $(AM_CFLAGS) \
-  -Wno-sign-conversion -Wno-conversion -Wno-switch-default -Wno-strict-overflow -Wno-redundant-decls # HACK
+  -Wno-error=sign-conversion -Wno-error=conversion -Wno-error=switch-default -Wno-error=strict-overflow -Wno-error=redundant-decls # HACK
 
 else
 modules/native modules/native/ mod-native: modules/native/libnative.la

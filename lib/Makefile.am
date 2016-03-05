@@ -1,4 +1,3 @@
-AM_CFLAGS += -Wno-format-nonliteral
 DIST_SUBDIRS				= lib/ivykis
 
 include lib/transport/Makefile.am
@@ -251,7 +250,10 @@ lib_libsyslog_ng_la_SOURCES		= \
 	$(compat_sources)     \
 	$(logmsg_sources)
 
-lib_libsyslog_ng_la_CFLAGS		= @UUID_CFLAGS@ $(libsystemd_CFLAGS)
+lib_libsyslog_ng_la_CFLAGS		= \
+	@UUID_CFLAGS@ $(libsystemd_CFLAGS) \
+	$(AM_CFLAGS) \
+	-Wno-error=format-nonliteral -Wno-error=cast-qual -Wno-error=sign-compare -Wno-error=bad-function-cast # HACK
 lib_libsyslog_ng_la_LIBADD		+= @OPENSSL_LIBS@ @UUID_LIBS@
 
 # each line with closely related files (e.g. the ones generated from the same source)

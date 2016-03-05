@@ -23,6 +23,9 @@ check_PROGRAMS				+= \
 unit_test_extra_modules			= \
 	$(PREOPEN_SYSLOGFORMAT)
 
+tests_unit_test_nvtable_CFLAGS		= \
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_nvtable_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
@@ -50,9 +53,15 @@ tests_unit_test_msgparse_LDADD		= \
 tests_unit_test_dnscache_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
+tests_unit_test_findcrlf_CFLAGS		= \
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_findcrlf_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
+tests_unit_test_tags_CFLAGS		= \
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_tags_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
@@ -65,16 +74,23 @@ tests_unit_test_zone_LDADD		= \
 tests_unit_test_persist_state_LDADD	= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
+tests_unit_test_value_pairs_CFLAGS	= \
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_value_pairs_LDADD	= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
 tests_unit_test_value_pairs_walk_LDADD	= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
-tests_unit_test_ringbuffer_CFLAGS	= $(TEST_CFLAGS)
+tests_unit_test_ringbuffer_CFLAGS	=	\
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_ringbuffer_LDADD	= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
-tests_unit_test_hostid_CFLAGS	= $(TEST_CFLAGS)
+tests_unit_test_hostid_CFLAGS	=	\
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 tests_unit_test_hostid_LDADD	= \
 	$(TEST_LDADD) $(unit_test_extra_modules)

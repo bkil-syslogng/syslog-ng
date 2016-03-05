@@ -7,6 +7,9 @@ modules_pseudofile_libpseudofile_la_SOURCES	=	\
 	modules/pseudofile/pseudofile-parser.h		\
 	modules/pseudofile/pseudofile-plugin.c
 
+modules_pseudofile_libpseudofile_la_CFLAGS	=	\
+	$(AM_CFLAGS)				\
+	-Wno-error=sign-compare
 modules_pseudofile_libpseudofile_la_CPPFLAGS	=	\
 	$(AM_CPPFLAGS)				\
 	-I$(top_srcdir)/modules/pseudofile		\

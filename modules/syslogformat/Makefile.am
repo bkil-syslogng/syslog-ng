@@ -18,6 +18,10 @@ modules_syslogformat_libsyslogformat_la_CPPFLAGS=	\
 	-I${top_srcdir}/modules/syslogformat		\
 	-I${top_builddir}/modules/syslogformat
 
+modules_syslogformat_libsyslogformat_la_CFLAGS = \
+	$(AM_CFLAGS)					\
+	-Wno-error=sign-compare -Wno-error=cast-qual # HACK
+
 modules_syslogformat_libsyslogformat_la_LIBADD	=	\
 	$(MODULE_DEPS_LIBS)
 modules_syslogformat_libsyslogformat_la_LDFLAGS	=	\

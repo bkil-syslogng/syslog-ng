@@ -26,7 +26,7 @@ libtest_libsyslog_ng_test_a_SOURCES =   \
 
 libtest_libsyslog_ng_test_a_CFLAGS = \
 	$(AM_CFLAGS) \
-	-Wno-redundant-decls # HACK
+	-Wno-error=format -Wno-error=cast-qual -Wno-error=redundant-decls # HACK
 
 libtestinclude_HEADERS		    =	\
 	libtest/testutils.h		\
