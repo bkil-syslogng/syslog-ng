@@ -20,18 +20,18 @@ AM_CFLAGS =
 
 if ENABLE_DEBUG
 AM_CFLAGS += -Wall -W -Wextra -Wshadow \
- -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
- -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
- -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
- -Wabi -Waggregate-return -Winvalid-pch \
- -Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
- -Wpointer-arith -Wpointer-sign \
- -Wno-unused-parameter -Wno-missing-field-initializers \
- -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
- -Wvariadic-macros -Wswitch-default
- # -Wold-style-definition
+	-fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
+	-Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
+	-Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
+	-Wabi -Waggregate-return -Winvalid-pch \
+	-Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
+	-Wpointer-arith -Wpointer-sign \
+	-Wno-unused-parameter -Wno-missing-field-initializers \
+	-Wstrict-overflow=2 -Wconversion -Wsign-conversion \
+	-Wvariadic-macros -Wswitch-default \
+ 	-Wstrict-prototypes -Wold-style-definition \
  # -Wpedantic -Wundef -Wredundant-decls -Wlong-long
- # -Wstrict-prototypes -Winline -Wstack-protector -Wdeprecated
+ # -Winline -Wstack-protector -Wdeprecated
 endif
 
 TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS) $(CFLAGS)
