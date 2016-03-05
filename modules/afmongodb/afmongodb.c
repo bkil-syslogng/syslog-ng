@@ -372,6 +372,39 @@ _worker_insert(LogThrDestDriver *s, LogMessage *msg)
   return WORKER_INSERT_RESULT_SUCCESS;
 }
 
+static gboolean
+_uri_init(MongoDBDestDriver *self)
+{
+  self->uri_obj = mongoc_uri_new(self->uri_str->str);
+  if (!self->uri_obj)
+    {
+      msg_error("Error parsing MongoDB URI",
+                evt_tag_str("uri", self->uri_str->str),
+                evt_tag_str("driver", self->super.super.super.id),
+                NULL);
+      return FALSE;
+    }
+
+  self->const_db = mongoc_uri_get_database(self->uri_obj);
+  if (!self->const_db || !strlen(self->const_db))
+    {
+      msg_error("Missing DB name from MongoDB URI",
+                evt_tag_str("uri", self->uri_str->str),
+                evt_tag_str("driver", self->super.super.super.id),
+                NULL);
+      return FALSE;
+    }
+
+  msg_verbose("Initializing MongoDB destination",
+              evt_tag_str("uri", self->uri_str->str),
+              evt_tag_str("db", self->const_db),
+              evt_tag_str("collection", self->coll),
+              evt_tag_str("driver", self->super.super.super.id),
+              NULL);
+
+  return TRUE;
+}
+
 static void
 _worker_thread_init(LogThrDestDriver *d)
 {
@@ -426,32 +459,8 @@ _logpipe_init(LogPipe *s)
   if (!self->uri_str)
     self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
 
-  self->uri_obj = mongoc_uri_new(self->uri_str->str);
-  if (!self->uri_obj)
-    {
-      msg_error("Error parsing MongoDB URI",
-                evt_tag_str("uri", self->uri_str->str),
-                evt_tag_str("driver", self->super.super.super.id),
-                NULL);
-      return FALSE;
-    }
-
-  self->const_db = mongoc_uri_get_database(self->uri_obj);
-  if (!self->const_db || !strlen(self->const_db))
-    {
-      msg_error("Missing DB name from MongoDB URI",
-                evt_tag_str("uri", self->uri_str->str),
-                evt_tag_str("driver", self->super.super.super.id),
-                NULL);
-      return FALSE;
-    }
-
-  msg_verbose("Initializing MongoDB destination",
-              evt_tag_str("uri", self->uri_str->str),
-              evt_tag_str("db", self->const_db),
-              evt_tag_str("collection", self->coll),
-              evt_tag_str("driver", self->super.super.super.id),
-              NULL);
+  if (!_uri_init(self))
+    return FALSE;
 
   return log_threaded_dest_driver_start(s);
 }
