@@ -69,7 +69,7 @@ gboolean assert_guint64_non_fatal(guint64 actual, guint64 expected, const gchar 
 __attribute__((format(gnu_printf, 3, 4)));
 gboolean assert_gdouble_non_fatal(gdouble actual, gdouble expected, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 3, 4)));
-gboolean assert_nstring_non_fatal(const gchar *actual, gint actual_len, const gchar *expected, gint expected_len, const gchar *error_message, ...)
+gboolean assert_nstring_non_fatal(const gchar *actual, gssize actual_len, const gchar *expected, gssize expected_len, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 5, 6)));
 gboolean assert_guint32_array_non_fatal(guint32 *actual, guint32 actual_length, guint32 *expected, guint32 expected_length, const gchar *error_message, ...)
 __attribute__((format(gnu_printf, 5, 0)));

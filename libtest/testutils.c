@@ -97,7 +97,8 @@ stop_stopwatch_and_display_result(gchar *message_template, ...)
   vprintf(message_template, args);
   va_end(args);
 
-  diff = (end_time_val.tv_sec - start_time_val.tv_sec) * 1000000 + end_time_val.tv_usec - start_time_val.tv_usec;
+  diff = ((guint64)end_time_val.tv_sec - (guint64)start_time_val.tv_sec) * 1000000 +
+      (guint64)end_time_val.tv_usec - (guint64)start_time_val.tv_usec;
   printf("; runtime=%lu.%06lu s\n", diff / 1000000, diff % 1000000);
 }
 
@@ -247,20 +248,26 @@ assert_gdouble_non_fatal(gdouble actual, gdouble expected, const gchar *error_me
 }
 
 static gboolean
-assert_nstring_non_fatal_va(const gchar *actual, gint actual_len, const gchar *expected, gint expected_len, const gchar *error_message, va_list args)
+assert_nstring_non_fatal_va(const gchar *actual, gssize actual_len_, const gchar *expected, gssize expected_len_, const gchar *error_message, va_list args)
 __attribute__((format(gnu_printf, 5, 0)));
 
 static gboolean
-assert_nstring_non_fatal_va(const gchar *actual, gint actual_len, const gchar *expected, gint expected_len, const gchar *error_message, va_list args)
+assert_nstring_non_fatal_va(const gchar *actual, gssize actual_len_, const gchar *expected, gssize expected_len_, const gchar *error_message, va_list args)
 {
   if (expected == NULL && actual == NULL)
     return TRUE;
 
-  if (actual && actual_len < 0)
+  gsize actual_len;
+  if (actual && actual_len_ < 0)
     actual_len = strlen(actual);
+  else
+    actual_len = (gsize)actual_len_;
 
-  if (expected && expected_len < 0)
+  gsize expected_len;
+  if (expected && expected_len_ < 0)
     expected_len = strlen(expected);
+  else
+    expected_len = (gsize)expected_len_;
 
   if (actual_len == expected_len &&
       actual != NULL && expected != NULL &&
@@ -274,7 +281,7 @@ assert_nstring_non_fatal_va(const gchar *actual, gint actual_len, const gchar *e
 }
 
 gboolean
-assert_nstring_non_fatal(const gchar *actual, gint actual_len, const gchar *expected, gint expected_len, const gchar *error_message, ...)
+assert_nstring_non_fatal(const gchar *actual, gssize actual_len, const gchar *expected, gssize expected_len, const gchar *error_message, ...)
 {
   va_list args;
   gboolean result;
@@ -449,9 +456,11 @@ assert_no_error_non_fatal(GError *error, const gchar *error_message, ...)
 }
 
 static int
-cmp_guint32(const void *a, const void *b)
+cmp_guint32(const void *a_, const void *b_)
 {
-  return (*(const guint32 *)a - *(const guint32 *)b);
+  const guint32 a = *(const guint32 *)a_;
+  const guint32 b = *(const guint32 *)b_;
+  return a == b ? 0 : (a < b ? -1 : 1);
 }
 
 gboolean
@@ -501,9 +510,6 @@ assert_msg_field_equals_non_fatal(LogMessage *msg, const gchar *field_name, cons
   const gchar* actual_value;
   va_list args;
   gboolean result;
-
-  if (expected_value_len < 0)
-     expected_value_len = strlen(expected_value);
 
   NVHandle handle = log_msg_get_value_handle(field_name);
   actual_value = log_msg_get_value(msg, handle, &actual_value_len);

@@ -45,7 +45,7 @@ feed_some_messages(LogQueue *q, int n, MsgFormatOptions *po)
   LogMessage *msg;
   gint i;
 
-  path_options.ack_needed = q->use_backlog;
+  path_options.ack_needed = q->use_backlog ? 1 : 0;
   path_options.flow_control_requested = TRUE;
   for (i = 0; i < n; i++)
     {

@@ -89,7 +89,7 @@ create_empty_message(void)
   log_msg_set_value(msg, LM_V_HOST_FROM, "kismacska", -1);
   msg->timestamps[LM_TS_RECVD].tv_sec = 1139684315;
   msg->timestamps[LM_TS_RECVD].tv_usec = 639000;
-  msg->timestamps[LM_TS_RECVD].zone_offset = get_local_timezone_ofs(1139684315);
+  msg->timestamps[LM_TS_RECVD].zone_offset = (gint32)get_local_timezone_ofs(1139684315);
 
   return msg;
 }
@@ -162,7 +162,7 @@ assert_template_format_with_escaping_msg(const gchar *template, gboolean escapin
   const gchar *context_id = "test-context-id";
 
   log_template_format(templ, msg, NULL, LTZ_LOCAL, 999, context_id, res);
-  expect_nstring(res->str, res->len, expected, strlen(expected),
+  expect_nstring(res->str, (gssize)res->len, expected, (gssize)strlen(expected),
                  "template test failed, template=%s", template);
   log_template_unref(templ);
   g_string_free(res, TRUE);
@@ -195,7 +195,7 @@ assert_template_format_with_context(const gchar *template, const gchar *expected
   context[0] = context[1] = msg;
 
   log_template_format_with_context(templ, context, 2, NULL, LTZ_LOCAL, 999, context_id, res);
-  expect_nstring(res->str, res->len, expected, strlen(expected), "context template test failed, template=%s", template);
+  expect_nstring(res->str, (gssize)res->len, expected, (gssize)strlen(expected), "context template test failed, template=%s", template);
   log_template_unref(templ);
   g_string_free(res, TRUE);
   log_msg_unref(msg);

@@ -41,7 +41,7 @@ _add_nv_pair_int(LogTransportAuxData *aux, const gchar *name, gint value)
   GString *buf = sb_gstring_string(sbbuf);
   
   g_string_truncate(buf, 0);
-  format_uint32_padded(buf, -1, 0, 10, value);
+  format_uint32_padded(buf, -1, 0, 10, (guint32)value);
   log_transport_aux_data_add_nv_pair(aux, name, buf->str);
   sb_gstring_release(sbbuf);
 }

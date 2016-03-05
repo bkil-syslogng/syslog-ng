@@ -28,7 +28,7 @@
 
 typedef struct _FileOpenOptions
 {
-  gboolean needs_privileges:1,
+  guint needs_privileges:1,
            is_pipe:1;
   gint open_flags;
   gint create_dirs;

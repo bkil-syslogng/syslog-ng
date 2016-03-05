@@ -73,10 +73,10 @@ log_transport_mock_read_method(LogTransport *s, gpointer buf, gsize count, LogTr
   if (count + self->current_iov_pos > current_iov->iov_len)
     count = current_iov->iov_len - self->current_iov_pos;
 
-  if (GPOINTER_TO_UINT(current_iov->iov_base) < 4096)
+  if (GPOINTER_TO_SIZE(current_iov->iov_base) < 4096)
     {
       /* error injection */
-      errno = GPOINTER_TO_UINT(current_iov->iov_base);
+      errno = (int)GPOINTER_TO_SIZE(current_iov->iov_base);
       return -1;
     }
 
@@ -96,14 +96,14 @@ log_transport_mock_read_method(LogTransport *s, gpointer buf, gsize count, LogTr
       errno = EAGAIN;
       return -1;
     }
-  return count;
+  return (gssize)count;
 }
 
 static void
-log_transport_mock_init(LogTransportMock *self, const gchar *read_buffer1, gssize read_buffer_length1, va_list va)
+log_transport_mock_init(LogTransportMock *self, const gchar *read_buffer1, gint read_buffer_length1, va_list va)
 {
   gchar *buffer;
-  gssize length;
+  gssize slength;
 
   self->super.fd = 0;
   self->super.cond = 0;
@@ -111,20 +111,24 @@ log_transport_mock_init(LogTransportMock *self, const gchar *read_buffer1, gssiz
   self->super.free_fn = log_transport_free_method;
 
   buffer = (gchar *) read_buffer1;
-  length = read_buffer_length1;
+  slength = read_buffer_length1;
   while (buffer)
     {
       /* NOTE: our iov buffer is of a fixed size, increase if your test needs more chunks of data */
       g_assert(self->iov_cnt < sizeof(self->iov) / sizeof(self->iov[0]));
 
-      if (length < 0)
+      gsize length;
+      if (slength < 0)
         length = strlen(buffer);
+      else
+        length = (gsize)slength;
 
       self->iov[self->iov_cnt].iov_base = buffer;
       self->iov[self->iov_cnt].iov_len = length;
       self->iov_cnt++;
       buffer = (gchar *) va_arg(va, const gchar *);
-      length = va_arg(va, gint);
+      if (buffer)
+        slength = va_arg(va, gint);
     }
 
   self->current_iov_ndx = 0;

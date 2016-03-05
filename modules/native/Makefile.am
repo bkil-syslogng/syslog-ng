@@ -1,7 +1,5 @@
 if ENABLE_NATIVE
 
-CFLAGS += -Wno-sign-conversion -Wno-conversion -Wno-switch-default -Wno-strict-overflow # HACK
-
 export top_srcdir
 export top_builddir
 
@@ -20,6 +18,10 @@ modules_native_libsyslog_ng_native_connector_a_CPPFLAGS = \
   -fvisibility=hidden	\
   -I$(top_srcdir)/modules/native        \
   -I$(top_builddir)/modules/native
+
+modules_native_libsyslog_ng_native_connector_a_CFLAGS = \
+  $(AM_CFLAGS) \
+  -Wno-sign-conversion -Wno-conversion -Wno-switch-default -Wno-strict-overflow -Wno-redundant-decls # HACK
 
 else
 modules/native modules/native/ mod-native: modules/native/libnative.la

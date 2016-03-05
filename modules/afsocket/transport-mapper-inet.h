@@ -30,7 +30,7 @@ typedef struct _TransportMapperInet
 {
   TransportMapper super;
 
-  gint server_port;
+  guint16 server_port;
   const gchar *server_port_change_warning;
   gboolean require_tls;
   gboolean allow_tls;
@@ -39,7 +39,7 @@ typedef struct _TransportMapperInet
   gpointer tls_verify_data;
 } TransportMapperInet;
 
-static inline gint
+static inline guint16
 transport_mapper_inet_get_server_port(TransportMapper *self)
 {
   return ((TransportMapperInet *) self)->server_port;

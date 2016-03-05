@@ -27,11 +27,16 @@ AM_CFLAGS += -Wall -W -Wextra -Wshadow \
 	-Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
 	-Wpointer-arith -Wpointer-sign \
 	-Wno-unused-parameter -Wno-missing-field-initializers \
-	-Wstrict-overflow=2 -Wconversion -Wsign-conversion \
-	-Wvariadic-macros -Wswitch-default \
- 	-Wstrict-prototypes -Wold-style-definition \
- # -Wpedantic -Wundef -Wredundant-decls -Wlong-long
- # -Winline -Wstack-protector -Wdeprecated
+	-Wvariadic-macros \
+	-Wstrict-prototypes -Wold-style-definition
+
+ # -Wswitch-default 
+ #	-Wstrict-overflow=2
+ #  -Wconversion -Wsign-conversion 
+ # 	-Wredundant-decls
+ # -Winline
+ # -Wpedantic -Wundef -Wlong-long
+ # -Wstack-protector -Wdeprecated
 endif
 
 TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS) $(CFLAGS)
