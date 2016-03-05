@@ -129,7 +129,6 @@ test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
   GArray *matches = g_array_new(FALSE, TRUE, sizeof(RParserMatch));
   RParserMatch *match;
   const gchar *match_name;
-  gint i;
 
   g_array_set_size(matches, 1);
   va_start(args, name1);
@@ -138,7 +137,7 @@ test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
   if (ret && !name1)
     {
       printf("FAIL: found unexpected: '%s' => '%s' matches: ", key, (gchar *) ret->value);
-      for (i = 0; i < matches->len; i++)
+      for (gsize i = 0; i < matches->len; i++)
         {
           match = &g_array_index(matches, RParserMatch, i);
           match_name = log_msg_get_value_name(match->handle, NULL);
@@ -155,7 +154,7 @@ test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
     }
   else if (ret && name1)
     {
-      gint i = 1;
+      gsize i = 1;
       const gchar *name, *value;
 
       name = name1;
@@ -215,7 +214,7 @@ test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
  out:
   va_end(args);
 
-  for (i = 0; i < matches->len; i++)
+  for (gsize i = 0; i < matches->len; i++)
     {
       match = &g_array_index(matches, RParserMatch, i);
       if (match->match)
