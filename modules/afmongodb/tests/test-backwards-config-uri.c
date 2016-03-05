@@ -212,6 +212,8 @@ _expect_uri_in_log(const gchar *uri, const gchar *db, const gchar *col)
   g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
   gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern->str, "mismatch", NULL);
   g_string_free(pattern, TRUE);
+  if (ok)
+    display_grabbed_messages();
   reset_grabbed_messages();
   if (!ok)
     TEST_FAILED;
@@ -240,8 +242,11 @@ _run_and_expect_error(const gchar *mongo_config, const gchar *error)
   gboolean ok = !_run_test(mongo_config);
   if (!ok)
     msg_error("_run_test() accepted, but it should have failed", NULL, NULL);
-  ok &= EXPECT_MSG(error, "mismatch");
+  gboolean ok2 = EXPECT_MSG(error, "mismatch");
+  if (ok2)
+    display_grabbed_messages();
   reset_grabbed_messages();
+  ok &= ok2;
   if (!ok)
     TEST_FAILED;
 
