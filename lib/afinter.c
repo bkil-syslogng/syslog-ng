@@ -325,6 +325,7 @@ afinter_source_new(AFInterSourceDriver *owner, LogSourceOptions *options)
   self->super.super.init = afinter_source_init;
   self->super.super.deinit = afinter_source_deinit;
   self->super.wakeup = afinter_source_wakeup;
+  fprintf(stderr, "DEBUG: afinter_source_new()\n");
   return &self->super;
 }
 
@@ -459,8 +460,10 @@ afinter_global_deinit(void)
 {
   g_static_mutex_free(&internal_msg_lock);
   g_static_mutex_free(&internal_mark_target_lock);
+  fprintf(stderr, "DEBUG: afinter_global_deinit()\n");
   if (!internal_msg_queue)
     {
+      fprintf(stderr, "DEBUG: afinter_global_deinit() freeing messages\n");
       g_queue_free_full(internal_msg_queue, (GDestroyNotify)log_msg_unref);
       stats_unregister_counter(SCS_GLOBAL, "internal_queue_length", NULL, SC_TYPE_PROCESSED, &internal_queue_length);
       internal_msg_queue = NULL;

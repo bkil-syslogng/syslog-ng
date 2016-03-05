@@ -96,11 +96,18 @@ grab_message(LogMessage *msg)
   internal_messages = g_list_append(internal_messages, msg);
 }
 
+static void
+_processed_message(LogMessage *msg)
+{
+/*  if (msg->ack_func)
+    msg->ack_func(msg, AT_PROCESSED);*/
+  log_msg_unref(msg);
+}
+
 void
 reset_grabbed_messages(void)
 {
-  g_list_foreach(internal_messages, (GFunc) log_msg_unref, NULL);
-  g_list_free(internal_messages);
+  g_list_free_full(internal_messages, (GDestroyNotify)_processed_message);
   internal_messages = NULL;
 }
 

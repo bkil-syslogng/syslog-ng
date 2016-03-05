@@ -300,7 +300,10 @@ log_threaded_dest_driver_stop_thread(gpointer s)
 {
   LogThrDestDriver *self = (LogThrDestDriver *) s;
 
+  fprintf(stderr, "DEBUG: log_threaded_dest_driver_stop_thread(%x): %s\n",
+          (unsigned int)GPOINTER_TO_SIZE(self), self->format.persist_name(self));
   iv_event_post(&self->shutdown_event);
+  fprintf(stderr, "DEBUG: log_threaded_dest_driver_stop_thread after iv_event_post()\n");
 }
 
 static void

@@ -34,6 +34,7 @@
 #include "service-management.h"
 #include <unistd.h> // DEBUG
 #include "mainloop-call.h"
+#include "mainloop-worker.h"
 #include "mainloop-io-worker.h"
 #include "lib/plugin.h"
 #include "resolved-configurable-paths.h"
@@ -122,6 +123,21 @@ _setup(int argc, char **argv)
   app_post_daemonized();
 }
 
+static GlobalConfig *global_cfg;
+
+static void _continuation(void)
+{
+  msg_trace("continuation", NULL);
+  cfg_deinit(global_cfg);
+  iv_quit();
+}
+
+static void
+_terminate(void *cookie __attribute__((unused)))
+{
+  main_loop_worker_sync_call(_continuation);
+}
+
 static gboolean
 _run_test(const gchar *mongo_config)
 {
@@ -166,23 +182,32 @@ _run_test(const gchar *mongo_config)
   test_cfg->state = persist_state_new(persist_filename);
 
   ok = cfg_init(test_cfg);
-  stop_grabbing_messages();
+//  stop_grabbing_messages();
 
   msg_trace("after cfg_init()", NULL, NULL);
 
   if (!ok)
     msg_error("Failed to initialize configuration", evt_tag_str("mongo_config", mongo_config), NULL);
 
-  sleep(1);
   msg_trace("before app_post_config_loaded()", NULL, NULL);
   app_post_config_loaded();
 
   service_management_indicate_readiness();
   service_management_clear_status();
-//  iv_main();
+
+  struct iv_task terminator;
+  IV_TASK_INIT(&terminator);
+  global_cfg = test_cfg;
+  terminator.cookie = NULL;
+  terminator.handler = _terminate;
+  iv_task_register(&terminator);
+
+  iv_main();
+  fprintf(stderr, "DEBUG: after iv_main()\n");
+//  sleep(1);
 
   msg_trace("before cfg_deinit()", NULL, NULL);
-  gboolean ok2 = cfg_deinit(test_cfg);
+  gboolean ok2 = TRUE; // cfg_deinit(test_cfg);
   msg_debug("before persist_config_free()",
             evt_tag_int("persist==NULL", test_cfg->persist == NULL), NULL);
   if (test_cfg->persist)
@@ -198,7 +223,9 @@ _run_test(const gchar *mongo_config)
     {
       msg_error("Failed to deinitialize configuration", evt_tag_str("mongo_config", mongo_config), NULL);
     }
-
+//  sleep(1);
+  msg_trace("after sleep()", NULL, NULL);
+  stop_grabbing_messages();
   return ok && ok2;
 }
 
@@ -481,14 +508,30 @@ _test_uri(void)
           });
 }
 
+static void
+_test_debug_single(void)
+{
+  _correct_uri_cases((const URITestCase[])
+          {
+                {
+                    "",
+                    "127.0.0.1:27017/syslog" DEFAULTOPTS,
+                    "syslog",
+                    "messages"
+                }
+          });
+}
+
 int
 main(int argc, char **argv)
 {
   _setup(argc, argv);
 
-  _test_legacy();
-  _test_uri();
+  _test_debug_single();
 
   _teardown();
   return (int) _test_ret_num;
+
+  _test_uri();
+  _test_legacy();
 }

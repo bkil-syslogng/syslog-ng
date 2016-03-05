@@ -417,9 +417,14 @@ _worker_thread_init(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  _dd_connect(self, FALSE);
-
+  mongoc_init();
   self->bson = bson_sized_new(4096);
+  self->current_value = g_string_new("canary");
+
+  if (!_uri_init(self))
+    msg_error("Worker thread init failed", NULL);
+
+  _dd_connect(self, FALSE);
 }
 
 static void
@@ -427,7 +432,10 @@ _worker_thread_deinit(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
+  g_string_free(self->current_value, TRUE);
+  self->current_value = NULL;
   bson_free(self->bson);
+  mongoc_cleanup();
 }
 
 /*
@@ -479,15 +487,17 @@ _logpipe_init(LogPipe *s)
   _init_value_pairs_dot_to_underscore_transformation(self);
 
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+  mongoc_init();
   if (!afmongodb_dd_create_uri_from_legacy(self))
-    return FALSE;
+    {
+      _mongoc_cleanup();
+      return FALSE;
+    }
+  _mongoc_cleanup();
 #endif
 
   if (!self->uri_str)
     self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
-
-  if (!_uri_init(self))
-    return FALSE;
 
   return log_threaded_dest_driver_start(s);
 }
@@ -511,7 +521,6 @@ _logpipe_free(LogPipe *d)
     mongoc_uri_destroy(self->uri_obj);
   if (self->coll_obj)
     mongoc_collection_destroy(self->coll_obj);
-  mongoc_cleanup();
   log_threaded_dest_driver_free(d);
 }
 
@@ -531,8 +540,6 @@ LogDriver *
 afmongodb_dd_new(GlobalConfig *cfg)
 {
   MongoDBDestDriver *self = g_new0(MongoDBDestDriver, 1);
-
-  mongoc_init();
 
   log_threaded_dest_driver_init_instance(&self->super, cfg);
 

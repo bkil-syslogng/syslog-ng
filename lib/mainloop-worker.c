@@ -181,8 +181,8 @@ main_loop_worker_thread_start(void *cookie)
 void
 main_loop_worker_thread_stop(void)
 {
-  app_thread_stop();
   _release_thread_id();
+  app_thread_stop();
 }
 
 /*

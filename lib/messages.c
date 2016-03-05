@@ -301,6 +301,13 @@ msg_deinit(void)
       g_log_remove_handler("GLib", glib_handler_id);
       glib_handler_id = 0;
     }
+  g_static_private_free(&msg_context_private);
+}
+
+void
+msg_thread_deinit(void)
+{
+  g_static_private_free(&msg_context_private);
 }
 
 static GOptionEntry msg_option_entries[] =
