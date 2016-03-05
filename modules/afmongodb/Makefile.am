@@ -8,7 +8,8 @@ LIBMONGO_CFLAGS += -Werror -W -Wall -Wextra -Wshadow \
  -Wpointer-arith -Wpointer-sign \
  -Wno-unused-parameter -Wno-missing-field-initializers \
  -Wimplicit-function-declaration \
- -Wstrict-prototypes -Winline -Wstack-protector
+ -Wstrict-prototypes -Winline -Wstack-protector \
+ -Wold-style-definition
 
 EXTRA_FLAGS = -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
  -Wvariadic-macros -Wswitch-default \
