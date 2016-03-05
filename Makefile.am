@@ -21,7 +21,7 @@ if ENABLE_EXTRA_WARNINGS
 AM_CFLAGS += -Wall -Wshadow
 endif
 
-TEST_CFLAGS		= -I$(top_srcdir)/libtest
+TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS)
 
 TEST_LDADD		= $(top_builddir)/libtest/libsyslog-ng-test.a \
 			  $(top_builddir)/lib/libsyslog-ng.la \
