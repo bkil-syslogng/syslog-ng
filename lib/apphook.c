@@ -41,6 +41,7 @@
 #include "service-management.h"
 #include "crypto.h"
 #include "value-pairs/value-pairs.h"
+#include "reloc.h"
 
 #include <iv.h>
 #include <iv_work.h>
@@ -176,6 +177,7 @@ app_shutdown(void)
   hostname_global_deinit();
   crypto_deinit();
   msg_deinit();
+  reloc_deinit();
   timeutils_deinit();
   
   /* NOTE: the iv_deinit() call should come here, but there's some exit
