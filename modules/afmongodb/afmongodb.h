@@ -36,4 +36,6 @@ void afmongodb_dd_set_retries(LogDriver *d, gint retries);
 
 LogTemplateOptions *afmongodb_dd_get_template_options(LogDriver *s);
 
+gboolean afmongodb_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 #endif
