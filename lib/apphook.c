@@ -159,6 +159,20 @@ app_post_config_loaded(void)
   res_init();
 }
 
+static void
+_static_globals_deinit(void)
+{
+  reloc_deinit();
+  timeutils_deinit();
+}
+
+static void
+_thread_deinit(void)
+{
+  _static_globals_deinit();
+  msg_thread_deinit();
+}
+
 void 
 app_shutdown(void)
 {
@@ -176,11 +190,12 @@ app_shutdown(void)
   dns_cache_thread_deinit();
   dns_cache_global_deinit();
   hostname_global_deinit();
-  crypto_deinit();
+  _thread_deinit();
   msg_deinit();
   plugin_global_deinit();
-  reloc_deinit();
-  timeutils_deinit();
+//  reloc_deinit();
+//  timeutils_deinit();
+  crypto_deinit();
   
   /* NOTE: the iv_deinit() call should come here, but there's some exit
    * synchronization issue in libivykis that causes use-after-free with the
@@ -209,4 +224,5 @@ app_thread_stop(void)
   dns_cache_thread_deinit();
   scratch_buffers_free();
   main_loop_call_thread_deinit();
+  _thread_deinit();
 }

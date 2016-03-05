@@ -1372,7 +1372,7 @@ void
 log_msg_unref(LogMessage *self)
 {
   gint old_value;
-
+  fprintf(stderr, "DEBUG: log_msg_unref cached_refs=%d\n", logmsg_cached_refs);
   if (G_LIKELY(logmsg_current == self))
     {
       /* fastpath, @self is the current message, ref/unref processing is
@@ -1385,6 +1385,7 @@ log_msg_unref(LogMessage *self)
   old_value = log_msg_update_ack_and_ref(self, -1, 0);
   g_assert(LOGMSG_REFCACHE_VALUE_TO_REF(old_value) >= 1);
 
+  fprintf(stderr, "DEBUG: log_msg_unref old_value=%d\n", LOGMSG_REFCACHE_VALUE_TO_REF(old_value));
   if (LOGMSG_REFCACHE_VALUE_TO_REF(old_value) == 1)
     {
       log_msg_free(self);

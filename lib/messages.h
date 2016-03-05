@@ -47,6 +47,7 @@ void msg_event_suppress_recursions_and_send(EVTREC *e);
 void msg_set_post_func(MsgPostFunc func);
 void msg_init(gboolean interactive);
 void msg_deinit(void);
+void msg_thread_deinit(void);
 
 void msg_add_option_group(GOptionContext *ctx);
 

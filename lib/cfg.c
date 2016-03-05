@@ -526,6 +526,7 @@ cfg_read_config(GlobalConfig *self, const gchar *fname, gboolean syntax_only, gc
 void
 cfg_free(GlobalConfig *self)
 {
+  fprintf(stderr, "DEBUG: %s()\n", __func__);
   g_assert(self->persist == NULL);
   if (self->state)
     persist_state_free(self->state);

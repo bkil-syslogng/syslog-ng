@@ -336,6 +336,8 @@ plugin_load_module(const gchar *module_name, GlobalConfig *cfg, CfgArgs *args)
   ModuleInfo *module_info;
 
   /* lookup in the main executable */
+
+  fprintf(stderr, "DEBUG: %s()\n", __func__);
   if (!main_module_handle)
     main_module_handle = g_module_open(NULL, 0);
   module_init_func = plugin_get_module_init_name(module_name);
@@ -464,9 +466,10 @@ plugin_load_candidate_modules(GlobalConfig *cfg)
                 }
               g_free(module_name);
               if (mod)
-                g_module_close(mod);
-              else
-                mod = NULL;
+                {
+                  g_module_close(mod);
+                  mod = NULL;
+                }
             }
         }
       g_dir_close(dir);
@@ -579,6 +582,7 @@ plugin_free_plugins(GlobalConfig *cfg)
 {
   g_list_foreach(cfg->plugins, (GFunc) _free_plugin, NULL);
   g_list_free(cfg->plugins);
+  fprintf(stderr, "DEBUG: plugin_free_plugins()\n");
 }
 
 void
