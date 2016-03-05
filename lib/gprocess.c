@@ -123,6 +123,7 @@ static struct
   gchar *argv_start;
   size_t argv_env_len;
   gchar *argv_orig;
+  gchar **environ_orig;
   gboolean core;
   gint fd_limit_min;
   gint check_period;
@@ -508,6 +509,7 @@ g_process_set_argv_space(gint argc, gchar **argv)
   for (i = 0; envp[i] != NULL; i++)
     ;
   
+  process_opts.environ_orig = environ;
   environ = g_new(char *, i + 1);
 
   /*
@@ -1425,6 +1427,21 @@ g_process_startup_ok(void)
   g_process_detach_stdio();
 }
 
+void
+g_process_restore_environ(void)
+{
+#ifdef SYSLOG_NG_HAVE_ENVIRON
+  extern char **environ;
+
+  for (gsize i = 0; environ[i] != NULL; i++)
+    g_free(environ[i]);
+  g_free(environ);
+
+  g_free(process_opts.argv_orig);
+  environ = process_opts.environ_orig;
+#endif
+}
+
 /**
  * g_process_finish:
  *
@@ -1435,6 +1452,7 @@ g_process_startup_ok(void)
 void
 g_process_finish(void)
 {
+  g_process_restore_environ();
   g_process_remove_pidfile();
 }
 
