@@ -185,6 +185,7 @@ _run_test(const gchar *mongo_config)
     }
   msg_trace("before cfg_free()", NULL, NULL);
   cfg_free(test_cfg);
+  msg_trace("after cfg_free()", NULL, NULL);
 
   if (!ok2)
     {
@@ -204,6 +205,7 @@ _expect_uri_in_log(const gchar *uri, const gchar *db, const gchar *col)
   g_string_append_printf(pattern, URI_MSG_FMT, uri, db, col);
   gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern->str, "mismatch", NULL);
   g_string_free(pattern, TRUE);
+  reset_grabbed_messages();
   if (!ok)
     TEST_FAILED;
   return ok;
@@ -232,6 +234,7 @@ _run_and_expect_error(const gchar *mongo_config, const gchar *error)
   if (!ok)
     msg_error("_run_test() accepted, but it should have failed", NULL, NULL);
   ok &= EXPECT_MSG(error, "mismatch");
+  reset_grabbed_messages();
   if (!ok)
     TEST_FAILED;
 
