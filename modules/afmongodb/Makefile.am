@@ -20,6 +20,7 @@ modules_afmongodb_libafmongodb_la_SOURCES	=	\
 	modules/afmongodb/afmongodb-grammar.y		\
 	modules/afmongodb/afmongodb.c			\
 	modules/afmongodb/afmongodb.h			\
+	modules/afmongodb/afmongodb-private.h			\
 	modules/afmongodb/afmongodb-parser.c		\
 	modules/afmongodb/afmongodb-parser.h		\
 	${DUMMY_C}
