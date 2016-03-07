@@ -34,12 +34,6 @@
 
 #include <time.h>
 
-typedef struct
-{
-  gchar *name;
-  LogTemplate *value;
-} MongoDBField;
-
 /*
  * Configuration
  */
