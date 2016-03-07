@@ -20,53 +20,13 @@
  *
  */
 
-#ifndef AFMONGODB_PRIVATE_H_
-#define AFMONGODB_PRIVATE_H_
+#ifndef AFMONGODB_LEGACY_URI_H_
+#define AFMONGODB_LEGACY_URI_H_
 
-#include "mongoc.h"
-#include "logthrdestdrv.h"
-#include "string-list.h"
-#include "value-pairs/value-pairs.h"
+#include "afmongodb-private.h"
 
-typedef struct _MongoDBDestDriver
-{
-  LogThrDestDriver super;
-
-  /* Shared between main/writer; only read by the writer, never
-   written */
-  gchar *coll;
-  GString *uri_str;
-
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  GList *servers;
-  gchar *address;
-  gint port;
-
-  gboolean safe_mode;
-  gchar *user;
-  gchar *password;
-#endif
-
-  LogTemplateOptions template_options;
-
-  time_t last_msg_stamp;
-
-  ValuePairs *vp;
-
-  /* Writer-only stuff */
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  GList *recovery_cache;
-  gboolean is_legacy;
-  gchar *db;
-#endif
-
-  const gchar *const_db;
-  mongoc_uri_t *uri_obj;
-  mongoc_client_t *client;
-  mongoc_collection_t *coll_obj;
-
-  GString *current_value;
-  bson_t *bson;
-} MongoDBDestDriver;
+void afmongodb_dd_init_legacy(MongoDBDestDriver *self);
+void afmongodb_dd_free_legacy(MongoDBDestDriver *self);
+gboolean afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self);
 
 #endif
