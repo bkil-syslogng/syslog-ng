@@ -1,3 +1,21 @@
+
+LIBMONGO_CFLAGSX = -Werror -W -Wall -Wextra -Wshadow \
+ -fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
+ -Wbad-function-cast \
+ -Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
+ -Wabi -Waggregate-return -Winvalid-pch \
+ -Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
+ -Wpointer-arith -Wpointer-sign \
+ -Wno-unused-parameter -Wno-missing-field-initializers \
+ -Wimplicit-function-declaration \
+ -Wstrict-prototypes -Winline -Wstack-protector \
+ -Wold-style-definition
+
+EXTRA_FLAGS = -Wstrict-overflow=2 -Wconversion -Wsign-conversion \
+ -Wvariadic-macros -Wswitch-default \
+ -Wredundant-decls -Wlong-long -Wmissing-prototypes -Wmissing-declarations
+# -Wpedantic -Wundef
+
 DIST_SUBDIRS 					+= modules/afmongodb/mongo-c-driver
 
 if LIBMONGO_INTERNAL
