@@ -40,12 +40,6 @@
 
 typedef struct
 {
-  gchar *name;
-  LogTemplate *value;
-} MongoDBField;
-
-typedef struct
-{
   LogThrDestDriver super;
 
   /* Shared between main/writer; only read by the writer, never
