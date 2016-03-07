@@ -25,7 +25,6 @@
 #include "afmongodb.h"
 #include "afmongodb-parser.h"
 #include "messages.h"
-#include "string-list.h"
 #include "stats/stats-registry.h"
 #include "nvtable.h"
 #include "logqueue.h"
@@ -33,35 +32,8 @@
 #include "vptransform.h"
 #include "plugin.h"
 #include "plugin-types.h"
-#include "logthrdestdrv.h"
 
-#include "mongoc.h"
 #include <time.h>
-
-typedef struct
-{
-  LogThrDestDriver super;
-
-  /* Shared between main/writer; only read by the writer, never
-     written */
-  gchar *coll;
-  gchar *uri;
-
-  LogTemplateOptions template_options;
-
-  time_t last_msg_stamp;
-
-  ValuePairs *vp;
-
-  /* Writer-only stuff */
-  const gchar *db;
-  mongoc_uri_t *uri_obj;
-  mongoc_client_t *client;
-  mongoc_collection_t *coll_obj;
-
-  GString *current_value;
-  bson_t *bson;
-} MongoDBDestDriver;
 
 /*
  * Configuration
