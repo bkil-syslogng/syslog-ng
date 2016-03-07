@@ -20,53 +20,19 @@
  *
  */
 
-#ifndef AFMONGODB_PRIVATE_H_
-#define AFMONGODB_PRIVATE_H_
+#ifndef AFMONGODB_LEGACY_GRAMMAR_H_
+#define AFMONGODB_LEGACY_GRAMMAR__H_
 
-#include "mongoc.h"
-#include "logthrdestdrv.h"
-#include "string-list.h"
-#include "value-pairs/value-pairs.h"
+#include "driver.h"
 
-typedef struct _MongoDBDestDriver
-{
-  LogThrDestDriver super;
-
-  /* Shared between main/writer; only read by the writer, never
-   written */
-  gchar *coll;
-  GString *uri_str;
-
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  GList *servers;
-  gchar *address;
-  gint port;
-
-  gboolean safe_mode;
-  gchar *user;
-  gchar *password;
-#endif
-
-  LogTemplateOptions template_options;
-
-  time_t last_msg_stamp;
-
-  ValuePairs *vp;
-
-  /* Writer-only stuff */
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  GList *recovery_cache;
-  gboolean is_legacy;
-  gchar *db;
-#endif
-
-  const gchar *const_db;
-  mongoc_uri_t *uri_obj;
-  mongoc_client_t *client;
-  mongoc_collection_t *coll_obj;
-
-  GString *current_value;
-  bson_t *bson;
-} MongoDBDestDriver;
+gboolean afmongodb_dd_check_address(LogDriver *d, gboolean local);
+void afmongodb_dd_set_servers(LogDriver *d, GList *servers);
+void afmongodb_dd_set_host(LogDriver *d, const gchar *host);
+void afmongodb_dd_set_port(LogDriver *d, gint port);
+void afmongodb_dd_set_database(LogDriver *d, const gchar *database);
+void afmongodb_dd_set_user(LogDriver *d, const gchar *user);
+void afmongodb_dd_set_password(LogDriver *d, const gchar *password);
+void afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state);
+void afmongodb_dd_set_path(LogDriver *d, const gchar *path);
 
 #endif
