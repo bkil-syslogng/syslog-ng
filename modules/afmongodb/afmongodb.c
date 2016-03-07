@@ -419,6 +419,7 @@ afmongodb_worker_thread_deinit(LogThrDestDriver *d)
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
   g_string_free(self->current_value, TRUE);
+  self->current_value = NULL;
 
   bson_free(self->bson);
 }
@@ -470,8 +471,10 @@ afmongodb_dd_free(LogPipe *d)
   g_free(self->coll);
   value_pairs_unref(self->vp);
 
-  mongoc_uri_destroy(self->uri_obj);
-  mongoc_collection_destroy (self->coll_obj);
+  if (self->uri_obj)
+    mongoc_uri_destroy(self->uri_obj);
+  if (self->coll_obj)
+    mongoc_collection_destroy(self->coll_obj);
   mongoc_cleanup ();
   log_threaded_dest_driver_free(d);
 }
