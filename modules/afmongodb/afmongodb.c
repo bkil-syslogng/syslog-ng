@@ -117,7 +117,7 @@ _dd_connect(MongoDBDestDriver *self, gboolean reconnect)
 
   if (!self->client)
     {
-      msg_error("Error connecting to MongoDB", evt_tag_str("driver", self->super.super.super.id), NULL);
+      msg_error("Error creating MongoDB URI", evt_tag_str("driver", self->super.super.super.id), NULL);
       return FALSE;
     }
 
@@ -127,6 +127,21 @@ _dd_connect(MongoDBDestDriver *self, gboolean reconnect)
       msg_error("Error getting specified MongoDB collection",
                 evt_tag_str("collection", self->coll),
                 evt_tag_str("driver", self->super.super.super.id),
+                NULL);
+      return FALSE;
+    }
+
+  bson_t *status = bson_new();
+  bson_error_t error;
+  const mongoc_read_prefs_t *read_prefs = mongoc_collection_get_read_prefs(self->coll_obj);
+  gboolean ok = mongoc_client_get_server_status(self->client, (mongoc_read_prefs_t *)read_prefs,
+                                                status, &error);
+  bson_destroy(status);
+  if (!ok)
+    {
+      msg_error("Error connecting to MongoDB",
+                evt_tag_str("driver", self->super.super.super.id),
+                evt_tag_str("reason", error.message),
                 NULL);
       return FALSE;
     }
