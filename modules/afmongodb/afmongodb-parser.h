@@ -28,6 +28,10 @@
 #include "cfg-lexer.h"
 #include "afmongodb.h"
 
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+#include "afmongodb-legacy-grammar.h"
+#endif
+
 extern CfgParser afmongodb_parser;
 
 CFG_PARSER_DECLARE_LEXER_BINDING(afmongodb_, LogDriver **)

@@ -34,6 +34,11 @@
 
 #include <time.h>
 
+#include "afmongodb-private.h"
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+#include "afmongodb-legacy-uri.h"
+#endif
+
 /*
  * Configuration
  */
@@ -467,6 +472,11 @@ _logpipe_init(LogPipe *s)
 
   _init_value_pairs_dot_to_underscore_transformation(self);
 
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+  if (!afmongodb_dd_create_uri_from_legacy(self))
+    return FALSE;
+#endif
+
   if (!self->uri_str)
     self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
   if (!_uri_init(self))
@@ -484,6 +494,9 @@ _logpipe_free(LogPipe *d)
 
   g_string_free(self->uri_str, TRUE);
   g_free(self->coll);
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+  afmongodb_dd_free_legacy(self);
+#endif
   value_pairs_unref(self->vp);
 
   if (self->uri_obj)
@@ -528,6 +541,9 @@ afmongodb_dd_new(GlobalConfig *cfg)
   self->super.stats_source = SCS_MONGODB;
   self->super.messages.retry_over = _worker_retry_over_message;
 
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+  afmongodb_dd_init_legacy(self);
+#endif
   afmongodb_dd_set_collection((LogDriver *)self, "messages");
 
   log_template_options_defaults(&self->template_options);
