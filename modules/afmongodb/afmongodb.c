@@ -388,9 +388,19 @@ _worker_insert(LogThrDestDriver *s, LogMessage *msg)
   return WORKER_INSERT_RESULT_SUCCESS;
 }
 
-static gboolean
-_uri_init(MongoDBDestDriver *self)
+gboolean
+afmongodb_dd_private_uri_init(LogDriver *d)
 {
+  MongoDBDestDriver *self = (MongoDBDestDriver *)d;
+
+  #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+  if (!afmongodb_dd_create_uri_from_legacy(self))
+    return FALSE;
+#endif
+
+  if (!self->uri_str)
+    self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
+
   self->uri_obj = mongoc_uri_new(self->uri_str->str);
   if (!self->uri_obj)
     {
@@ -476,14 +486,7 @@ _logpipe_init(LogPipe *s)
 
   _init_value_pairs_dot_to_underscore_transformation(self);
 
-#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  if (!afmongodb_dd_create_uri_from_legacy(self))
-    return FALSE;
-#endif
-
-  if (!self->uri_str)
-    self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
-  if (!_uri_init(self))
+  if (!afmongodb_dd_private_uri_init(&self->super.super.super))
     return FALSE;
 
   return log_threaded_dest_driver_start(s);
