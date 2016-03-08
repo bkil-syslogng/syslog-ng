@@ -22,9 +22,14 @@
  */
 
 #include "testutils.h"
-#include "modules/afmongodb/afmongodb.h"
-/*
+#include "lib/plugin.h"
+#include "resolved-configurable-paths.h"
 #include "mainloop.h"
+#include "modules/afmongodb/afmongodb.h"
+#include "module-config.h"
+//#include "thread-utils.h"
+
+/*
 #include "cfg-lexer.h"
 #include "cfg-grammar.h"
 #include "messages.h"
@@ -38,8 +43,6 @@
 #include "mainloop-call.h"
 #include "mainloop-worker.h"
 #include "mainloop-io-worker.h"
-#include "lib/plugin.h"
-#include "resolved-configurable-paths.h"
 */
 extern GList *internal_messages; // testutils.h
 
@@ -531,11 +534,30 @@ _test_debug_single(void)
           });
 }
 
+static void
+_invoke_module_init(gchar *key, ModuleConfig *mc, gpointer *args)
+{
+  GlobalConfig *cfg = (GlobalConfig *) args[0];
+  gboolean *result = (gboolean *) args[1];
+
+  if (!module_config_init(mc, cfg))
+    *result = FALSE;
+}
+
 static gboolean
-_test(void)
+_cfg_init_modules(GlobalConfig *cfg)
+{
+  gboolean result = TRUE;
+  gpointer args[] = { cfg, &result };
+  g_hash_table_foreach(cfg->module_config, (GHFunc) _invoke_module_init, args);
+
+  return result;
+}
+
+static gboolean
+_test_1(void)
 {
   const gchar *mongo_config = "";
-  reset_grabbed_messages();
 
   GlobalConfig *test_cfg = cfg_new(0x0308);
   if (!test_cfg)
@@ -544,7 +566,7 @@ _test(void)
       return FALSE;
     }
 
-//  plugin_load_candidate_modules(test_cfg);
+  plugin_load_candidate_modules(test_cfg);
   gchar *preprocess_into = NULL;
 
   GString *config_string = g_string_sized_new(0);
@@ -559,10 +581,10 @@ _test(void)
       "};",
       mongo_config);
 
-  start_grabbing_messages();
-  gboolean syntax_only = FALSE;
+//  start_grabbing_messages();
+  gboolean syntax_only_ = FALSE;
   gboolean ok = cfg_load_config(test_cfg, config_string->str,
-                                syntax_only, preprocess_into);
+                                syntax_only_, preprocess_into);
   g_string_free(config_string, TRUE);
   msg_trace("after cfg_load_config()", NULL, NULL);
 
@@ -576,10 +598,25 @@ _test(void)
 
   const gchar *persist_filename = "";
   test_cfg->state = persist_state_new(persist_filename);
+  fprintf(stderr, "_test_1()\n");
+  msg_error("hi", NULL);
+//  ok = cfg_tree_start(test_cfg);
+//  ok = cfg->module_config cfg_init(test_cfg);
+  ok = _cfg_init_modules(test_cfg) && cfg_tree_start(&test_cfg->tree);;
 
+  if (!ok)
+    msg_error("Failed to initialize configuration", evt_tag_str("mongo_config", mongo_config), NULL);
+/*
   LogDriver *mongodb = afmongodb_dd_new(test_cfg);
-  log_pipe_unref(&mongodb->super);
+  msg_error("E: _test_1()", NULL);
 
+  afmongodb_dd_set_port(mongodb, 1234);
+  afmongodb_dd_set_host(mongodb, "localhost");
+
+  mongodb->super.init(&mongodb->super);
+  log_pipe_unref(&mongodb->super);
+  mongodb = mongodb;
+*/
 
   if (test_cfg->persist)
     {
@@ -587,15 +624,42 @@ _test(void)
       test_cfg->persist = NULL;
     }
 
-  cfg_free(test_cfg);
+//  cfg_free(test_cfg);
   stop_grabbing_messages();
+
   return TRUE;
+}
+
+static void
+_test(void)
+{
+  syntax_only = FALSE;
+  debug_flag = TRUE;
+  verbose_flag = TRUE;
+  trace_flag = TRUE;
+  log_stderr = TRUE;
+
+  main_thread_handle = get_thread_id();
+  resolved_configurable_paths_init(&resolvedConfigurablePaths);
+  msg_init(FALSE);
+  log_msg_registry_init();
+  stats_init();
+
+  if (!_test_1())
+    TEST_FAILED;
+  display_grabbed_messages();
+  reset_grabbed_messages();
+
+  stats_destroy();
+  log_msg_registry_deinit();
+  msg_deinit();
 }
 
 int
 main(int argc, char **argv)
 {
   _test();
+//  _test();
   return (int) _test_ret_num;
 
 //  _setup(argc, argv);
