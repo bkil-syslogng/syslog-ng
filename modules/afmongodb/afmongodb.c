@@ -503,7 +503,7 @@ _logpipe_free(LogPipe *d)
     mongoc_uri_destroy(self->uri_obj);
   if (self->coll_obj)
     mongoc_collection_destroy(self->coll_obj);
-  mongoc_cleanup ();
+  mongoc_cleanup();
   log_threaded_dest_driver_free(d);
 }
 
@@ -524,7 +524,7 @@ afmongodb_dd_new(GlobalConfig *cfg)
 {
   MongoDBDestDriver *self = g_new0(MongoDBDestDriver, 1);
 
-  mongoc_init ();
+  mongoc_init();
 
   log_threaded_dest_driver_init_instance(&self->super, cfg);
 
