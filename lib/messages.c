@@ -284,6 +284,7 @@ void
 msg_deinit(void)
 {
   evt_ctx_free(evt_context);
+  evt_context = NULL;
   log_stderr = TRUE;
 }
 
