@@ -544,7 +544,7 @@ afmongodb_dd_new(GlobalConfig *cfg)
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
   afmongodb_dd_init_legacy(self);
 #endif
-  afmongodb_dd_set_collection((LogDriver *)self, "messages");
+  afmongodb_dd_set_collection(&self->super.super.super, "messages");
 
   log_template_options_defaults(&self->template_options);
   afmongodb_dd_set_value_pairs(&self->super.super.super, value_pairs_new_default(cfg));
