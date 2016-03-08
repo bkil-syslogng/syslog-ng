@@ -215,10 +215,6 @@ _check_auth_options(MongoDBDestDriver *self)
 gboolean
 afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
 {
-  if (self->uri_str)
-    msg_trace("create_uri", evt_tag_str("uri_str", self->uri_str->str), NULL);
-  msg_trace("create_uri", evt_tag_int("is_legacy", self->is_legacy), NULL);
-
   if (!_check_auth_options(self))
     return FALSE;
 
