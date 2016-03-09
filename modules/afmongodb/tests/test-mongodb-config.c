@@ -26,11 +26,10 @@
 #include "modules/afmongodb/afmongodb-parser.h"
 
 static int _tests_failed = 0;
-
-#define DEFAULTOPTS "?slaveOk=true&sockettimeoutms=60000"
-
 static GlobalConfig *test_cfg;
 static LogDriver *mongodb;
+
+#define SAFEOPTS "?wtimeoutMS=60000&socketTimeoutMS=60000&connectTimeoutMS=60000"
 
 static void
 _before_test(void)
@@ -87,7 +86,7 @@ _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, con
 static void
 _test_uri_correct(void)
 {
-  _expect_uri_in_log("default_uri", "127.0.0.1:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("default_uri", "127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_uri(mongodb, "mongodb:///tmp/mongo.sock");
   _expect_uri_in_log("socket", "/tmp/mongo.sock", "tmp/mongo.sock", "messages");
@@ -96,7 +95,7 @@ _test_uri_correct(void)
   _expect_uri_in_log("uri", "localhost:1234/syslog-ng", "syslog-ng", "messages");
 
   afmongodb_dd_set_collection(mongodb, "messages2");
-  _expect_uri_in_log("collection", "127.0.0.1:27017/syslog" DEFAULTOPTS, "syslog", "messages2");
+  _expect_uri_in_log("collection", "127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages2");
 }
 
 static void
@@ -110,51 +109,53 @@ _test_uri_error(void)
 }
 
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+#define UNSAFEOPTS "?w=0&safe=false&socketTimeoutMS=60000&connectTimeoutMS=60000"
+
 static void
 _test_legacy_correct(void)
 {
   GList *servers = g_list_append(NULL, g_strdup("127.0.0.2:27018"));
   servers = g_list_append(servers, g_strdup("localhost:1234"));
   afmongodb_dd_set_servers(mongodb, servers);
-  _expect_uri_in_log("servers_multi", "localhost:1234,127.0.0.2:27018/syslog" DEFAULTOPTS,
+  _expect_uri_in_log("servers_multi", "localhost:1234,127.0.0.2:27018/syslog" SAFEOPTS,
                      "syslog", "messages");
 
   servers = g_list_append(NULL, g_strdup("127.0.0.2"));
   afmongodb_dd_set_servers(mongodb, servers);
-  _expect_uri_in_log("servers_single", "127.0.0.2:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("servers_single", "127.0.0.2:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_host(mongodb, "localhost");
-  _expect_uri_in_log("host", "localhost:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("host", "localhost:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_host(mongodb, "localhost");
   afmongodb_dd_set_port(mongodb, 1234);
-  _expect_uri_in_log("host_port", "localhost:1234/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("host_port", "localhost:1234/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_port(mongodb, 27017);
-  _expect_uri_in_log("port_default", "127.0.0.1:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("port_default", "127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_port(mongodb, 1234);
-  _expect_uri_in_log("port", "127.0.0.1:1234/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("port", "127.0.0.1:1234/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_path(mongodb, "/tmp/mongo.sock");
-  _expect_uri_in_log("path", "/tmp/mongo.sock" DEFAULTOPTS, "tmp/mongo.sock", "messages");
+  _expect_uri_in_log("path", "/tmp/mongo.sock" SAFEOPTS, "tmp/mongo.sock", "messages");
 
   afmongodb_dd_set_database(mongodb, "syslog-ng");
-  _expect_uri_in_log("database", "127.0.0.1:27017/syslog-ng" DEFAULTOPTS, "syslog-ng", "messages");
+  _expect_uri_in_log("database", "127.0.0.1:27017/syslog-ng" SAFEOPTS, "syslog-ng", "messages");
 
   afmongodb_dd_set_safe_mode(mongodb, TRUE);
-  _expect_uri_in_log("safe_mode_true", "127.0.0.1:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("safe_mode_true", "127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_safe_mode(mongodb, FALSE);
-  _expect_uri_in_log("safe_mode_false", "127.0.0.1:27017/syslog", "syslog", "messages");
+  _expect_uri_in_log("safe_mode_false", "127.0.0.1:27017/syslog" UNSAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_user(mongodb, "user");
   afmongodb_dd_set_password(mongodb, "password");
-  _expect_uri_in_log("user_password", "user:password@127.0.0.1:27017/syslog" DEFAULTOPTS, "syslog", "messages");
+  _expect_uri_in_log("user_password", "user:password@127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages");
 
   afmongodb_dd_set_collection(mongodb, "messages2");
   afmongodb_dd_set_safe_mode(mongodb, FALSE);
-  _expect_uri_in_log("collection_safe_mode", "127.0.0.1:27017/syslog", "syslog", "messages2");
+  _expect_uri_in_log("collection_safe_mode", "127.0.0.1:27017/syslog" UNSAFEOPTS, "syslog", "messages2");
 }
 
 static void
