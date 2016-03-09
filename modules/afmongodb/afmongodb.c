@@ -399,7 +399,8 @@ afmongodb_dd_private_uri_init(LogDriver *d)
 #endif
 
   if (!self->uri_str)
-    self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog?slaveOk=true&sockettimeoutms=60000");
+    self->uri_str = g_string_new("mongodb://127.0.0.1:27017/syslog"
+        "?wtimeoutMS=60000&socketTimeoutMS=60000&connectTimeoutMS=60000");
 
   self->uri_obj = mongoc_uri_new(self->uri_str->str);
   if (!self->uri_obj)
