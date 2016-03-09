@@ -253,8 +253,16 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
         g_string_append_printf(self->uri_str, "/%s", self->db);
 
       if (self->safe_mode)
-        g_string_append_printf(self->uri_str, "?slaveOk=true&sockettimeoutms=%d",
+        g_string_append_printf(self->uri_str,
+                               "?wtimeoutMS=%d",
                                SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+      else
+        g_string_append(self->uri_str, "?w=0&safe=false");
+
+      g_string_append_printf(self->uri_str,
+                             "&socketTimeoutMS=%d&connectTimeoutMS=%d",
+                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS,
+                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
     }
 
   return TRUE;
