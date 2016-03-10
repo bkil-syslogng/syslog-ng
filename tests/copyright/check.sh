@@ -384,6 +384,7 @@ parse_expected_licenses() {
 
  cat "$POLICY" |
  grep --invert-match --extended-regexp "^\s*$" |
+ sed "s~[\\]~&&~g" |
  sed "
   s~^ ~L ~
   t e
