@@ -41,7 +41,6 @@
 static gboolean dbi_initialized = FALSE;
 static const char *s_oracle = "oracle";
 static const char *s_freetds = "freetds";
-static dbi_inst dbi_instance;
 
 #define MAX_FAILED_ATTEMPTS 3
 
@@ -702,7 +701,7 @@ afsql_dd_ensure_initialized_connection(AFSqlDestDriver *self)
   if (self->dbi_ctx)
     return TRUE;
 
-  self->dbi_ctx = dbi_conn_new_r(self->type, dbi_instance);
+  self->dbi_ctx = dbi_conn_new(self->type);
 
   if (!self->dbi_ctx)
     {
@@ -1297,7 +1296,7 @@ afsql_dd_init(LogPipe *s)
 
   if (!dbi_initialized)
     {
-      gint rc = dbi_initialize_r(NULL, &dbi_instance);
+      gint rc = dbi_initialize(NULL);
 
       if (rc < 0)
         {
