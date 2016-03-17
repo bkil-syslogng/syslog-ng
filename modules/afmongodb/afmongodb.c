@@ -201,7 +201,7 @@ afmongodb_vp_obj_end(const gchar *name,
       bson_t *d = (bson_t *)*prefix_data;
 
       bson_append_document(root, name, -1, d);
-      bson_free(d);
+      bson_destroy(d);
     }
   return FALSE;
 }
@@ -417,7 +417,8 @@ afmongodb_worker_thread_deinit(LogThrDestDriver *d)
 
   g_string_free(self->current_value, TRUE);
 
-  bson_free(self->bson);
+  bson_destroy(self->bson);
+  self->bson = NULL;
 }
 
 /*
