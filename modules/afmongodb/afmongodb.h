@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Balabit
+ * Copyright (c) 2010-2016 Balabit
  * Copyright (c) 2010-2013 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,7 +32,6 @@ LogDriver *afmongodb_dd_new(GlobalConfig *cfg);
 void afmongodb_dd_set_uri(LogDriver *d, const gchar *uri);
 void afmongodb_dd_set_collection(LogDriver *d, const gchar *collection);
 void afmongodb_dd_set_value_pairs(LogDriver *d, ValuePairs *vp);
-void afmongodb_dd_set_retries(LogDriver *d, gint retries);
 
 LogTemplateOptions *afmongodb_dd_get_template_options(LogDriver *s);
 
