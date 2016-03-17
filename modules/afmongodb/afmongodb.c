@@ -51,7 +51,8 @@ afmongodb_dd_set_uri(LogDriver *d, const gchar *uri)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  g_string_free(self->uri_str, TRUE);
+  if (self->uri_str)
+    g_string_free(self->uri_str, TRUE);
   self->uri_str = g_string_new(uri);
 }
 
@@ -423,8 +424,11 @@ _worker_thread_deinit(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  g_string_free(self->current_value, TRUE);
-  self->current_value = NULL;
+  if (self->current_value)
+    {
+      g_string_free(self->current_value, TRUE);
+      self->current_value = NULL;
+    }
 
   bson_destroy(self->bson);
   self->bson = NULL;
@@ -471,7 +475,11 @@ _logpipe_free(LogPipe *d)
 
   log_template_options_destroy(&self->template_options);
 
-  g_string_free(self->uri_str, TRUE);
+  if (self->uri_str)
+    {
+      g_string_free(self->uri_str, TRUE);
+      self->uri_str = NULL;
+    }
   g_free(self->coll);
   value_pairs_unref(self->vp);
 
