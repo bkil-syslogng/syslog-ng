@@ -165,7 +165,7 @@ afmongodb_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
   const mongoc_read_prefs_t *read_prefs = mongoc_collection_get_read_prefs(self->coll_obj);
   gboolean ok = mongoc_client_get_server_status(self->client, (mongoc_read_prefs_t *)read_prefs,
                                                 status, &error);
-  bson_free(status);
+  bson_destroy(status);
   if (!ok)
     {
       msg_error("Error connecting to MongoDB",
