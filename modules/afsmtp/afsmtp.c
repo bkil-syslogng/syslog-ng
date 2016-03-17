@@ -187,7 +187,7 @@ afsmtp_dd_add_header(LogDriver *d, const gchar *header, LogTemplate *value)
 /*
  * Utilities
  */
-void
+static void
 ignore_sigpipe (void)
 {
   struct sigaction sa;
@@ -227,7 +227,7 @@ afsmtp_dd_format_persist_name(LogThrDestDriver *d)
 static void
 _smtp_message_add_recipient_header(smtp_message_t self, AFSMTPRecipient *rcpt, AFSMTPDriver *driver) 
 {
-  gchar *hdr;
+  const gchar *hdr;
   switch (rcpt->type)
     {
     case AFSMTP_RCPT_TYPE_TO:

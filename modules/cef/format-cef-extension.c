@@ -26,6 +26,7 @@
 #include "value-pairs/cmdline.h"
 #include "syslog-ng.h"
 #include "format-cef-extension.h"
+#include "utf8utils.h"
 
 typedef struct _TFCefState
 {
@@ -86,7 +87,7 @@ tf_cef_append_escaped(GString *escaped_string, const gchar *str, gsize str_len)
         {
         case (gunichar) -1:
         case (gunichar) -2:
-          g_string_append_printf(escaped_string, "\\x%02x", *(guint8 *) str++);
+          g_string_append_printf(escaped_string, "\\x%02x", *(const guint8 *) str++);
           str_len--;
           continue;
           break;
@@ -109,7 +110,7 @@ tf_cef_append_escaped(GString *escaped_string, const gchar *str, gsize str_len)
             tf_cef_append_unichar(escaped_string, uchar);
           break;
         }
-      char_ptr = g_utf8_next_char(str);
+      char_ptr = _g_utf8_next_char_const(str);
       str_len -= char_ptr - str;
       str = char_ptr;
     }

@@ -58,7 +58,7 @@ _mask(uint64_t base, uint64_t mask)
 }
 
 void
-get_network_address(unsigned char *ipv6, int prefix, struct in6_addr *network)
+get_network_address(const unsigned char *ipv6, int prefix, struct in6_addr *network)
 {
   struct ipv6_parts
   {
@@ -122,12 +122,12 @@ _eval(FilterExprNode *s, LogMessage **msgs, gint num_msg)
 }
 
 FilterExprNode *
-filter_netmask6_new(gchar *cidr)
+filter_netmask6_new(const gchar *cidr)
 {
   FilterNetmask6 *self = g_new0(FilterNetmask6, 1);
   struct in6_addr packet_addr;
   gchar address[INET6_ADDRSTRLEN] = "";
-  gchar *slash = strchr(cidr, '/');
+  const gchar *slash = strchr(cidr, '/');
 
   filter_expr_node_init_instance(&self->super);
   if (strlen(cidr) >= INET6_ADDRSTRLEN + 5 || !slash)

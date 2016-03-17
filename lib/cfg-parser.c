@@ -31,7 +31,8 @@
 extern int main_debug;
 
 /* defined in the parser */
-int main_parse(CfgLexer *lexer, gpointer *dummy, gpointer arg);
+int
+main_parse(CfgLexer *lexer, gpointer *dummy, gpointer arg);
 
 /*
  * PLEASE: if at all possible avoid adding keywords here, as these
@@ -233,9 +234,12 @@ _report_buffer_location(const gchar *buffer_content, YYLTYPE *yylloc)
       sol = eol + 1;
       eol = strchr(sol, '\n');
     }
+  g_assert(eol == NULL || eol >= sol);
   if (lineno == yylloc->first_line)
     {
-      gsize cs = MIN(eol ? eol - sol - 1 : strlen(sol), sizeof(buf) - 2);
+      gsize cs = 0;
+      if (eol > sol)
+        cs = MIN(eol ? (gsize)(eol - sol - 1) : strlen(sol), sizeof(buf) - 2);
 
       memcpy(buf, sol, cs);
       buf[cs] = 0;
@@ -286,7 +290,7 @@ report_syntax_error(CfgLexer *lexer, YYLTYPE *yylloc, const char *what, const ch
 gboolean
 cfg_process_flag(CfgFlagHandler *handlers, gpointer base, const gchar *flag_)
 {
-  gint h;
+  gsize h;
   gchar flag[32];
 
   for (h = 0; flag_[h] && h < sizeof(flag); h++)

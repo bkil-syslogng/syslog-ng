@@ -22,6 +22,7 @@
  *
  */
 
+#include "test_logproto.h"
 #include "mock-transport.h"
 #include "proto_lib.h"
 #include "msg_parse_lib.h"
@@ -33,7 +34,7 @@
  * LogProtoTextServer
  ****************************************************************************************/
 
-LogProtoServer *
+static LogProtoServer *
 construct_test_proto(LogTransport *transport)
 {
   proto_server_options.max_msg_size = 32;
@@ -297,7 +298,7 @@ test_log_proto_text_server_multi_read_not_allowed(void)
 #endif
 }
 
-LogProtoServer *
+static LogProtoServer *
 construct_test_proto_with_accumulator(gint (*accumulator)(LogProtoTextServer *, const guchar *, gsize, gssize), LogTransport *transport)
 {
   LogProtoServer *proto = construct_test_proto(transport);

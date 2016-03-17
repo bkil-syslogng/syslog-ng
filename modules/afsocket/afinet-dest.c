@@ -133,7 +133,7 @@ afinet_dd_construct_writer(AFSocketDestDriver *s)
   return writer;
 }
 
-static const gint
+static gint
 _determine_port(AFInetDestDriver *self)
 {
   gint port = 0;
@@ -410,7 +410,7 @@ afinet_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
   log_dest_driver_queue_method(s, msg, path_options, user_data);
 }
 
-void
+static void
 afinet_dd_free(LogPipe *s)
 {
   AFInetDestDriver *self = (AFInetDestDriver *) s;

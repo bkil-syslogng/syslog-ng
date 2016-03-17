@@ -168,7 +168,7 @@ write_chunk(send_data_t send_func, void *send_func_ud, void *buf, size_t buf_len
 
   while (pos < buf_len)
     {
-      rc = send_func(send_func_ud, buf + pos, buf_len - pos);
+      rc = send_func(send_func_ud, (gchar *) buf + pos, buf_len - pos);
 
       if (rc < 0)
         return -1;
@@ -599,7 +599,7 @@ gint active_finished;
 gint connect_finished;
 guint64 sum_count;
 
-gpointer
+static gpointer
 idle_thread(gpointer st)
 {
   int sock;
@@ -630,7 +630,7 @@ error:
   return NULL;
 }
 
-gpointer
+static gpointer
 active_thread(gpointer st)
 {
 
@@ -734,7 +734,7 @@ static GOptionEntry file_option_entries[] =
   { NULL }
 };
 
-void
+static void
 version(void)
 {
   printf(SYSLOG_NG_PACKAGE_NAME " " SYSLOG_NG_VERSION "\n");

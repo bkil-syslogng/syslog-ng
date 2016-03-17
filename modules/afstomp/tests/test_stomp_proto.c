@@ -24,28 +24,28 @@
 #include "stomp.h"
 #include "testutils.h"
 
-void
-assert_stomp_header(stomp_frame* frame, char* key, char* value)
+static void
+assert_stomp_header(stomp_frame* frame, const char* key, const char* value)
 {
   char* myvalue = g_hash_table_lookup(frame->headers, key);
 
   assert_string(myvalue, value, "Stomp header assertion failed!");
 }
 
-void
-assert_stomp_command(stomp_frame* frame, char* command)
+static void
+assert_stomp_command(stomp_frame* frame, const char* command)
 {
   assert_string(frame->command, command, "Stomp command assertion failed");
 }
 
-void
-assert_stomp_body(stomp_frame* frame, char* body)
+static void
+assert_stomp_body(stomp_frame* frame, const char* body)
 {
   assert_string(frame->body, body, "Stomp body assertion failed");
 }
 
-void
-test_only_command()
+static void
+test_only_command(void)
 {
   stomp_frame frame;
 
@@ -54,8 +54,8 @@ test_only_command()
   stomp_frame_deinit(&frame);
 }
 
-void
-test_command_and_data()
+static void
+test_command_and_data(void)
 {
   stomp_frame frame;
 
@@ -65,8 +65,8 @@ test_command_and_data()
   stomp_frame_deinit(&frame);
 };
 
-void
-test_command_and_header_and_data()
+static void
+test_command_and_header_and_data(void)
 {
   stomp_frame frame;
 
@@ -77,8 +77,8 @@ test_command_and_header_and_data()
   stomp_frame_deinit(&frame);
 };
 
-void
-test_command_and_header()
+static void
+test_command_and_header(void)
 {
   stomp_frame frame;
 
@@ -88,8 +88,8 @@ test_command_and_header()
   stomp_frame_deinit(&frame);
 };
 
-void
-test_generate_gstring_from_frame()
+static void
+test_generate_gstring_from_frame(void)
 {
   stomp_frame frame;
   GString* actual;

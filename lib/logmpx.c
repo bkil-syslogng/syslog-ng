@@ -35,7 +35,7 @@ static gboolean
 log_multiplexer_init(LogPipe *s)
 {
   LogMultiplexer *self = (LogMultiplexer *) s;
-  gint i;
+  gsize i;
   
   for (i = 0; i < self->next_hops->len; i++)
     {
@@ -65,7 +65,7 @@ static void
 log_multiplexer_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
   LogMultiplexer *self = (LogMultiplexer *) s;
-  gint i;
+  gsize i;
   LogPathOptions local_options = *path_options;
   gboolean matched;
   gboolean delivered = FALSE;

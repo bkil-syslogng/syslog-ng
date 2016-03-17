@@ -355,9 +355,10 @@ dnl ***************************************************************************
 dnl Set up CFLAGS
 
 if test "x$ac_compiler_gnu" = "xyes"; then
-        CFLAGS="${CFLAGS} -Wall -Wshadow"
         if test "x$enable_debug" = "xyes"; then
-                CFLAGS="${ac_cv_env_CFLAGS_value} -Wall -g"
+                CFLAGS="${CFLAGS} -g"
+        else
+                CPPFLAGS="${CPPFLAGS} -DG_DISABLE_ASSERT"
         fi
 
         if test "x$enable_gprof" = "xyes"; then
@@ -1470,6 +1471,7 @@ AM_CONDITIONAL(ENABLE_JAVA, [test "$enable_java" = "yes"])
 AM_CONDITIONAL(ENABLE_JAVA_MODULES, [test "$enable_java_modules" = "yes"])
 AM_CONDITIONAL(ENABLE_MANPAGES, [test "$enable_manpages" != "no"])
 AM_CONDITIONAL(ENABLE_NATIVE, [test "$enable_native" != "no"])
+AM_CONDITIONAL(ENABLE_DEBUG, [test "$enable_debug" = "yes"])
 
 AC_SUBST(timezonedir)
 AC_SUBST(pidfiledir)

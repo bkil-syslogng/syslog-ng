@@ -136,7 +136,9 @@ log_matcher_posix_re_match(LogMatcher *s, LogMessage *msg, gint value_handle, co
 }
 
 static gchar *
-log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize value_len, LogTemplate *replacement, gssize *new_length)
+log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle,
+                             const gchar *value, gssize maybe_value_len,
+                             LogTemplate *replacement, gssize *new_length)
 {
   LogMatcherPosixRe *self = (LogMatcherPosixRe *) s; 
   regmatch_t matches[RE_MAX_MATCHES];
@@ -144,7 +146,13 @@ log_matcher_posix_re_replace(LogMatcher *s, LogMessage *msg, gint value_handle, 
   GString *new_value = NULL;
   gsize current_ofs = 0;
   gboolean first_round = TRUE;
-  gchar *buf;
+  const gchar *buf;
+  gsize value_len;
+
+  if (maybe_value_len < 0)
+    value_len = strlen(value);
+  else
+    value_len = (gsize) maybe_value_len;
   
   APPEND_ZERO(buf, value, value_len);
 
@@ -234,7 +242,7 @@ typedef struct _LogMatcherString
 {
   LogMatcher super;
   gchar *pattern;
-  gint pattern_len;
+  gsize pattern_len;
 } LogMatcherString;
 
 static gboolean
@@ -275,7 +283,7 @@ log_matcher_string_match_string(LogMatcherString *self, const gchar *value, gsiz
     {
       if (self->super.flags & LMF_ICASE)
         {
-          gchar *buf;
+          const gchar *buf;
           gchar *res;
 
           APPEND_ZERO(buf, value, value_len);
@@ -303,15 +311,18 @@ log_matcher_string_match(LogMatcher *s, LogMessage *msg, gint value_handle, cons
 }
 
 static gchar *
-log_matcher_string_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize value_len, LogTemplate *replacement, gssize *new_length)
+log_matcher_string_replace(LogMatcher *s, LogMessage *msg, gint value_handle, const gchar *value, gssize maybe_value_len, LogTemplate *replacement, gssize *new_length)
 {
   LogMatcherString *self = (LogMatcherString *) s; 
   GString *new_value = NULL;
   gsize current_ofs = 0;
   gboolean first_round = TRUE;
 
-  if (value_len < 0)
+  gsize value_len;
+  if (maybe_value_len < 0)
     value_len = strlen(value);
+  else
+    value_len = (gsize) maybe_value_len;
 
   const gchar *match;
 
@@ -421,7 +432,7 @@ log_matcher_glob_match(LogMatcher *s, LogMessage *msg, gint value_handle, const 
   if (G_LIKELY((msg->flags & LF_UTF8) || g_utf8_validate(value, value_len, NULL)))
     {
       static gboolean warned = FALSE;
-      gchar *buf;
+      const gchar *buf;
       
       if (G_UNLIKELY(!warned && (msg->flags & LF_UTF8) == 0))
         {
@@ -927,7 +938,7 @@ log_matcher_options_destroy(LogMatcherOptions *options)
 }
 
 GQuark
-log_matcher_error_quark()
+log_matcher_error_quark(void)
 {
   return g_quark_from_static_string("log-matcher-error-quark");
 }

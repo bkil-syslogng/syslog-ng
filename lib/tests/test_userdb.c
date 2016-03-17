@@ -24,7 +24,8 @@
 
 #include "userdb.h"
 
-int main(void)
+int
+main(void)
 {
   gint uid;
   gint gid;

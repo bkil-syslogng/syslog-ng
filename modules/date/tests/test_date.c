@@ -25,13 +25,14 @@
 #include "date-parser.h"
 #include "apphook.h"
 #include "testutils.h"
+#include "timeutils.h"
 #include "template_lib.h"
 
 #include <locale.h>
 #include <stdlib.h>
 
 static LogParser *
-_construct_parser(gchar *timezone, gchar *format, gint time_stamp)
+_construct_parser(const gchar *timezone, const gchar *format, gint time_stamp)
 {
   LogParser *parser;
 
@@ -58,7 +59,7 @@ _construct_logmsg(const gchar *msg)
 }
 
 static void
-assert_parsed_date_equals_with_stamp(gchar *msg, gchar *timezone, gchar *format, gint time_stamp, gchar *expected)
+assert_parsed_date_equals_with_stamp(const gchar *msg, const gchar *timezone, const gchar *format, gint time_stamp, const gchar *expected)
 {
   LogMessage *logmsg;
   LogParser *parser = _construct_parser(timezone, format, time_stamp);
@@ -88,13 +89,13 @@ assert_parsed_date_equals_with_stamp(gchar *msg, gchar *timezone, gchar *format,
 }
 
 static void
-assert_parsed_date_equals(gchar *msg, gchar *timezone, gchar *format, gchar *expected)
+assert_parsed_date_equals(const gchar *msg, const gchar *timezone, const gchar *format, const gchar *expected)
 {
   assert_parsed_date_equals_with_stamp(msg, timezone, format, LM_TS_STAMP, expected);
 }
 
 static void
-assert_parsing_fails(gchar *msg)
+assert_parsing_fails(const gchar *msg)
 {
   LogMessage *logmsg;
   LogParser *parser = _construct_parser(NULL, NULL, LM_TS_STAMP);
@@ -115,13 +116,13 @@ assert_parsing_fails(gchar *msg)
 }
 
 
-int main()
+int
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 
   setlocale (LC_ALL, "C");
-  putenv("TZ=CET-1");
-  tzset();
+  set_tz("CET-1");
 
   configuration = cfg_new(0x0302);
 

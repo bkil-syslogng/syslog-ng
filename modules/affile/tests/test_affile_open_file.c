@@ -43,7 +43,7 @@
 #define REGULAR_FILE_OPEN_FLAGS (O_CREAT | O_NOCTTY | O_LARGEFILE)
 
 static void
-setup()
+setup(void)
 {
   msg_init(FALSE);
 }
@@ -74,7 +74,7 @@ open_file(gchar *fname, int open_flags, gint extra_flags, gint *fd)
 }
 
 static void
-test_open_regular_file()
+test_open_regular_file(void)
 {
   gint fd;
   gchar fname[] = "test.log";
@@ -87,7 +87,7 @@ test_open_regular_file()
 }
 
 static void
-test_open_pipe()
+test_open_pipe(void)
 {
   gint fd;
   gchar fname[] = "test.pipe";
@@ -100,7 +100,7 @@ test_open_pipe()
 }
 
 static void
-test_spurious_path()
+test_spurious_path(void)
 {
   gint fd;
   gchar fname[] = "./../test.fname";
@@ -109,7 +109,7 @@ test_spurious_path()
 }
 
 static void
-test_create_file_in_nonexistent_dir()
+test_create_file_in_nonexistent_dir(void)
 {
   gchar test_dir[] = "nonexistent";
   gchar fname[] = "nonexistent/test.txt";
@@ -124,7 +124,7 @@ test_create_file_in_nonexistent_dir()
 }
 
 static void
-test_file_flags()
+test_file_flags(void)
 {
   gint fd;
   gchar fname[] = "test_flags.log";
@@ -137,7 +137,8 @@ test_file_flags()
   remove(fname);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   setup();
 

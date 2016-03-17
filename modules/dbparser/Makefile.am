@@ -37,7 +37,8 @@ modules_dbparser_libsyslog_ng_patterndb_la_SOURCES	=	\
 # warning option.
 #
 modules_dbparser_libsyslog_ng_patterndb_la_CFLAGS	=	\
-	$(AM_CFLAGS) -fPIC @CFLAGS_NOWARN_POINTER_SIGN@
+	$(AM_CFLAGS) -fPIC @CFLAGS_NOWARN_POINTER_SIGN@ \
+	-Wno-error=pointer-sign -Wno-error=sign-compare -Wno-error=cast-qual
 modules_dbparser_libsyslog_ng_patterndb_la_LIBADD	=	\
 	$(MODULE_DEPS_LIBS)
 modules_dbparser_libsyslog_ng_patterndb_la_DEPENDENCIES	=	\
@@ -56,11 +57,16 @@ modules_dbparser_libdbparser_la_SOURCES			=	\
 	modules/dbparser/groupingby.c				\
 	modules/dbparser/groupingby.h				\
 	$(modules_dbparser_libsyslog_ng_patterndb_la_SOURCES)
+
+modules_dbparser_libdbparser_la_CFLAGS		=	\
+	$(AM_CFLAGS)						\
+	@CFLAGS_NOWARN_POINTER_SIGN@	\
+	-Wno-error=pointer-sign -Wno-error=cast-qual -Wno-error=sign-compare
+
 modules_dbparser_libdbparser_la_CPPFLAGS		=	\
 	$(AM_CPPFLAGS)						\
 	-I$(top_srcdir)/modules/dbparser			\
-	-I$(top_builddir)/modules/dbparser			\
-	@CFLAGS_NOWARN_POINTER_SIGN@
+	-I$(top_builddir)/modules/dbparser
 modules_dbparser_libdbparser_la_LIBADD			=	\
 	$(MODULE_DEPS_LIBS)
 modules_dbparser_libdbparser_la_LDFLAGS			=	\

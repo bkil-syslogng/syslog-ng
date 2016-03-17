@@ -58,7 +58,7 @@ _is_path_spurious(const gchar *name)
 }
 
 static inline gboolean
-_obtain_capabilities(gchar *name, FileOpenOptions *open_opts, FilePermOptions *perm_opts, cap_t *act_caps)
+_obtain_capabilities(const gchar *name, FileOpenOptions *open_opts, FilePermOptions *perm_opts, cap_t *act_caps)
 {
   if (open_opts->needs_privileges)
     {
@@ -135,7 +135,7 @@ _validate_file_type(const gchar *name, FileOpenOptions *open_opts)
 }
 
 gboolean
-affile_open_file(gchar *name, FileOpenOptions *open_opts, FilePermOptions *perm_opts, gint *fd)
+affile_open_file(const gchar *name, FileOpenOptions *open_opts, FilePermOptions *perm_opts, gint *fd)
 {
   cap_t saved_caps;
 

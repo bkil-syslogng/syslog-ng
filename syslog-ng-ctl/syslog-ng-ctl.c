@@ -112,7 +112,7 @@ static GOptionEntry verbose_options[] =
 
 
 static const gchar *
-_stats_command_builder()
+_stats_command_builder(void)
 {
   return stats_options_reset_is_set ? "RESET_STATS\n" : "STATS\n";
 }
@@ -167,7 +167,7 @@ static GOptionEntry no_options[] =
   { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL }
 };
 
-const gchar *
+static const gchar *
 get_mode(int *argc, char **argv[])
 {
   gint i;
@@ -210,7 +210,7 @@ static struct
   { NULL, NULL },
 };
 
-void
+static void
 usage(const gchar *bin_name)
 {
   gint mode;

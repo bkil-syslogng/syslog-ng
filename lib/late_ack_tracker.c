@@ -78,7 +78,7 @@ _get_continuous_range_length(LateAckTracker *self)
 static inline void
 _drop_range(LateAckTracker *self, guint32 n)
 {
-  int i;
+  guint32 i;
   LateAckRecord *ack_rec;
 
   for (i = 0; i < n; i++)

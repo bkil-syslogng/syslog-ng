@@ -22,7 +22,6 @@
  */
 
 #include "confgen.h"
-#include "cfg.h"
 #include "cfg-lexer.h"
 #include "messages.h"
 #include "plugin.h"
@@ -31,7 +30,7 @@
 #include <string.h>
 #include <errno.h>
 
-gboolean
+static gboolean
 confgen_generate(CfgLexer *lexer, gint type, const gchar *name, CfgArgs *args, gpointer user_data)
 {
   gchar *value;

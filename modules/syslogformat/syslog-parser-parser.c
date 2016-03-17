@@ -25,8 +25,6 @@
 #include "cfg-parser.h"
 #include "syslog-parser-grammar.h"
 
-extern int syslog_parser_debug;
-
 int syslog_parser_parse(CfgLexer *lexer, LogParser **instance, gpointer arg);
 
 static CfgLexerKeyword syslog_parser_keywords[] =

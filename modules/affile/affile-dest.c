@@ -390,7 +390,7 @@ affile_dd_set_fsync(LogDriver *s, gboolean use_fsync)
 {
   AFFileDestDriver *self = (AFFileDestDriver *) s;
 
-  self->use_fsync = use_fsync;
+  self->use_fsync = use_fsync ? 1 : 0;
 }
 
 static inline gchar *

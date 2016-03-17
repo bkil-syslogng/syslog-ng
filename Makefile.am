@@ -15,7 +15,34 @@ pkgconfigdir		= $(libdir)/pkgconfig
 pkgconfig_DATA		= syslog-ng.pc
 
 AM_CPPFLAGS		= -I$(top_srcdir)/lib -I$(top_srcdir)/modules -I$(top_builddir)/lib -I$(top_builddir)/modules
-TEST_CFLAGS		= -I$(top_srcdir)/libtest
+
+AM_CFLAGS =
+
+if ENABLE_DEBUG
+AM_CFLAGS += -Wall -W -Wextra -Wshadow \
+	-fno-common -Wdouble-promotion -Wformat=2 -Wcast-align \
+	-Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations \
+	-Wnested-externs -Wcast-qual -Wwrite-strings -Wfloat-equal \
+	-Wabi -Waggregate-return -Winvalid-pch \
+	-Wmissing-format-attribute -Wdeprecated-declarations -Woverflow \
+	-Wpointer-arith -Wpointer-sign \
+	-Wno-unused-parameter -Wno-missing-field-initializers \
+	-Wvariadic-macros \
+	-Wstrict-prototypes -Wold-style-definition	\
+	-Wconversion -Wno-error=conversion	\
+	-Wsign-conversion -Wno-error=sign-conversion \
+	-Wredundant-decls -Wno-error=redundant-decls	\
+	-Wstack-protector -Wno-error=stack-protector	\
+	-Wdeprecated -Wno-error=deprecated	\
+	-Wundef -Wno-error=undef
+
+ # -Wswitch-default 
+ #	-Wstrict-overflow=2
+ # -Winline
+ # -Wpedantic -Wlong-long
+endif
+
+TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS) $(CFLAGS)
 
 TEST_LDADD		= $(top_builddir)/libtest/libsyslog-ng-test.a \
 			  $(top_builddir)/lib/libsyslog-ng.la \

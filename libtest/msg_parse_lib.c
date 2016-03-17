@@ -25,8 +25,10 @@
 #include "msg_parse_lib.h"
 #include "plugin.h"
 
+MsgFormatOptions parse_options;
+
 void
-init_and_load_syslogformat_module()
+init_and_load_syslogformat_module(void)
 {
   configuration = cfg_new(VERSION_VALUE);
   plugin_load_module("syslogformat", configuration, NULL);
@@ -35,7 +37,7 @@ init_and_load_syslogformat_module()
 }
 
 void
-deinit_syslogformat_module()
+deinit_syslogformat_module(void)
 {
   if (configuration)
     cfg_free(configuration);

@@ -23,6 +23,7 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "cfg.h"
+#include "timeutils.h"
 
 #include <stdarg.h>
 
@@ -76,7 +77,7 @@ _expect_cef_result_format_va(const gchar *format, const gchar *expected, ...)
 }
 
 static void
-_test_null_in_value()
+_test_null_in_value(void)
 {
   LogMessage *msg = create_empty_message();
 
@@ -218,8 +219,7 @@ int
 main(int argc, char *argv[])
 {
   app_startup();
-  putenv("TZ=UTC");
-  tzset();
+  set_tz("UTC");
   init_template_tests();
   plugin_load_module("cef", configuration, NULL);
 

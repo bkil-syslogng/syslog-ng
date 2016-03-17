@@ -13,6 +13,9 @@ modules_afsql_libafsql_la_CPPFLAGS	=	\
 	$(AM_CPPFLAGS)				\
 	-I$(top_srcdir)/modules/afsql		\
 	-I$(top_builddir)/modules/afsql
+modules_afsql_libafsql_la_CFLAGS	=	\
+	$(AM_CFLAGS)	\
+	-Wno-error=sign-compare -Wno-error=bad-function-cast
 modules_afsql_libafsql_la_LIBADD	= 	\
 	$(MODULE_DEPS_LIBS) $(LIBDBI_LIBS)	\
 	$(OPENSSL_LIBS)

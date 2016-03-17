@@ -22,6 +22,7 @@
  *
  */
 
+#include "logqueue-fifo.h"
 #include "logqueue.h"
 #include "logpipe.h"
 #include "messages.h"
@@ -84,7 +85,7 @@ typedef struct _LogQueueFifo
   gint qoverflow_size; /* in number of elements */
 
   struct iv_list_head qbacklog;    /* entries that were sent but not acked yet */
-  gint qbacklog_len;
+  guint qbacklog_len;
 
   struct
   {
@@ -111,7 +112,7 @@ log_queue_fifo_get_length(LogQueue *s)
   return self->qoverflow_wait_len + self->qoverflow_output_len;
 }
 
-gboolean
+static gboolean
 log_queue_fifo_is_empty_racy(LogQueue *s)
 {
   LogQueueFifo *self = (LogQueueFifo *) s;
@@ -408,12 +409,12 @@ log_queue_fifo_pop_head(LogQueue *s, LogPathOptions *path_options)
  * Can only run from the output thread.
  */
 static void
-log_queue_fifo_ack_backlog(LogQueue *s, gint rewind_count)
+log_queue_fifo_ack_backlog(LogQueue *s, guint rewind_count)
 {
   LogQueueFifo *self = (LogQueueFifo *) s;
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-  gint pos;
+  guint pos;
 
   for (pos = 0; pos < rewind_count && self->qbacklog_len > 0; pos++)
     {

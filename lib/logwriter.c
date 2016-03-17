@@ -869,8 +869,8 @@ log_writer_do_padding(LogWriter *self, GString *result)
       return;
     }
   /* store the original length of the result */
-  gint len = result->len;
-  gint padd_bytes = self->options->padding - result->len;
+  gsize len = result->len;
+  gsize padd_bytes = self->options->padding - len;
   /* set the size to the padded size, this will allocate the string */
   g_string_set_size(result, self->options->padding);
   memset(result->str + len - 1, '\0', padd_bytes);
@@ -932,7 +932,7 @@ log_writer_format_log(LogWriter *self, LogMessage *lm, GString *result)
 
       len = result->len;
       log_msg_append_format_sdata(lm, result, seq_num);
-      if (len == result->len)
+      if (len == (gssize) result->len)
         {
           /* NOTE: sd_param format did not generate any output, take it as an empty SD string */
           g_string_append_c(result, '-');
@@ -1048,13 +1048,13 @@ log_writer_format_log(LogWriter *self, LogMessage *lm, GString *result)
     }
   if (self->options->options & LWO_NO_MULTI_LINE)
     {
-      gchar *p;
+      const gchar *p;
 
       p = result->str;
       /* NOTE: the size is calculated to leave trailing new line */
       while ((p = find_cr_or_lf(p, result->str + result->len - p - 1)))
         {
-          *p = ' ';
+          result->str[p - result->str] = ' ';
           p++;
         }
 
@@ -1099,7 +1099,7 @@ log_writer_flush_finalize(LogWriter *self)
   return TRUE;
 }
 
-gboolean
+static gboolean
 log_writer_write_message(LogWriter *self, LogMessage *msg, LogPathOptions *path_options, gboolean *write_error)
 {
   gboolean consumed = FALSE;
@@ -1421,7 +1421,7 @@ log_writer_set_pending_proto(LogWriter *self, LogProtoClient *proto, gboolean pr
  * the destination LogProtoClient instance. It needs to be ran in the main
  * thread as it reregisters the watches associated with the main
  * thread. */
-void
+static void
 log_writer_reopen_deferred(gpointer s)
 {
   gpointer *args = (gpointer *) s;
@@ -1576,7 +1576,7 @@ log_writer_options_set_template_escape(LogWriterOptions *options, gboolean enabl
 }
 
 void
-log_writer_options_set_mark_mode(LogWriterOptions *options, gchar *mark_mode)
+log_writer_options_set_mark_mode(LogWriterOptions *options, const gchar *mark_mode)
 {
   options->mark_mode = cfg_lookup_mark_mode(mark_mode);
 }

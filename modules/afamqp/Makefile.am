@@ -19,7 +19,9 @@ module_LTLIBRARIES			+= modules/afamqp/libafamqp.la
 modules_afamqp_libafamqp_la_CFLAGS	= 	\
 	$(LIBRABBITMQ_CFLAGS) 			\
 	-I$(top_srcdir)/modules/afamqp 		\
-	-I$(top_builddir)/modules/afamqp
+	-I$(top_builddir)/modules/afamqp \
+	$(AM_CFLAGS) \
+	-Wno-error=aggregate-return
 modules_afamqp_libafamqp_la_SOURCES	= 	\
 	modules/afamqp/dummy.c			\
 	modules/afamqp/afamqp-grammar.y		\

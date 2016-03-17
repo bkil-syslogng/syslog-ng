@@ -261,7 +261,8 @@ test_kv_scanner(void)
   KV_SCANNER_TESTCASE(test_kv_scanner_quotation_is_stored_in_the_was_quoted_value_member);
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   test_kv_scanner();
 }

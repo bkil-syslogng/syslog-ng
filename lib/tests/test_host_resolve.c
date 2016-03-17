@@ -35,7 +35,12 @@
 #include "cfg.h"
 #include <libgen.h>
 
-#define HOST_RESOLVE_TESTCASE(x, ...) do { host_resolve_testcase_begin(domain_override, #x, #__VA_ARGS__); x(__VA_ARGS__); host_resolve_testcase_end(); } while(0)
+#define HOST_RESOLVE_TESTCASE(x, ...) \
+  do { \
+      host_resolve_testcase_begin(domain_override, #x, #__VA_ARGS__); \
+      x(__VA_ARGS__); \
+      host_resolve_testcase_end(); \
+  } while(0)
 
 
 #define host_resolve_testcase_begin(domain_override, func, args)    \

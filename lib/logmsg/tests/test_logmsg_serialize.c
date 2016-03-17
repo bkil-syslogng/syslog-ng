@@ -85,7 +85,7 @@ unsigned char _serialized_pe_msg[] = {
 unsigned int _serialized_pe_msg_len = 517;
 
 static void
-_reset_log_msg_registry()
+_reset_log_msg_registry(void)
 {
   log_msg_registry_deinit();
   log_msg_registry_init();
@@ -132,7 +132,7 @@ _serialize_message_for_test(GString *stream)
 }
 
 static void
-test_serialize()
+test_serialize(void)
 {
   NVHandle indirect_handle = 0;
   gssize length = 0;
@@ -155,7 +155,7 @@ test_serialize()
 }
 
 static void
-test_pe_serialized_message()
+test_pe_serialized_message(void)
 {
   GString serialized = {0};
   serialized.allocated_len = 0;

@@ -35,9 +35,9 @@
 gboolean fail = FALSE;
 gboolean verbose = FALSE;
 
-void r_print_node(RNode *node, int depth);
+static void r_print_node(RNode *node, int depth);
 
-void
+static void
 r_print_pnode(RNode *node, int depth)
 {
   int i;
@@ -53,7 +53,7 @@ r_print_pnode(RNode *node, int depth)
     r_print_pnode(node->pchildren[i], depth + 1);
 }
 
-void
+static void
 r_print_node(RNode *node, int depth)
 {
   int i;
@@ -69,27 +69,25 @@ r_print_node(RNode *node, int depth)
     r_print_pnode(node->pchildren[i], depth + 1);
 }
 
-void
-insert_node_with_value(RNode *root, gchar *key, gpointer value)
+static void
+insert_node_with_value(RNode *root, const gchar *key, const gchar *value)
 {
-  gchar *dup;
-
   /* NOTE: we need to duplicate the key as r_insert_node modifies its input
    * and it might be a read-only string literal */
 
-  dup = g_strdup(key);
-  r_insert_node(root, dup, value ? : key, NULL);
-  g_free(dup);
+  gchar *dup_key = g_strdup(key);
+  r_insert_node(root, dup_key, value ? g_strdup(value) : g_strdup(key), NULL);
+  g_free(dup_key);
 }
 
-void
-insert_node(RNode *root, gchar *key)
+static void
+insert_node(RNode *root, const gchar *key)
 {
   insert_node_with_value(root, key, NULL);
 }
 
-void
-test_search_value(RNode *root, gchar *key, gchar *expected_value)
+static void
+test_search_value(RNode *root, const gchar *key, const gchar *expected_value)
 {
   RNode *ret = r_find_node(root, key, strlen(key), NULL);
 
@@ -117,21 +115,20 @@ test_search_value(RNode *root, gchar *key, gchar *expected_value)
     }
 }
 
-void
-test_search(RNode *root, gchar *key, gboolean expect)
+static void
+test_search(RNode *root, const gchar *key, gboolean expect)
 {
   test_search_value(root, key, expect ? key : NULL);
 }
 
-void
-test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
+static void
+test_search_matches(RNode *root, const gchar *key, const gchar *name1, ...)
 {
   RNode *ret;
   va_list args;
   GArray *matches = g_array_new(FALSE, TRUE, sizeof(RParserMatch));
   RParserMatch *match;
   const gchar *match_name;
-  gint i;
 
   g_array_set_size(matches, 1);
   va_start(args, name1);
@@ -140,7 +137,7 @@ test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
   if (ret && !name1)
     {
       printf("FAIL: found unexpected: '%s' => '%s' matches: ", key, (gchar *) ret->value);
-      for (i = 0; i < matches->len; i++)
+      for (gsize i = 0; i < matches->len; i++)
         {
           match = &g_array_index(matches, RParserMatch, i);
           match_name = log_msg_get_value_name(match->handle, NULL);
@@ -157,8 +154,8 @@ test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
     }
   else if (ret && name1)
     {
-      gint i = 1;
-      gchar *name, *value;
+      gsize i = 1;
+      const gchar *name, *value;
 
       name = name1;
       value = va_arg(args, gchar *);
@@ -217,7 +214,7 @@ test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
  out:
   va_end(args);
 
-  for (i = 0; i < matches->len; i++)
+  for (gsize i = 0; i < matches->len; i++)
     {
       match = &g_array_index(matches, RParserMatch, i);
       if (match->match)
@@ -228,7 +225,7 @@ test_search_matches(RNode *root, gchar *key, gchar *name1, ...)
   g_array_free(matches, TRUE);
 }
 
-void
+static void
 test_literals(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -285,10 +282,10 @@ test_literals(void)
 
   test_search(root, "qwqw", FALSE);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
-void
+static void
 test_parsers(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -364,10 +361,10 @@ test_parsers(void)
   test_search_value(root, "@", "@@");
   test_search_value(root, "@@", "@@@@");
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
-void
+static void
 test_matches(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -684,10 +681,10 @@ test_matches(void)
 
   test_search_matches(root, "zzz árvíztűrőtükörfúrógép", "test", "árvíztűrőtükörfúró", NULL);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 }
 
-void
+static void
 test_zorp_logs(void)
 {
   RNode *root = r_new_node("", NULL);
@@ -702,7 +699,7 @@ test_zorp_logs(void)
   test_search_value(root, "Deny udp src OUTSIDE:10.0.0.0/1234 dst INSIDE:192.168.0.0/5678 by access-group \"OUTSIDE\" [0xb74026ad, 0x0]", "CISCO");
   test_search_matches(root, "1, 2006-08-22 16:31:39,INFO,BLK,", "Seq", "1", "DateTime", "2006-08-22 16:31:39", "Severity", "INFO", "Comp", "BLK", NULL);
 
-  r_free_node(root, NULL);
+  r_free_node(root, g_free);
 
 }
 

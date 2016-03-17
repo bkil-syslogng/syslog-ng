@@ -137,7 +137,6 @@ void afsql_dd_set_session_statements(LogDriver *s, GList *session_statements);
 void afsql_dd_set_flags(LogDriver *s, gint flags);
 LogDriver *afsql_dd_new(GlobalConfig *cfg);
 gint afsql_dd_lookup_flag(const gchar *flag);
-void afsql_dd_set_retries(LogDriver *s, gint num_retries);
 void afsql_dd_add_dbd_option(LogDriver *s, const gchar *name, const gchar *value);
 void afsql_dd_add_dbd_option_numeric(LogDriver *s, const gchar *name, gint value);
 

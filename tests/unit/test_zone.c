@@ -23,24 +23,12 @@
 
 #include "apphook.h"
 #include "timeutils.h"
-#include "timeutils.h"
 #include "logstamp.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-void
-set_tz(const char *tz)
-{
-  static char envbuf[64];
-
-  snprintf(envbuf, sizeof(envbuf), "TZ=%s", tz);
-  putenv(envbuf);
-  tzset();
-  clean_time_cache();
-}
-
-void
+static void
 testcase(const gchar *zone, time_t utc, long expected_ofs)
 {
   long ofs;
@@ -55,7 +43,7 @@ testcase(const gchar *zone, time_t utc, long expected_ofs)
     }
 }
 
-int
+static int
 timezone_exists(const char *time_zone)
 {
   TimeZoneInfo *info;
@@ -71,7 +59,7 @@ timezone_exists(const char *time_zone)
   return FALSE;
 }
 
-int
+static int
 test_timezone_2(const time_t stamp_to_test, const char* time_zone)
 {
   TimeZoneInfo *info;
@@ -87,7 +75,7 @@ test_timezone_2(const time_t stamp_to_test, const char* time_zone)
   return offset == expected_offset;
 }
 
-int
+static int
 test_timezone(const time_t stamp_to_test, const char* time_zone)
 {
   if (!timezone_exists(time_zone))
@@ -110,7 +98,7 @@ test_timezone(const time_t stamp_to_test, const char* time_zone)
   } while (0)
 
 
-int
+static int
 test_zones(void)
 {
   gint rc = 0;
@@ -760,7 +748,7 @@ test_zones(void)
   return rc;
 }
 
-int
+static int
 test_logstamp(void)
 {
   LogStamp stamp;

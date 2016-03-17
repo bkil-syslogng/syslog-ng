@@ -64,6 +64,8 @@ typedef struct _RParserMatch
   guint8 type;
 } RParserMatch;
 
+typedef gboolean (*ParserFun)(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
+
 typedef struct _RParserNode
 {
   /* user supplied parameters */
@@ -78,7 +80,7 @@ typedef struct _RParserNode
   guint8 type;
   NVHandle handle;
 
-  gboolean (*parse)(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
+  ParserFun parse;
   void (*free_state)(gpointer state);
 } RParserNode;
 
@@ -108,7 +110,7 @@ typedef struct _RDebugInfo
   gint match_len;
 } RDebugInfo;
 
-static inline gchar *
+static inline const gchar *
 r_parser_type_name(guint8 type)
 {
   switch (type)
@@ -146,12 +148,14 @@ r_parser_type_name(guint8 type)
     }
 }
 
-RNode *r_new_node(guint8 *key, gpointer value);
+RNode *r_new_node(const guint8 *key, gpointer value);
 void r_free_node(RNode *node, void (*free_fn)(gpointer data));
-void r_insert_node(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func);
-RNode *r_find_node(RNode *root, guint8 *key, gint keylen, GArray *matches);
-RNode *r_find_node_dbg(RNode *root, guint8 *key, gint keylen, GArray *matches, GArray *dbg_list);
-gchar **r_find_all_applicable_nodes(RNode *root, guint8 *key, gint keylen, RNodeGetValueFunc value_func);
+void r_insert_node(RNode *root, guint8 *key, gpointer value, RNodeGetValueFunc value_func) __attribute__((nonnull(1, 2)));
+RNode *r_find_node(RNode *root, const guint8 *key, gint keylen, GArray *matches);
+RNode *r_find_node_dbg(RNode *root, const guint8 *key, gint keylen, GArray *matches, GArray *dbg_list);
+gchar **r_find_all_applicable_nodes(RNode *root, const guint8 *key, gint keylen, RNodeGetValueFunc value_func);
 
+gboolean r_parser_string(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
+gboolean r_parser_qstring(const guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match);
 #endif
 

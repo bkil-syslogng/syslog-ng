@@ -21,6 +21,7 @@
  * COPYING for details.
  *
  */
+#include "logproto-builtins.h"
 #include "logproto-dgram-server.h"
 #include "logproto-text-client.h"
 #include "logproto-text-server.h"

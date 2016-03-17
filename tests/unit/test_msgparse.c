@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-unsigned long
+static unsigned long
 absolute_value(signed long diff)
 {
   if (diff < 0)
@@ -53,7 +53,7 @@ absolute_value(signed long diff)
  * be used for testcases that lack year information. ts_month is the 0
  * based month in the timestamp being parsed.
  */
-time_t
+static time_t
 get_bsd_year_utc(int ts_month)
 {
   struct tm *tm;
@@ -73,7 +73,7 @@ get_bsd_year_utc(int ts_month)
   return mktime(tm);
 }
 
-void
+static void
 assert_log_message_sdata_pairs(LogMessage *message, const gchar *expected_sd_pairs[][2])
 {
   gint i;
@@ -84,15 +84,15 @@ assert_log_message_sdata_pairs(LogMessage *message, const gchar *expected_sd_pai
     }
 }
 
-void
+static void
 simulate_log_readers_effect_on_timezone_offset(LogMessage *message)
 {
   if (message->timestamps[LM_TS_STAMP].zone_offset == -1)
     message->timestamps[LM_TS_STAMP].zone_offset = get_local_timezone_ofs(message->timestamps[LM_TS_STAMP].tv_sec);
 }
 
-LogMessage *
-parse_log_message(gchar *raw_message_str, gint parse_flags, gchar *bad_hostname_re)
+static LogMessage *
+parse_log_message(const gchar *raw_message_str, gint parse_flags, const gchar *bad_hostname_re)
 {
   LogMessage *message;
   GSockAddr *addr = g_sockaddr_inet_new("10.10.10.10", 1010);
@@ -120,10 +120,10 @@ parse_log_message(gchar *raw_message_str, gint parse_flags, gchar *bad_hostname_
   return message;
 }
 
-void
-testcase(gchar *msg,
+static void
+testcase(const gchar *msg,
          gint parse_flags,
-         gchar *bad_hostname_re,
+         const gchar *bad_hostname_re,
          gint expected_pri,
          unsigned long expected_stamp_sec,
          unsigned long expected_stamp_usec,
@@ -184,8 +184,8 @@ testcase(gchar *msg,
   testcase_end();
 }
 
-void
-test_log_messages_can_be_parsed()
+static void
+test_log_messages_can_be_parsed(void)
 {
   const gchar *ignore_sdata_pairs[][2] = { { NULL, NULL } };
   const gchar *empty_sdata_pairs[][2] = { { NULL, NULL } };
@@ -896,8 +896,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
   init_and_load_syslogformat_module();
 
   test_log_messages_can_be_parsed();

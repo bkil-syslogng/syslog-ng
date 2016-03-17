@@ -26,6 +26,7 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "mainloop.h"
+#include "timeutils.h"
 #include "tls-support.h"
 #include "mainloop-io-worker.h"
 #include "libtest/queue_utils_lib.h"
@@ -40,8 +41,8 @@ MsgFormatOptions parse_options;
 
 #define OVERFLOW_SIZE 10000
 
-void
-testcase_zero_diskbuf_and_normal_acks()
+static void
+testcase_zero_diskbuf_and_normal_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -65,8 +66,8 @@ testcase_zero_diskbuf_and_normal_acks()
   log_queue_unref(q);
 }
 
-void
-testcase_zero_diskbuf_alternating_send_acks()
+static void
+testcase_zero_diskbuf_alternating_send_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -99,11 +100,11 @@ testcase_zero_diskbuf_alternating_send_acks()
 GStaticMutex tlock;
 glong sum_time;
 
-gpointer
+static gpointer
 threaded_feed(gpointer args)
 {
   LogQueue *q = args;
-  char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
+  const char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
   gint msg_len = strlen(msg_str);
   gint i;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
@@ -145,7 +146,7 @@ threaded_feed(gpointer args)
   return NULL;
 }
 
-gpointer
+static gpointer
 threaded_consume(gpointer st)
 {
   LogQueue *q = (LogQueue *) st;
@@ -197,7 +198,7 @@ threaded_consume(gpointer st)
   return NULL;
 }
 
-gpointer
+static gpointer
 output_thread(gpointer args)
 {
   WorkerOptions wo;
@@ -214,8 +215,8 @@ output_thread(gpointer args)
 }
 
 
-void
-testcase_with_threads()
+static void
+testcase_with_threads(void)
 {
   LogQueue *q;
   GThread *thread_feed[FEEDERS], *thread_consume;
@@ -252,11 +253,10 @@ testcase_with_threads()
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
 
   configuration = cfg_new(0x0302);
   plugin_load_module("syslogformat", configuration, NULL);

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2013 Balabit
- * Copyright (c) 1998-2013 Balázs Scheidler
+ * Copyright (c) 2010-2014 Balabit
+ * Copyright (c) 2010-2014 Balázs Scheidler <balazs.scheidler@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,36 +21,35 @@
  *
  */
 
-#include "cfg-parser.h"
+#ifndef TEST_PARSERS_E2E_H_
+#define TEST_PARSERS_E2E_H_
+
+#include "apphook.h"
+#include "tags.h"
+#include "logmsg/logmsg.h"
+#include "messages.h"
+#include "filter/filter-expr.h"
 #include "plugin.h"
-#include "plugin-types.h"
+#include "cfg.h"
+#include "timerwheel.h"
+#include "libtest/msg_parse_lib.h"
 
-gboolean pseudofile_module_init(GlobalConfig *cfg, CfgArgs *args);
+#include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <glib/gstdio.h>
+#include "patterndb.h"
 
-extern CfgParser pseudofile_parser;
+#define MYHOST "MYHOST"
 
-static Plugin pseudofile_plugins[] =
-{
-  {
-    .type = LL_CONTEXT_DESTINATION,
-    .name = "pseudofile",
-    .parser = &pseudofile_parser,
-  },
-};
+extern PatternDB *patterndb;
+extern GPtrArray *messages;
+extern gchar *filename;
 
-gboolean
-pseudofile_module_init(GlobalConfig *cfg, CfgArgs *args)
-{
-  plugin_register(cfg, pseudofile_plugins, G_N_ELEMENTS(pseudofile_plugins));
-  return TRUE;
-}
+void test_patterndb_parsers(void);
+void _load_pattern_db_from_string(const gchar *pdb);
+void _destroy_pattern_db(void);
 
-const ModuleInfo module_info =
-{
-  .canonical_name = "pseudofile",
-  .version = SYSLOG_NG_VERSION,
-  .description = "The pseudofile module provides the pseudofile() destination for syslog-ng",
-  .core_revision = SYSLOG_NG_SOURCE_REVISION,
-  .plugins = pseudofile_plugins,
-  .plugins_len = G_N_ELEMENTS(pseudofile_plugins),
-};
+#endif

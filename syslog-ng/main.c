@@ -90,7 +90,7 @@ interactive_mode(void)
   msg_init(TRUE);
 }
 
-gboolean
+static gboolean
 get_installer_version(gchar **inst_version)
 {
   gchar line[1024];
@@ -120,12 +120,12 @@ get_installer_version(gchar **inst_version)
 #define ON_OFF_STR(x) (x ? "on" : "off")
 
 
-void
+static void
 version(void)
 {
   if (!get_installer_version(&installer_version) || installer_version == NULL)
     {
-      installer_version = SYSLOG_NG_VERSION;
+      installer_version = g_strdup(SYSLOG_NG_VERSION);
     }
   printf(SYSLOG_NG_PACKAGE_NAME " " SYSLOG_NG_VERSION "\n"
          "Installer-Version: %s\n"

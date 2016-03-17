@@ -43,6 +43,8 @@
 #include <inttypes.h>
 #endif
 
+gboolean system_source_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 static void
 system_sysblock_add_unix_dgram_driver(GString *sysblock, const gchar *path,
                                       const gchar *perms, const gchar *recvbuf_size)
@@ -190,9 +192,9 @@ system_sysblock_add_systemd_source(GString *sysblock)
 static void
 system_sysblock_add_linux_kmsg(GString *sysblock)
 {
-  gchar *kmsg = "/proc/kmsg";
+  const gchar *kmsg = "/proc/kmsg";
   int fd;
-  gchar *format = NULL;
+  const gchar *format = NULL;
 
   if ((fd = open("/dev/kmsg", O_RDONLY)) != -1)
     {

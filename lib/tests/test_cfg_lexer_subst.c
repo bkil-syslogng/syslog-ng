@@ -212,7 +212,9 @@ test_values_are_resolution_order_args_defaults_globals_env(void)
 {
   CfgLexerSubst *subst = construct_object();
 
-  putenv("env=env_for_env");
+  static char envbuf[64];
+  snprintf(envbuf, sizeof(envbuf), "env=env_for_env");
+  putenv(envbuf);
   assert_invoke_result(subst, "foo `arg` bar", "foo arg_value bar");
   assert_invoke_result(subst, "foo `def` bar", "foo default_for_def bar");
   assert_invoke_result(subst, "foo `globl` bar", "foo global_for_globl bar");
@@ -308,7 +310,8 @@ test_cfg_lexer_subst(void)
   SUBST_TESTCASE(test_strings_with_embedded_apostrophe_cause_an_error_when_encoding_in_qstring);
 }
 
-int main()
+int
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

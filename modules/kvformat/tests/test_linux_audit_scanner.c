@@ -124,7 +124,8 @@ test_kv_scanner(void)
   KV_SCANNER_TESTCASE(test_linux_audit_scanner_audit_style_hex_dump_is_decoded);
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   test_kv_scanner();
 }

@@ -93,7 +93,7 @@ afinet_sd_setup_addresses(AFSocketSourceDriver *s)
   return TRUE;
 }
 
-gboolean
+static gboolean
 afinet_sd_init(LogPipe *s)
 {
   AFInetSourceDriver *self = (AFInetSourceDriver *) s;
@@ -104,7 +104,7 @@ afinet_sd_init(LogPipe *s)
   return TRUE;
 }
 
-void
+static void
 afinet_sd_free(LogPipe *s)
 {
   AFInetSourceDriver *self = (AFInetSourceDriver *) s;

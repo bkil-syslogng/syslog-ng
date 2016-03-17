@@ -25,7 +25,7 @@
 #include "plugin.h"
 #include "cfg.h"
 
-void
+static void
 test_format_welf(void)
 {
   assert_template_format("$(format-welf MSG=$MSG)", "MSG=árvíztűrőtükörfúrógép");
@@ -39,8 +39,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=UTC");
-  tzset();
+  set_tz("UTC");
   init_template_tests();
   plugin_load_module("kvformat", configuration, NULL);
 

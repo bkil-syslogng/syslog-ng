@@ -40,7 +40,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const QueueType log_queue_disk_type = "DISK";
+QueueType log_queue_disk_type = "DISK";
 
 static gint64
 _get_length(LogQueue *s)
@@ -117,7 +117,7 @@ _pop_head(LogQueue *s, LogPathOptions *path_options)
 }
 
 static void
-_ack_backlog(LogQueue *s, gint num_msg_to_ack)
+_ack_backlog(LogQueue *s, guint num_msg_to_ack)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;
 
@@ -146,7 +146,7 @@ _rewind_backlog(LogQueue *s, guint rewind_count)
   g_static_mutex_unlock(&self->super.lock);
 }
 
-void
+static void
 _backlog_all(LogQueue *s)
 {
   LogQueueDisk *self = (LogQueueDisk *) s;

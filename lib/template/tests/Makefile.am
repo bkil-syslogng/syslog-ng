@@ -7,16 +7,21 @@ lib_template_tests_TESTS	=		 \
 check_PROGRAMS		+= ${lib_template_tests_TESTS}
 
 lib_template_tests_test_template_compile_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS) \
+	-Wno-error=cast-qual -Wno-error=sign-compare
 lib_template_tests_test_template_compile_LDADD	=	\
 	$(TEST_LDADD)
 
 lib_template_tests_test_template_on_error_CFLAGS	= \
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS) \
+	-Wno-error=cast-qual
 lib_template_tests_test_template_on_error_LDADD		= \
 	$(TEST_LDADD)
 
-lib_template_tests_test_template_CFLAGS		= $(TEST_CFLAGS)
+lib_template_tests_test_template_CFLAGS		= \
+	$(TEST_CFLAGS) \
+	-Wno-error=cast-qual
+	
 lib_template_tests_test_template_LDADD		= \
 	$(TEST_LDADD) 			\
 	$(PREOPEN_SYSLOGFORMAT)		\
@@ -24,3 +29,7 @@ lib_template_tests_test_template_LDADD		= \
 
 lib_template_tests_test_template_speed_LDADD	= \
 	$(TEST_LDADD) $(PREOPEN_SYSLOGFORMAT)
+
+lib_template_tests_test_template_speed_CFLAGS	= \
+	$(TEST_CFLAGS) \
+	-Wno-error=cast-qual

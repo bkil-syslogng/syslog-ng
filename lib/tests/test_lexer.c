@@ -25,6 +25,7 @@
 #include "testutils.h"
 #include "cfg-lexer.h"
 #include "cfg-grammar.h"
+#include <math.h>
 
 typedef struct {
   YYSTYPE *yylval;
@@ -55,7 +56,7 @@ test_parser_input(TestParser *self, const gchar *buffer)
   self->lexer = cfg_lexer_new_buffer(buffer, strlen(buffer));
 }
 
-TestParser *
+static TestParser *
 test_parser_new(void)
 {
   TestParser *self = g_new0(TestParser, 1);
@@ -71,7 +72,7 @@ test_parser_new(void)
   return self;
 }
 
-void
+static void
 test_parser_free(TestParser *self)
 {
   test_parser_clear_token(self);
@@ -149,7 +150,7 @@ _current_token(void)
 #define assert_parser_float(expected)                           \
   _next_token();                                                        \
   assert_token_type(LL_FLOAT);                                         \
-  assert_true(_current_token()->fnum == expected, "Bad parsed value at %s:%d", __FUNCTION__, __LINE__);
+  assert_true(fabs(_current_token()->fnum - expected) < DBL_MIN, "Bad parsed value at %s:%d", __FUNCTION__, __LINE__);
 
 #define assert_parser_identifier(expected) \
   _next_token();                                                        \

@@ -160,7 +160,7 @@ log_source_mangle_hostname(LogSource *self, LogMessage *msg)
   if (!self->options->keep_hostname || !orig_host || !orig_host[0])
     {
       gchar host[256];
-      gint host_len = -1;
+      gssize host_len = -1;
       if (G_UNLIKELY(self->options->chain_hostnames)) 
 	{
           msg->flags |= LF_CHAINED_HOSTNAME;
@@ -186,7 +186,7 @@ log_source_mangle_hostname(LogSource *self, LogMessage *msg)
                   host[255] = 0;
                 }
 	    }
-          if (host_len >= sizeof(host))
+          if (host_len >= (gssize) sizeof(host))
             host_len = sizeof(host) - 1;
           log_msg_set_value(msg, LM_V_HOST, host, host_len);
 	}
@@ -253,7 +253,7 @@ static void
 log_source_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
   LogSource *self = (LogSource *) s;
-  gint i;
+  gsize i;
   
   msg_set_context(msg);
 

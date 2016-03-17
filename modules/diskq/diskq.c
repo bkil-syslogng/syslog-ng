@@ -94,7 +94,7 @@ _acquire_queue(LogDestDriver *dd, gchar *persist_name, gpointer user_data)
   return queue;
 }
 
-void
+static void
 _release_queue(LogDestDriver *dd, LogQueue *queue, gpointer user_data)
 {
   GlobalConfig *cfg = log_pipe_get_config(&dd->super.super);

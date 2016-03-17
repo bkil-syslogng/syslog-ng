@@ -26,7 +26,7 @@
 #include "transport-mapper-lib.h"
 #include "apphook.h"
 
-TransportMapper *
+static TransportMapper *
 transport_mapper_dummy_new(void)
 {
   TransportMapper *self = g_new0(TransportMapper, 1);

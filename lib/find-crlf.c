@@ -31,11 +31,11 @@
  *
  * It uses an algorithm very similar to what there's in libc memchr/strchr.
  **/
-gchar *
-find_cr_or_lf(gchar *s, gsize n)
+const gchar *
+find_cr_or_lf(const gchar *s, gsize n)
 {
-  gchar *char_ptr;
-  gulong *longword_ptr;
+  const gchar *char_ptr;
+  const gulong *longword_ptr;
   gulong longword, magic_bits, cr_charmask, lf_charmask;
   const char CR = '\r';
   const char LF = '\n';
@@ -49,7 +49,7 @@ find_cr_or_lf(gchar *s, gsize n)
         return NULL;
     }
 
-  longword_ptr = (gulong *) char_ptr;
+  longword_ptr = (const gulong *) char_ptr;
 
 #if GLIB_SIZEOF_LONG == 8
   magic_bits = 0x7efefefefefefeffL;
@@ -68,7 +68,7 @@ find_cr_or_lf(gchar *s, gsize n)
           ((((longword ^ cr_charmask) + magic_bits) ^ ~(longword ^ cr_charmask)) & ~magic_bits) != 0 ||
           ((((longword ^ lf_charmask) + magic_bits) ^ ~(longword ^ lf_charmask)) & ~magic_bits) != 0)
         {
-          gint i;
+          gsize i;
 
           char_ptr = (gchar *) (longword_ptr - 1);
 

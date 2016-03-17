@@ -102,7 +102,7 @@ assert_test_data_idx_range_in(RingBuffer *rb, int start, int end)
 }
 
 static void
-test_init_buffer_state()
+test_init_buffer_state(void)
 {
   RingBuffer rb;
 
@@ -117,7 +117,7 @@ test_init_buffer_state()
 }
 
 static void
-test_pop_from_empty_buffer()
+test_pop_from_empty_buffer(void)
 {
   RingBuffer rb;
 
@@ -128,7 +128,7 @@ test_pop_from_empty_buffer()
 }
 
 static void
-test_push_to_full_buffer()
+test_push_to_full_buffer(void)
 {
   RingBuffer rb;
 
@@ -140,7 +140,7 @@ test_push_to_full_buffer()
 }
 
 static void
-test_ring_buffer_is_full()
+test_ring_buffer_is_full(void)
 {
   RingBuffer rb;
   int i;
@@ -163,7 +163,7 @@ test_ring_buffer_is_full()
 }
 
 static void
-test_pop_all_pushed_element_in_correct_order()
+test_pop_all_pushed_element_in_correct_order(void)
 {
   RingBuffer rb;
   int cnt = 0;
@@ -186,7 +186,7 @@ test_pop_all_pushed_element_in_correct_order()
 }
 
 static void
-test_drop_elements()
+test_drop_elements(void)
 {
   RingBuffer rb;
   const int rb_capacity = 103;
@@ -203,7 +203,7 @@ test_drop_elements()
 }
 
 static void
-test_elements_ordering()
+test_elements_ordering(void)
 {
   RingBuffer rb;
   TestData *td;
@@ -224,7 +224,7 @@ test_elements_ordering()
 }
 
 static void
-test_element_at()
+test_element_at(void)
 {
   RingBuffer rb;
   size_t i;
@@ -245,7 +245,7 @@ test_element_at()
 }
 
 static void
-test_continual_range()
+test_continual_range(void)
 {
   RingBuffer rb;
 
@@ -258,7 +258,7 @@ test_continual_range()
 }
 
 static void
-test_zero_length_continual_range()
+test_zero_length_continual_range(void)
 {
   RingBuffer rb;
   TestData *td;
@@ -276,7 +276,7 @@ test_zero_length_continual_range()
 }
 
 static void
-test_broken_continual_range()
+test_broken_continual_range(void)
 {
   RingBuffer rb;
 
@@ -296,12 +296,12 @@ test_broken_continual_range()
 
 
 static void
-test_push_after_pop()
+test_push_after_pop(void)
 {
 }
 
 static void
-test_tail()
+test_tail(void)
 {
   RingBuffer rb;
   TestData *td_tail;
@@ -321,7 +321,8 @@ test_tail()
   ring_buffer_free(&rb);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   RINGBUFFER_TESTCASE(test_init_buffer_state);
   RINGBUFFER_TESTCASE(test_pop_from_empty_buffer);

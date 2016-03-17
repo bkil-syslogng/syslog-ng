@@ -28,6 +28,7 @@
 #include "apphook.h"
 #include "plugin.h"
 #include "testutils.h"
+#include "timeutils.h"
 #include "queue_utils_lib.h"
 #include "test_diskq_tools.h"
 
@@ -45,7 +46,7 @@ static void msg_post_function(LogMessage *msg)
   log_msg_unref(msg);
 }
 
-void
+static void
 test_diskq_become_full(gboolean reliable)
 {
   LogQueue *q;
@@ -67,7 +68,7 @@ test_diskq_become_full(gboolean reliable)
 
   log_queue_set_use_backlog(q, TRUE);
 
-  q->persist_name = "test_diskq";
+  q->persist_name = g_strdup("test_diskq");
   stats_lock();
   stats_register_counter(0, SCS_DESTINATION, q->persist_name, NULL, SC_TYPE_DROPPED, &q->dropped_messages);
   stats_counter_set(q->dropped_messages, 0);
@@ -84,11 +85,10 @@ test_diskq_become_full(gboolean reliable)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
 
   configuration = cfg_new(0x0308);
   plugin_load_module("syslogformat", configuration, NULL );

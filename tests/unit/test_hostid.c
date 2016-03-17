@@ -38,7 +38,7 @@
 #define PERSIST_FILE "/tmp/test_hostid.persist"
 
 static GlobalConfig *
-create_cfg()
+create_cfg(void)
 {
   GlobalConfig *cfg;
 
@@ -119,7 +119,7 @@ create_persist_file_with_hostid(const gchar *persist_file, guint32 hostid)
 }
 
 static void
-test_if_hostid_generated_when_persist_file_not_exists()
+test_if_hostid_generated_when_persist_file_not_exists(void)
 {
   guint32 hostid;
   init_mainloop_with_newly_created_persist_file(PERSIST_FILE);
@@ -133,7 +133,7 @@ test_if_hostid_generated_when_persist_file_not_exists()
 }
 
 static void
-test_if_hostid_remain_unchanged_when_persist_file_exists()
+test_if_hostid_remain_unchanged_when_persist_file_exists(void)
 {
   static const int hostid = 323;
   create_persist_file_with_hostid(PERSIST_FILE, hostid);
@@ -146,7 +146,8 @@ test_if_hostid_remain_unchanged_when_persist_file_exists()
               hostid);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
 #if __hpux__
   return 0;

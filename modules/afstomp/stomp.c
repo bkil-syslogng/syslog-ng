@@ -58,7 +58,7 @@ stomp_frame_add_header(stomp_frame *frame, const char *name, const char *value)
   g_hash_table_insert(frame->headers, g_strdup(name), g_strdup(value));
 };
 
-void
+static void
 stomp_frame_add_header_len(stomp_frame *frame, const char *name, int name_len, const char *value, int value_len)
 {
   char* name_slice = g_strndup(name, name_len);

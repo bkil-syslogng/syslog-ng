@@ -26,6 +26,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+gboolean csvparser_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 extern CfgParser csvparser_parser;
 
 static Plugin csvparser_plugins[] =

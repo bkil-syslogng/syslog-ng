@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void
+static void
 assert_new_log_message_attributes(LogMessage *log_message)
 {
   assert_log_message_value(log_message, LM_V_HOST, "newhost");
@@ -49,7 +49,7 @@ assert_new_log_message_attributes(LogMessage *log_message)
   assert_log_message_value(log_message, log_msg_get_value_handle("newvalue"), "newvalue");
 }
 
-void
+static void
 set_new_log_message_attributes(LogMessage *log_message)
 {
   log_msg_set_value(log_message, LM_V_HOST, "newhost", -1);
@@ -62,8 +62,8 @@ set_new_log_message_attributes(LogMessage *log_message)
   log_msg_set_value_by_name(log_message, "newvalue", "newvalue", -1);
 }
 
-void
-test_cloning_with_log_message(gchar *msg)
+static void
+test_cloning_with_log_message(const gchar *msg)
 {
   LogMessage *original_log_message, *log_message, *cloned_log_message;
   regex_t bad_hostname;

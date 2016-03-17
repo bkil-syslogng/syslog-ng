@@ -104,7 +104,7 @@ transport_mapper_inet_construct_log_transport(TransportMapper *s, gint fd)
     return transport_mapper_construct_log_transport_method(s, fd);
 }
 
-void
+static void
 transport_mapper_inet_free_method(TransportMapper *s)
 {
   TransportMapperInet *self = (TransportMapperInet *) s;
@@ -125,7 +125,7 @@ transport_mapper_inet_init_instance(TransportMapperInet *self, const gchar *tran
 }
 
 
-TransportMapperInet *
+static TransportMapperInet *
 transport_mapper_inet_new_instance(const gchar *transport)
 {
   TransportMapperInet *self = g_new0(TransportMapperInet, 1);

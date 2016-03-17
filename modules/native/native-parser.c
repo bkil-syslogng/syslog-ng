@@ -27,8 +27,6 @@
 #include "parser.h"
 #include "native-grammar.h"
 
-extern int native_debug;
-
 __attribute__((__visibility__("hidden"))) int native_parse(CfgLexer *lexer, LogParser **instance, gpointer arg);
 
 static CfgLexerKeyword native_keywords[] = {

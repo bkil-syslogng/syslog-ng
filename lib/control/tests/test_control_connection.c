@@ -50,7 +50,7 @@ GString *result_string;
 
 void (*next_step)(gpointer s);
 
-PositionedBuffer *
+static PositionedBuffer *
 positioned_buffer_new(gsize size)
 {
   PositionedBuffer *self = g_new0(PositionedBuffer,1);
@@ -59,14 +59,14 @@ positioned_buffer_new(gsize size)
   return self;
 }
 
-void
+static void
 positioned_buffer_free(PositionedBuffer *self)
 {
   g_string_free(self->buffer, TRUE);
   g_free(self);
 }
 
-int
+static int
 control_connection_moc_read(ControlConnection *s, gpointer buffer, gsize size)
 {
   ControlConnectionMoc *self = (ControlConnectionMoc *)s;
@@ -90,7 +90,7 @@ control_connection_moc_read(ControlConnection *s, gpointer buffer, gsize size)
   return bytes_to_read;
 }
 
-int
+static int
 control_connection_moc_write(ControlConnection *s, gpointer buffer, gsize size)
 {
   ControlConnectionMoc *self = (ControlConnectionMoc *)s;
@@ -108,7 +108,7 @@ control_connection_moc_write(ControlConnection *s, gpointer buffer, gsize size)
   return bytes_to_write;
 }
 
-void
+static void
 control_connection_moc_free(ControlConnection *s)
 {
   ControlConnectionMoc *self = (ControlConnectionMoc *)s;
@@ -117,7 +117,7 @@ control_connection_moc_free(ControlConnection *s)
   positioned_buffer_free(self->destination_buffer);
 }
 
-ControlConnection *
+static ControlConnection *
 control_connection_moc_new(ControlServer *server)
 {
   ControlConnectionMoc *self =  g_new0(ControlConnectionMoc,1);
@@ -134,7 +134,7 @@ control_connection_moc_new(ControlServer *server)
   return &self->super;
 }
 
-GString *
+static GString *
 test_command(GString *command)
 {
   assert_string(command->str,"test command", "Bad command handling");
@@ -183,14 +183,16 @@ control_connection_start_watches(ControlConnection *s)
     }
 }
 
-void
+static void
 test_control_connection(gsize transaction_size)
 {
   moc_connection = (ControlConnectionMoc *)control_connection_moc_new(&moc_server);
   g_string_assign(moc_connection->source_buffer->buffer,"test command\n");
   moc_connection->transaction_size = transaction_size;
   control_connection_start_watches((ControlConnection *)moc_connection);
-  assert_string(result_string->str, "OK\n.\n", "BAD Behaviour transaction_size: %d",transaction_size);
+  assert_string(result_string->str,
+                "OK\n.\n", "BAD Behaviour transaction_size: %" G_GSIZE_FORMAT,
+                transaction_size);
 }
 
 int

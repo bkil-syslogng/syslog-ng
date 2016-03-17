@@ -308,8 +308,7 @@ main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
   configuration->template_options.time_zone_info[LTZ_LOCAL] = time_zone_info_new(NULL);
 
 
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
 
   test_macros();
   test_nvpairs();

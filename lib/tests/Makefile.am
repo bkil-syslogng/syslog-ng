@@ -21,18 +21,23 @@ check_PROGRAMS		+= ${lib_tests_TESTS}
 noinst_PROGRAMS 	= \
 	lib/tests/test_host_resolve
 
+# -Wno-error=format -Wno-error=cast-qual
+
 lib_tests_test_cfg_lexer_subst_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=cast-qual
 lib_tests_test_cfg_lexer_subst_LDADD	=	\
 	$(TEST_LDADD)
 
 lib_tests_test_cfg_tree_CFLAGS		=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=cast-qual
 lib_tests_test_cfg_tree_LDADD		=	\
 	$(TEST_LDADD)
 
 lib_tests_test_type_hints_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=format
 lib_tests_test_type_hints_LDADD	=	\
 	$(TEST_LDADD)
 
@@ -52,12 +57,14 @@ lib_tests_test_reloc_LDADD	=	\
 	$(TEST_LDADD)
 
 lib_tests_test_hostname_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=cast-qual
 lib_tests_test_hostname_LDADD	=	\
 	$(TEST_LDADD)
 
 lib_tests_test_host_resolve_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=cast-qual
 lib_tests_test_host_resolve_LDADD	=	\
 	$(TEST_LDADD)
 
@@ -96,7 +103,8 @@ lib_tests_test_utf8utils_LDADD	=	\
 	$(TEST_LDADD)
 
 lib_tests_test_str_utils_CFLAGS	=	\
-	$(TEST_CFLAGS)
+	$(TEST_CFLAGS)	\
+	-Wno-error=sign-compare
 lib_tests_test_str_utils_LDADD	=	\
 	$(TEST_LDADD)
 

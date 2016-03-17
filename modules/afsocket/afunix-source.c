@@ -113,7 +113,7 @@ afunix_sd_free(LogPipe *s)
   afsocket_sd_free_method(s);
 }
 
-AFUnixSourceDriver *
+static AFUnixSourceDriver *
 afunix_sd_new_instance(TransportMapper *transport_mapper, gchar *filename, GlobalConfig *cfg)
 {
   AFUnixSourceDriver *self = g_new0(AFUnixSourceDriver, 1);

@@ -177,11 +177,16 @@ journald_get_realtime_usec(Journald *self, guint64 *usec)
 }
 
 Journald *
-journald_mock_new()
+journald_mock_new(void)
 {
   Journald *self = g_new0(Journald, 1);
 
-  pipe(self->fds);
+  int ok = pipe(self->fds);
+  if (ok < 0)
+    {
+      g_free(self);
+      return NULL;
+    }
   g_fd_set_nonblock(self->fds[0], TRUE);
   g_fd_set_nonblock(self->fds[1], TRUE);
 
@@ -193,17 +198,17 @@ mock_entry_new(const gchar *cursor)
 {
   MockEntry *self = g_new0(MockEntry, 1);
   self->cursor = g_strdup(cursor);
-  self->data = g_ptr_array_new();
+  self->data = g_ptr_array_new_with_free_func(g_free);
   return self;
 }
 
 void
-mock_entry_add_data(MockEntry *self, gchar *data)
+mock_entry_add_data(MockEntry *self, const gchar *data)
 {
-  g_ptr_array_add(self->data, data);
+  g_ptr_array_add(self->data, g_strdup(data));
 }
 
-void
+static void
 mock_entry_free(gpointer s)
 {
   MockEntry *self = (MockEntry *)s;

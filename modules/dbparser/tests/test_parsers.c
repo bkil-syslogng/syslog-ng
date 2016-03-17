@@ -47,7 +47,7 @@
 
 
 static gboolean
-_invoke_parser(gboolean (*parser)(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match), const gchar *str, gpointer param, gpointer state, gchar **result_string)
+_invoke_parser(ParserFun parser, const gchar *str, const gchar *param, gpointer state, gchar **result_string)
 {
   gboolean result;
   gint len;
@@ -74,7 +74,7 @@ _invoke_parser(gboolean (*parser)(guint8 *str, gint *len, const gchar *param, gp
 }
 
 static void
-assert_parser_success(gboolean (*parser)(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match), const gchar *str, gpointer param, gpointer state, const gchar *expected_string)
+assert_parser_success(ParserFun parser, const gchar *str, const gchar *param, gpointer state, const gchar *expected_string)
 {
   gchar *result_string;
   gboolean result;
@@ -86,7 +86,7 @@ assert_parser_success(gboolean (*parser)(guint8 *str, gint *len, const gchar *pa
 }
 
 static void
-assert_parser_failure(gboolean (*parser)(guint8 *str, gint *len, const gchar *param, gpointer state, RParserMatch *match), const gchar *str, gpointer param, gpointer state)
+assert_parser_failure(ParserFun parser, const gchar *str, const gchar *param, gpointer state)
 {
   gboolean result;
 
@@ -112,7 +112,7 @@ test_string_parser_with_additional_end_characters(void)
   assert_parser_success(r_parser_string, "foo=bar", "=", NULL, "foo=bar");
 }
 
-void
+static void
 test_string(void)
 {
   PARSER_TESTCASE(test_string_parser_without_parameter_parses_a_word);
@@ -134,7 +134,7 @@ compile_qstring_state(const gchar *quotes)
 }
 
 static void
-assert_qstring_parser_success(const gchar *str, gchar *quotes, const gchar *expected_string)
+assert_qstring_parser_success(const gchar *str, const gchar *quotes, const gchar *expected_string)
 {
   assert_parser_success(r_parser_qstring, str, quotes, compile_qstring_state(quotes), expected_string);
 }
@@ -142,16 +142,16 @@ assert_qstring_parser_success(const gchar *str, gchar *quotes, const gchar *expe
 static void
 test_qstring_parser_extracts_word_from_quotes(void)
 {
-  gchar *single_quotes = "''";
-  gchar *double_quotes = "\"\"";
-  gchar *braces = "{}";
+  const gchar *single_quotes = "''";
+  const gchar *double_quotes = "\"\"";
+  const gchar *braces = "{}";
 
   assert_qstring_parser_success("'foo'", single_quotes, "foo");
   assert_qstring_parser_success("\"foo\"", double_quotes, "foo");
   assert_qstring_parser_success("{foo}", braces, "foo");
 }
 
-void
+static void
 test_qstring(void)
 {
   PARSER_TESTCASE(test_qstring_parser_extracts_word_from_quotes);

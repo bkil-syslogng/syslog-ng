@@ -29,8 +29,8 @@
 #include "stats/stats-registry.h"
 #include "apphook.h"
 
-void
-test_log()
+static void
+test_log(void)
 {
   GString *command = g_string_sized_new(128);
   GString *reply;
@@ -85,8 +85,8 @@ test_log()
   return;
 }
 
-void
-test_stats()
+static void
+test_stats(void)
 {
   GString *reply = NULL;
   GString *command = g_string_sized_new(128);
@@ -112,8 +112,8 @@ test_stats()
   return;
 }
 
-void
-test_reset_stats()
+static void
+test_reset_stats(void)
 {
   GString *reply = NULL;
   GString *command = g_string_sized_new(128);

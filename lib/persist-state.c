@@ -144,8 +144,8 @@ struct _PersistState
   /* keys being used */
   GHashTable *keys;
   PersistEntryHandle current_key_block;
-  gint current_key_ofs;
-  gint current_key_size;
+  gsize current_key_ofs;
+  gsize current_key_size;
 };
 
 typedef struct _PersistEntry
@@ -310,7 +310,7 @@ _free_value(PersistState *self, PersistEntryHandle handle)
 
 /* key management */
 
-gboolean
+static gboolean
 persist_state_lookup_key(PersistState *self, const gchar *key, PersistEntryHandle *handle)
 {
   PersistEntry *entry;
@@ -349,7 +349,7 @@ static gboolean
 _add_key(PersistState *self, const gchar *key, PersistEntryHandle handle)
 {
   PersistEntry *entry;
-  gpointer key_area;
+  gchar *key_area;
   gboolean new_block_created = FALSE;
   SerializeArchive *sa;
 
@@ -451,7 +451,7 @@ _load_v23(PersistState *self, gint version, SerializeArchive *sa)
       guint32 str_len;
       if (key[0] && serialize_read_cstring(sa, &value, &len))
         {
-          gpointer new_block;
+          gchar *new_block;
           PersistEntryHandle new_handle;
 
           /*  add length of the string */

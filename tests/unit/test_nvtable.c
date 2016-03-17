@@ -54,7 +54,7 @@
   while (0)
 
 static void
-test_nv_registry()
+test_nv_registry(void)
 {
   NVRegistry *reg;
   gint i, j;
@@ -178,7 +178,7 @@ test_nv_registry()
 #define DYN_NAME "VAL17"
 
 static void
-test_nvtable_direct()
+test_nvtable_direct(void)
 {
   NVTable *tab;
   NVHandle handle;
@@ -346,7 +346,7 @@ test_nvtable_direct()
  *        -
  */
 static void
-test_nvtable_indirect()
+test_nvtable_indirect(void)
 {
   NVTable *tab;
   NVHandle handle;
@@ -713,7 +713,7 @@ test_nvtable_others(void)
 }
 
 static void
-test_nvtable_lookup()
+test_nvtable_lookup(void)
 {
   NVTable *tab;
   NVHandle handle;

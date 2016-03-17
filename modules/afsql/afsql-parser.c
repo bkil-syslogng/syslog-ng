@@ -25,10 +25,6 @@
 #include "cfg-parser.h"
 #include "afsql-grammar.h"
 
-extern int afsql_debug;
-
-int afsql_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
-
 static CfgLexerKeyword afsql_keywords[] = {
   { "sql",                KW_SQL },
   { "username",           KW_USERNAME },

@@ -203,7 +203,7 @@ json_dot_notation_compile(JSONDotNotation *self, const gchar *dot_notation)
 }
 
 #ifdef JSON_C_VERSION
-struct json_object *
+static struct json_object *
 _json_object_object_get(struct json_object* obj, const char *key)
 {
   struct json_object *value;
@@ -215,7 +215,7 @@ _json_object_object_get(struct json_object* obj, const char *key)
 #define _json_object_object_get json_object_object_get
 #endif
 
-struct json_object *
+static struct json_object *
 json_dot_notation_eval(JSONDotNotation *self, struct json_object *jso)
 {
   JSONDotNotationElem *compiled;
@@ -258,7 +258,7 @@ json_dot_notation_eval(JSONDotNotation *self, struct json_object *jso)
   return jso;
 }
 
-JSONDotNotation *
+static JSONDotNotation *
 json_dot_notation_new(void)
 {
   JSONDotNotation *self = g_new0(JSONDotNotation, 1);
@@ -266,7 +266,7 @@ json_dot_notation_new(void)
   return self;
 }
 
-void
+static void
 json_dot_notation_free(JSONDotNotation *self)
 {
   _free_compiled_dot_notation(self->compiled_elems);

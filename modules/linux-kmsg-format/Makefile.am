@@ -6,6 +6,9 @@ modules_linux_kmsg_format_liblinux_kmsg_format_la_SOURCES	=	\
 	modules/linux-kmsg-format/linux-kmsg-format.h			\
 	modules/linux-kmsg-format/linux-kmsg-format-plugin.c
 
+modules_linux_kmsg_format_liblinux_kmsg_format_la_CFLAGS	=	\
+	$(AM_CFLAGS)							\
+	-Wno-error=sign-compare -Wno-error=cast-qual
 modules_linux_kmsg_format_liblinux_kmsg_format_la_CPPFLAGS	=	\
 	$(AM_CPPFLAGS)							\
 	-I${top_srcdir}/modules/linux-kmsg-format			\

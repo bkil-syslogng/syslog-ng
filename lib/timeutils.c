@@ -31,6 +31,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <iv.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const char *month_names_abbrev[] =
 {
@@ -149,7 +151,7 @@ cached_g_current_time(GTimeVal *result)
 }
 
 time_t
-cached_g_current_time_sec()
+cached_g_current_time_sec(void)
 {
   GTimeVal now;
 
@@ -355,7 +357,7 @@ timespec_add_msec(struct timespec *ts, glong msec)
 }
 
 glong
-timspec_diff_msec(struct timespec *t1, struct timespec *t2)
+timespec_diff_msec(struct timespec *t1, struct timespec *t2)
 {
   return (t1->tv_sec - t2->tv_sec) * 1e3 + (t1->tv_nsec - t2->tv_nsec) / 1e6;
 }
@@ -950,4 +952,15 @@ time_zone_info_free(TimeZoneInfo *self)
   zone_info_free(self->zone);
   zone_info_free(self->zone64);
   g_free(self);
+}
+
+void
+set_tz(const char *tz)
+{
+  static char envbuf[64];
+
+  snprintf(envbuf, sizeof(envbuf), "TZ=%s", tz);
+  putenv(envbuf);
+  tzset();
+  clean_time_cache();
 }

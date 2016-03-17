@@ -38,7 +38,7 @@ typedef struct _TestState
   guint32 value;
 } TestState;
 
-void
+static void
 test_persist_state_open_success_on_invalid_file(void)
 {
   PersistState *state;
@@ -46,7 +46,8 @@ test_persist_state_open_success_on_invalid_file(void)
   unlink("test_invalid_magic.persist");
 
   fd = open("test_invalid_magic.persist", O_CREAT | O_RDWR, 0777);
-  write(fd, "aaa", 3);
+  ssize_t ok = write(fd, "aaa", 3);
+  assert_true(ok == 3, "can't write to file!");
   close(fd);
 
   state = persist_state_new("test_invalid_magic.persist");
@@ -55,7 +56,7 @@ test_persist_state_open_success_on_invalid_file(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_persist_state_open_fails_on_invalid_file_with_dump(void)
 {
   PersistState *state;
@@ -63,7 +64,8 @@ test_persist_state_open_fails_on_invalid_file_with_dump(void)
   unlink("test_invalid_magic.persist");
 
   fd = open("test_invalid_magic.persist", O_CREAT | O_RDWR, 0777);
-  write(fd, "aaa", 3);
+  ssize_t ok = write(fd, "aaa", 3);
+  assert_true(ok == 3, "can't write to file!");
   close(fd);
 
   state = persist_state_new("test_invalid_magic.persist");
@@ -72,7 +74,7 @@ test_persist_state_open_fails_on_invalid_file_with_dump(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_persist_state_open_failes_when_file_open_fails(void)
 {
   PersistState *state;
@@ -85,7 +87,7 @@ test_persist_state_open_failes_when_file_open_fails(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 write_test_file_for_test_in_use_handle(gboolean in_use_handle)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_in_use.persist");
@@ -100,7 +102,7 @@ write_test_file_for_test_in_use_handle(gboolean in_use_handle)
   commit_and_free_persist_state(state);
 }
 
-void
+static void
 test_persist_state_in_use_handle_is_loaded(void)
 {
   PersistState *state;
@@ -120,7 +122,7 @@ test_persist_state_in_use_handle_is_loaded(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_persist_state_not_in_use_handle_is_not_loaded(void)
 {
   PersistState *state;
@@ -140,7 +142,7 @@ test_persist_state_not_in_use_handle_is_not_loaded(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_persist_state_not_in_use_handle_is_loaded_in_dump_mode(void)
 {
   PersistState *state;
@@ -162,7 +164,7 @@ test_persist_state_not_in_use_handle_is_loaded_in_dump_mode(void)
 }
 
 
-void
+static void
 test_persist_state_remove_entry(void)
 {
   guint8 version;
@@ -185,7 +187,7 @@ test_persist_state_remove_entry(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void 
+static void
 _foreach_callback_assertions(gchar* name, gint size, gpointer entry, gpointer userdata)
 {
   assert_string((gchar *) userdata, "test_userdata", "Userdata is not passed correctly to foreach func!");
@@ -195,7 +197,7 @@ _foreach_callback_assertions(gchar* name, gint size, gpointer entry, gpointer us
   assert_gint(size, sizeof(TestState), "Size of state does not match!");
 }
 
-void 
+static void
 test_persist_state_foreach_entry(void)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_persist_foreach.persist");
@@ -205,12 +207,14 @@ test_persist_state_foreach_entry(void)
   test_state->value = 3;
   persist_state_unmap_entry(state, handle);
 
-  persist_state_foreach_entry(state, _foreach_callback_assertions, "test_userdata");
+  gchar *str = g_strdup("test_userdata");
+  persist_state_foreach_entry(state, _foreach_callback_assertions, str);
+  g_free(str);
 
   cancel_and_destroy_persist_state(state);
 }
 
-void
+static void
 test_values(void)
 {
   PersistState *state;
@@ -296,8 +300,8 @@ test_values(void)
   cancel_and_destroy_persist_state(state);
 }
 
-void
-test_persist_state_temp_file_cleanup_on_cancel()
+static void
+test_persist_state_temp_file_cleanup_on_cancel(void)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_persist_state_temp_file_cleanup_on_cancel.persist");
 
@@ -309,8 +313,8 @@ test_persist_state_temp_file_cleanup_on_cancel()
               "backup persist file is removed on destroy()");
 }
 
-void
-test_persist_state_temp_file_cleanup_on_commit_destroy()
+static void
+test_persist_state_temp_file_cleanup_on_commit_destroy(void)
 {
   PersistState *state = clean_and_create_persist_state_for_test("test_persist_state_temp_file_cleanup_on_commit_destroy.persist");
 

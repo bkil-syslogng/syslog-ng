@@ -961,7 +961,7 @@ log_msg_format_sdata(const LogMessage *self, GString *result,  guint32 seq_num)
   log_msg_append_format_sdata(self, result, seq_num);
 }
 
-gboolean
+static gboolean
 log_msg_append_tags_callback(const LogMessage *self, LogTagId tag_id, const gchar *name, gpointer user_data)
 {
   GString *result = (GString *) ((gpointer *) user_data)[0];
@@ -1122,7 +1122,7 @@ log_msg_merge_context(LogMessage *self, LogMessage **context, gsize context_len)
  * This function allocates, parses and returns a new LogMessage instance.
  **/
 LogMessage *
-log_msg_new(const gchar *msg, gint length,
+log_msg_new(const gchar *msg, gsize length,
             GSockAddr *saddr,
             MsgFormatOptions *parse_options)
 {
@@ -1699,12 +1699,6 @@ log_msg_global_init(void)
   stats_register_counter(0, SCS_GLOBAL, "payload_reallocs", NULL, SC_TYPE_PROCESSED, &count_payload_reallocs);
   stats_register_counter(0, SCS_GLOBAL, "sdata_updates", NULL, SC_TYPE_PROCESSED, &count_sdata_updates);
   stats_unlock();
-}
-
-const gchar *
-log_msg_get_handle_name(NVHandle handle, gssize *length)
-{
-  return nv_registry_get_handle_name(logmsg_registry, handle, length);
 }
 
 void

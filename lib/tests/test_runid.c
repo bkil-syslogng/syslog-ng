@@ -31,13 +31,13 @@
 
 #define RUN_ID_FIRST 1
 
-PersistState *
+static PersistState *
 create_persist_state(void)
 {
   return clean_and_create_persist_state_for_test("test_run_id.persist");
 };
 
-PersistState *
+static PersistState *
 restart_persist_state_with_cancel(PersistState* state)
 {
   PersistState* new_state;
@@ -49,13 +49,13 @@ restart_persist_state_with_cancel(PersistState* state)
   return new_state;
 };
 
-void
+static void
 destroy_persist_state(PersistState* state)
 {
   cancel_and_destroy_persist_state(state);
 };
 
-void
+static void
 test_run_id__first_run__run_id_is_one(void)
 {
   PersistState *state;
@@ -69,7 +69,7 @@ test_run_id__first_run__run_id_is_one(void)
   destroy_persist_state(state);
 };
 
-void
+static void
 test_run_id__second_run__run_id_is_two(void)
 {
   PersistState *state;
@@ -86,7 +86,7 @@ test_run_id__second_run__run_id_is_two(void)
   destroy_persist_state(state);
 };
 
-void
+static void
 test_run_id__second_run_but_with_non_commit__run_id_is_one(void)
 {
   PersistState *state;
@@ -102,7 +102,7 @@ test_run_id__second_run_but_with_non_commit__run_id_is_one(void)
   destroy_persist_state(state);
 };
 
-void
+static void
 test_run_id__is_same_run__differs_when_not_same_run(void)
 {
   PersistState *state;
@@ -121,7 +121,7 @@ test_run_id__is_same_run__differs_when_not_same_run(void)
   destroy_persist_state(state);
 };
 
-void
+static void
 test_run_id_macro__macro_has_the_same_value_as_run_id(void)
 {
   PersistState *state;
@@ -137,7 +137,7 @@ test_run_id_macro__macro_has_the_same_value_as_run_id(void)
   g_string_free(res, TRUE);
 };
 
-void
+static void
 test_run_id_macro__macro_is_empty_if_run_id_is_not_inited(void)
 {
   GString* res = g_string_sized_new(0);
@@ -152,7 +152,7 @@ test_run_id_macro__macro_is_empty_if_run_id_is_not_inited(void)
 
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
   test_run_id__first_run__run_id_is_one();

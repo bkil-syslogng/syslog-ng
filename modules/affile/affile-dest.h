@@ -36,7 +36,7 @@ typedef struct _AFFileDestDriver
   GStaticMutex lock;
   LogTemplate *filename_template;
   AFFileDestWriter *single_writer;
-  gboolean filename_is_a_template:1,
+  guint filename_is_a_template:1,
     template_escape:1,
     use_fsync:1;
   FilePermOptions file_perm_options;

@@ -57,7 +57,7 @@ _dyn_entry_cmp(const void *a, const void *b)
   return (handle_a < handle_b) ? -1 : 1;
 }
 
-void
+static void
 _update_indirect_dynamic_entry(NVTable* self, NVHandle oh, const gchar* name, NVEntry* entry, NVRegistry *logmsg_nv_registry)
 {
   NVDynValue* dyn_slot;
@@ -112,7 +112,7 @@ _update_all_indirect_entries(NVTable *self, NVRegistry *logmsg_nv_registry)
     }
 }
 
-void
+static void
 _copy_handles(NVHandle* handles_to_update, NVHandle* new_updated_handles, guint8 num_handles_to_update)
 {
   guint16 i;
@@ -122,7 +122,7 @@ _copy_handles(NVHandle* handles_to_update, NVHandle* new_updated_handles, guint8
     }
 }
 
-const gchar *
+static const gchar *
 _get_entry_name(NVTable *self, NVDynValue *dyn_entry)
 {
   NVEntry *entry = nv_table_get_entry_at_ofs(self, dyn_entry->ofs);
@@ -336,7 +336,7 @@ error:
 static inline gboolean
 _read_payload(SerializeArchive *sa, NVTable *res)
 {
-  return serialize_read_blob(sa, NV_TABLE_ADDR(res, res->size - res->used), res->used);
+  return serialize_read_blob(sa, NV_TABLE_ADDR_DIFF(res, res->size, res->used), res->used);
 }
 
 NVTable *
@@ -424,7 +424,7 @@ _fill_meta_data(NVTable *self, NVTableMetaData *meta_data)
 static void
 _write_payload(SerializeArchive *sa, NVTable *self)
 {
-  serialize_write_blob(sa, NV_TABLE_ADDR(self, self->size - self->used), self->used);
+  serialize_write_blob(sa, NV_TABLE_ADDR_DIFF(self, self->size, self->used), self->used);
 }
 
 gboolean

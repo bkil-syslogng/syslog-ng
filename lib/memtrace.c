@@ -23,6 +23,7 @@
  */
    
 #include "syslog-ng.h"
+#include "memtrace.h"
 
 #if SYSLOG_NG_ENABLE_MEMTRACE
 
@@ -104,7 +105,7 @@ void *(*old_realloc)(void *ptr, size_t size);
 void *(*old_calloc)(size_t nmemb, size_t size);
 
 void
-z_mem_trace_init(gchar *tracefile)
+z_mem_trace_init(const gchar *tracefile)
 {
   int i;
   
@@ -208,7 +209,7 @@ z_mem_trace_stats(void)
 static gpointer z_mem_trace_check_canaries(gpointer ptr);
 
 void
-z_mem_trace_dump()
+z_mem_trace_dump(void)
 {
   int i;
   
@@ -596,7 +597,7 @@ calloc(size_t nmemb, size_t size)
 #else
 
 void 
-z_mem_trace_init(gchar *memtrace_file)
+z_mem_trace_init(const gchar *memtrace_file)
 {
 }
 
@@ -606,7 +607,7 @@ z_mem_trace_stats(void)
 }
 
 void 
-z_mem_trace_dump()
+z_mem_trace_dump(void)
 {
 }
 

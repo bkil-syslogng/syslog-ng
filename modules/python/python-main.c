@@ -114,7 +114,7 @@ _py_get_main_module(PythonConfig *pc)
   return pc->main_module;
 }
 
-gboolean
+static gboolean
 _py_evaluate_global_code(PythonConfig *pc, const gchar *code)
 {
   PyObject *result;

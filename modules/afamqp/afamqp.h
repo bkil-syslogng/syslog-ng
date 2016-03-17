@@ -28,6 +28,8 @@
 #include "driver.h"
 #include "value-pairs/value-pairs.h"
 
+gboolean afamqp_module_init(GlobalConfig *cfg, CfgArgs *args);
+
 LogDriver *afamqp_dd_new(GlobalConfig *cfg);
 
 void afamqp_dd_set_host(LogDriver *d, const gchar *host);

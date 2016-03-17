@@ -34,7 +34,7 @@
 gint num_callbacks;
 guint64 prev_now;
 
-void
+static void
 timer_callback(TimerWheel *self, guint64 now, gpointer user_data)
 {
   guint64 expires = *(guint64 *) user_data;
@@ -70,7 +70,7 @@ _test_assoc_data(TimerWheel *wheel)
     }
 }
 
-void
+static void
 test_wheel(gint seed)
 {
   TimerWheel *wheel;
@@ -136,7 +136,7 @@ test_wheel(gint seed)
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   test_wheel(1234567890);
   test_wheel(time(NULL));

@@ -19,7 +19,9 @@ modules_diskq_tests_test_diskq_full_LDFLAGS = $(TEST_LDLAGS) $(DISKQ_TEST_LD_FLA
 modules_diskq_tests_test_diskq_full_LDADD = $(TEST_LDADD) $(DISKQ_TEST_LD_ADD)
 modules_diskq_tests_test_diskq_full_SOURCES =  modules/diskq/tests/test_diskq_full.c modules/diskq/tests/test_diskq_tools.h
 
-modules_diskq_tests_test_reliable_backlog_CFLAGS = $(TEST_CFLAGS) $(DISKQ_TEST_C_FLAGS)
+modules_diskq_tests_test_reliable_backlog_CFLAGS =	\
+	$(TEST_CFLAGS) $(DISKQ_TEST_C_FLAGS)	\
+	-Wno-error=sign-compare -Wno-error=format-nonliteral -Wno-error=bad-function-cast
 modules_diskq_tests_test_reliable_backlog_LDFLAGS = $(TEST_LDLAGS) $(DISKQ_TEST_LD_FLAGS)
 modules_diskq_tests_test_reliable_backlog_LDADD = $(TEST_LDADD) $(DISKQ_TEST_LD_ADD)
 modules_diskq_tests_test_reliable_backlog_SOURCES =  modules/diskq/tests/test_reliable_backlog.c  modules/diskq/tests/test_diskq_tools.h

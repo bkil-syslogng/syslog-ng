@@ -105,7 +105,7 @@ test_vp_value(const gchar *name, const gchar *prefix,
   return FALSE;
 }
 
-void
+static void
 test_value_pairs_walk_prefix_data(GlobalConfig *cfg)
 {
   ValuePairs *vp;
@@ -127,7 +127,8 @@ test_value_pairs_walk_prefix_data(GlobalConfig *cfg)
   log_msg_unref(msg);
 };
 
-int main()
+int
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
 

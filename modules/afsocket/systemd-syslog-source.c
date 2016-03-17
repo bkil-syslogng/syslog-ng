@@ -169,7 +169,7 @@ typedef enum _SocketType {
   ST_STREAM
 } SocketType;
 
-AFSocketSourceDriver*
+static AFSocketSourceDriver*
 create_afunix_sd(gchar *filename, GlobalConfig *cfg, SocketType socket_type)
 {
   AFUnixSourceDriver *ud = NULL;

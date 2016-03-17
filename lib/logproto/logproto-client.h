@@ -131,7 +131,6 @@ log_proto_client_reset_error(LogProtoClient *s)
   s->status = LPS_SUCCESS;
 }
 
-gboolean log_proto_client_validate_options(LogProtoClient *self);
 void log_proto_client_init(LogProtoClient *s, LogTransport *transport, const LogProtoClientOptions *options);
 void log_proto_client_free(LogProtoClient *s);
 void log_proto_client_free_method(LogProtoClient *s);

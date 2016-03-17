@@ -34,7 +34,7 @@
   } while (0)
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   GString *stream;
   GString *value;

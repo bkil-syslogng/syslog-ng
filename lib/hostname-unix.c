@@ -61,7 +61,7 @@ _extract_fqdn_from_hostent(struct hostent *host)
  * resolver functions.  This is not a problem as it is only called once
  * during initialization when a single thread is active.
  */
-gchar *
+static gchar *
 get_local_fqdn_hostname_from_dns(void)
 {
   struct hostent *hostent;

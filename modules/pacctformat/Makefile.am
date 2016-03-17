@@ -6,6 +6,9 @@ modules_pacctformat_libpacctformat_la_SOURCES	=	\
 	modules/pacctformat/pacct-format.h		\
 	modules/pacctformat/pacct-format-plugin.c
 
+modules_pacctformat_libpacctformat_la_CFLAGS	=	\
+	$(AM_CFLAGS) \
+	-Wno-error=double-promotion -Wno-error=cast-qual
 modules_pacctformat_libpacctformat_la_CPPFLAGS	=	\
 	$(AM_CPPFLAGS)
 modules_pacctformat_libpacctformat_la_LIBADD	=	\

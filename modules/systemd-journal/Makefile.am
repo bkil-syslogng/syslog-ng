@@ -18,6 +18,9 @@ BUILT_SOURCES += modules/systemd-journal/systemd-journal-grammar.y \
 		 modules/systemd-journal/systemd-journal-grammar.c \
 		 modules/systemd-journal/systemd-journal-grammar.h
 
+modules_systemd_journal_libsdjournal_la_CFLAGS = \
+	$(AM_CFLAGS)	\
+	-Wno-error=sign-compare -Wno-error=cast-qual
 modules_systemd_journal_libsdjournal_la_CPPFLAGS = $(AM_CPPFLAGS) $(libsystemd_CFLAGS) -I$(top_srcdir)/modules/systemd-journal -I$(top_builddir)/modules/systemd-journal
 modules_systemd_journal_libsdjournal_la_LIBADD = $(MODULE_DEPS_LIBS) $(libsystemd_LIBS)
 modules_systemd_journal_libsdjournal_la_LDFLAGS = $(MODULE_LDFLAGS)

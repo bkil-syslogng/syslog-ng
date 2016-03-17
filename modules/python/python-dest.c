@@ -93,7 +93,7 @@ python_dd_set_imports(LogDriver *d, GList *imports)
   self->imports = imports;
 }
 
-void
+static void
 python_dd_insert_to_dict(gpointer key, gpointer value, gpointer dict)
 {
   PyObject *key_pyobj = PyBytes_FromStringAndSize((gchar*) key, strlen((gchar*) key));
@@ -101,7 +101,7 @@ python_dd_insert_to_dict(gpointer key, gpointer value, gpointer dict)
   PyDict_SetItem( (PyObject*) dict, key_pyobj, value_pyobj);
 }
 
-PyObject*
+static PyObject*
 python_dd_create_arg_dict(PythonDestDriver *self)
 {
   PyObject *arg_dict = PyDict_New();

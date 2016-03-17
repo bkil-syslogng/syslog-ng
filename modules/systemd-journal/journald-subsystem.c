@@ -33,7 +33,7 @@ struct _Journald
 };
 
 gboolean
-load_journald_subsystem()
+load_journald_subsystem(void)
 {
   return TRUE;
 }
@@ -93,7 +93,7 @@ static SD_JOURNAL_PROCESS sd_journal_process;
 static SD_JOURNAL_GET_REALTIME_USEC sd_journal_get_realtime_usec;
 
 gboolean
-load_journald_subsystem()
+load_journald_subsystem(void)
 {
   if (!journald_module)
     {
@@ -233,7 +233,7 @@ journald_get_realtime_usec(Journald *self, guint64 *usec)
 }
 
 Journald *
-journald_new()
+journald_new(void)
 {
   Journald *self = g_new0(Journald, 1);
   return self;

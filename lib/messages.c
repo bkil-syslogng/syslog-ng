@@ -125,7 +125,7 @@ msg_format_timestamp(gchar *buf, gsize buflen)
 {
   struct tm tm;
   GTimeVal now;
-  gint len;
+  gsize len;
   time_t now_sec;
 
   g_get_current_time(&now);
@@ -229,7 +229,7 @@ msg_event_free(EVTREC *e)
   g_static_mutex_unlock(&evtlog_lock);
 }
 
-void
+static void
 msg_log_func(const gchar *log_domain, GLogLevelFlags log_flags, const gchar *msg, gpointer user_data)
 {
   int pri = EVT_PRI_INFO;

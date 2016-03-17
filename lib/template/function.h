@@ -92,7 +92,8 @@ struct _LogTemplateFunction
 
 /* helper macros for template function plugins */
 #define TEMPLATE_FUNCTION(state_struct, prefix, prepare, eval, call, free_state, arg) \
-  TEMPLATE_FUNCTION_PROTOTYPE(prefix) 					\
+  TEMPLATE_FUNCTION_DECLARE(prefix)                                      \
+  TEMPLATE_FUNCTION_PROTOTYPE(prefix)                                    \
   {                                                                     \
     static LogTemplateFunction func = {                                 \
       sizeof(state_struct),                                             \

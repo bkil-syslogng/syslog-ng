@@ -53,7 +53,7 @@
  *
  **/
 GSockAddr *
-g_sockaddr_new(struct sockaddr *sa, int salen)
+g_sockaddr_new(struct sockaddr *sa, socklen_t salen)
 {
   GSockAddr *addr = NULL;
   
@@ -190,7 +190,7 @@ g_sockaddr_inet_bind_prepare(int sock, GSockAddr *addr)
 }
 
 /*+ format an IPv4 address into human readable form */
-gchar *
+static gchar *
 g_sockaddr_inet_format(GSockAddr *addr, gchar *text, gulong n, gint format)
 {
   GSockAddrInet *self = (GSockAddrInet *) addr;
@@ -464,7 +464,7 @@ typedef struct _GSockAddrUnix
   GAtomicCounter refcnt;
   guint32 flags;
   GSockAddrFuncs *sa_funcs;
-  int salen;
+  socklen_t salen;
   struct sockaddr_un saun;
 } GSockAddrUnix;
 

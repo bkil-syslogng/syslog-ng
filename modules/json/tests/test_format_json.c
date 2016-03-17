@@ -25,7 +25,7 @@
 #include "plugin.h"
 #include "cfg.h"
 
-void
+static void
 test_format_json(void)
 {
   assert_template_format("$(format-json MSG=$MSG)", "{\"MSG\":\"árvíztűrőtükörfúrógép\"}");
@@ -51,7 +51,7 @@ test_format_json(void)
   assert_template_format("$(format-json --scope syslog-proto)", "{\"PROGRAM\":\"syslog-ng\",\"PRIORITY\":\"err\",\"PID\":\"23323\",\"MESSAGE\":\"árvíztűrőtükörfúrógép\",\"HOST\":\"bzorp\",\"FACILITY\":\"local3\",\"DATE\":\"Feb 11 10:34:56\"}");
 }
 
-void
+static void
 test_format_json_key(void)
 {
   assert_template_format("$(format-json --key PID)", "{\"PID\":\"23323\"}");
@@ -66,14 +66,14 @@ test_format_json_key(void)
   assert_template_format("$(format-json --key PRI)", "{\"PRI\":\"155\"}");
 }
 
-void
+static void
 test_format_json_rekey(void)
 {
   assert_template_format("$(format-json .msg.text=dotted --rekey .* --shift 1 --add-prefix _)",
                          "{\"_msg\":{\"text\":\"dotted\"}}");
 }
 
-void
+static void
 test_format_json_with_type_hints(void)
 {
   assert_template_format("$(format-json i32=int32(1234))",
@@ -84,7 +84,7 @@ test_format_json_with_type_hints(void)
                          "{\"b\":true}");
 }
 
-void
+static void
 test_format_json_on_error(void)
 {
   configuration->template_options.on_error = ON_ERROR_DROP_MESSAGE | ON_ERROR_SILENT;
@@ -121,8 +121,7 @@ int
 main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
   app_startup();
-  putenv("TZ=UTC");
-  tzset();
+  set_tz("UTC");
   init_template_tests();
   plugin_load_module("json-plugin", configuration, NULL);
 

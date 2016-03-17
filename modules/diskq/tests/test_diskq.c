@@ -36,6 +36,7 @@
 #include "queue_utils_lib.h"
 #include "test_diskq_tools.h"
 #include "testutils.h"
+#include "timeutils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +52,7 @@
 MsgFormatOptions parse_options;
 
 static void
-testcase_zero_diskbuf_and_normal_acks()
+testcase_zero_diskbuf_and_normal_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -83,7 +84,7 @@ testcase_zero_diskbuf_and_normal_acks()
 }
 
 static void
-testcase_zero_diskbuf_alternating_send_acks()
+testcase_zero_diskbuf_alternating_send_acks(void)
 {
   LogQueue *q;
   gint i;
@@ -116,7 +117,7 @@ testcase_zero_diskbuf_alternating_send_acks()
 }
 
 static void
-testcase_ack_and_rewind_messages()
+testcase_ack_and_rewind_messages(void)
 {
   LogQueue *q;
   gint i;
@@ -164,7 +165,7 @@ static gpointer
 threaded_feed(gpointer args)
 {
   LogQueue *q = (LogQueue *)args;
-  char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
+  const  char *msg_str = "<155>2006-02-11T10:34:56+01:00 bzorp syslog-ng[23323]: árvíztűrőtükörfúrógép";
   gint msg_len = strlen(msg_str);
   gint i;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
@@ -247,7 +248,7 @@ threaded_consume(gpointer st)
 
 
 static void
-testcase_with_threads()
+testcase_with_threads(void)
 {
   LogQueue *q;
   GThread *thread_feed[FEEDERS], *thread_consume;
@@ -290,15 +291,14 @@ testcase_with_threads()
 }
 
 int
-main()
+main(int argc G_GNUC_UNUSED, char *argv[] G_GNUC_UNUSED)
 {
 #if _AIX
   fprintf(stderr,"On AIX this testcase can't executed, because the overriding of main_loop_io_worker_register_finish_callback does not work\n");
   return 0;
 #endif
   app_startup();
-  putenv("TZ=MET-1METDST");
-  tzset();
+  set_tz("MET-1METDST");
 
   configuration = cfg_new(0x308);
   plugin_load_module("syslogformat", configuration, NULL);

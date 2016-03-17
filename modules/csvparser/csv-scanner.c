@@ -171,7 +171,7 @@ _is_at_the_end_of_columns(CSVScanner *self)
 static void
 _parse_opening_quote_character(CSVScanner *self)
 {
-  gchar *quote = _strchr_optimized_for_single_char_haystack(self->options->quotes_start, *self->src);
+  const gchar *quote = _strchr_optimized_for_single_char_haystack(self->options->quotes_start, *self->src);
 
   if (quote != NULL)
     {
@@ -222,7 +222,7 @@ _parse_character_with_quotation(CSVScanner *self)
 }
 
 /* searches for str in list and returns the first occurence, otherwise NULL */
-static const gboolean
+static gboolean
 _match_string_delimiters_at_current_position(const char *input, GList *string_delimiters, int *result_length)
 {
   GList *l;

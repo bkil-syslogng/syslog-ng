@@ -22,6 +22,7 @@
  *
  */
 
+#include "test_logproto.h"
 #include "mock-transport.h"
 #include "proto_lib.h"
 #include "msg_parse_lib.h"

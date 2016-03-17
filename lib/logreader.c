@@ -302,15 +302,15 @@ _add_aux_nvpair(const gchar *name, const gchar *value, gsize value_len, gpointer
 }
 
 static gboolean
-log_reader_handle_line(LogReader *self, const guchar *line, gint length, LogTransportAuxData *aux)
+log_reader_handle_line(LogReader *self, const guchar *line, gsize length, LogTransportAuxData *aux)
 {
   LogMessage *m;
   
   msg_debug("Incoming log entry", 
-            evt_tag_printf("line", "%.*s", length, line),
+            evt_tag_printf("line", "%.*s", (int)length, line),
             NULL);
   /* use the current time to get the time zone offset */
-  m = log_msg_new((gchar *) line, length,
+  m = log_msg_new((const gchar *) line, length,
                   aux->peer_addr ? : self->peer_addr,
                   &self->options->parse_options);
 
@@ -488,7 +488,7 @@ log_reader_set_options(LogReader *s, LogPipe *control, LogReaderOptions *options
  * the source LogProtoServer instance. It needs to be ran in the main
  * thread as it reregisters the watches associated with the main
  * thread. */
-void
+static void
 log_reader_reopen_deferred(gpointer s)
 {
   gpointer *args = (gpointer *) s;
@@ -654,7 +654,7 @@ CfgFlagHandler log_reader_flag_handlers[] =
 };
 
 gboolean
-log_reader_options_process_flag(LogReaderOptions *options, gchar *flag)
+log_reader_options_process_flag(LogReaderOptions *options, const gchar *flag)
 {
   if (!msg_format_options_process_flag(&options->parse_options, flag))
     return cfg_process_flag(log_reader_flag_handlers, options, flag);
