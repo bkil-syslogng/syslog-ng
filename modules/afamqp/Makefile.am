@@ -17,6 +17,7 @@ AMQP_DUMMY_C_DEPS			 =	\
 module_LTLIBRARIES			+= modules/afamqp/libafamqp.la
 
 modules_afamqp_libafamqp_la_CFLAGS	= 	\
+    $(AM_CFLAGS) \
 	$(LIBRABBITMQ_CFLAGS) 			\
 	-I$(top_srcdir)/modules/afamqp 		\
 	-I$(top_builddir)/modules/afamqp
