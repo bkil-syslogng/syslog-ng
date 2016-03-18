@@ -15,6 +15,12 @@ pkgconfigdir		= $(libdir)/pkgconfig
 pkgconfig_DATA		= syslog-ng.pc
 
 AM_CPPFLAGS		= -I$(top_srcdir)/lib -I$(top_srcdir)/modules -I$(top_builddir)/lib -I$(top_builddir)/modules
+
+AM_CFLAGS =
+if ENABLE_EXTRA_WARNINGS
+AM_CFLAGS += -Wall -Wshadow
+endif
+
 TEST_CFLAGS		= -I$(top_srcdir)/libtest
 
 TEST_LDADD		= $(top_builddir)/libtest/libsyslog-ng-test.a \
