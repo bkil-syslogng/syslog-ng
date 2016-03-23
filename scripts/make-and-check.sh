@@ -12,11 +12,11 @@ main() {
 }
 
 logged_main() {
-  exec_prop_check "make -j V=1" ||
-  S=$?;
-  if [ "$S" = "42" -o "$S" = "0" ]; then
+  exec_prop_check "make -j V=1 install"
+  S=$?
+  if [ "$S" = "42" ]; then
     return $S;
-  else
+  elif [ "$S" != "0" ]; then
     make V=1 --keep-going # to make error messages more readable on error
     return 1
   fi
@@ -28,4 +28,3 @@ logged_main() {
 }
 
 main "$@"
-
