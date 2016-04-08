@@ -51,7 +51,6 @@ matrix:
             - libesmtp6
             - libssl1.0.0
             - libgeoip-dev
-            - libhiredis-dev
             - sqlite3
             - libdbd-sqlite3
       #      - libriemann-client-dev # disallowed
@@ -93,6 +92,7 @@ matrix:
             --enable-systemd-journal=optional
             --enable-manpages
             --disable-sql
+            --disable-redis
             --enable-all-modules
             --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       after_script:
@@ -101,6 +101,8 @@ matrix:
       dist: trusty
       sudo: required
       install:
+        - cat /etc/apt/sources.list
+        - sed -i "s~^deb http://us\.\(.*\)$~deb mirror://mirrors\1~" /etc/apt/sources.list
         - sudo apt-get update -qq
         - sudo apt-get install -qq curl
         - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
