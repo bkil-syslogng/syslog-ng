@@ -2,10 +2,12 @@ language: c
 
 matrix:
   include:
-    - sudo: false
-      compiler:
-        - gcc
-#        - clang
+    compiler:
+      - gcc
+#      - clang
+  include:
+    - env: E=precise_container
+      sudo: false
       cache:
         directories:
           - $HOME/.local/bin
@@ -58,6 +60,7 @@ matrix:
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
       install:
+        - gcc --version || exit $?
         - export PATH=/usr/lib/ccache:$PATH
         - export PATH=$HOME/.local/bin:$PATH
         - ccache -z
@@ -91,16 +94,14 @@ matrix:
             --enable-manpages
             --disable-sql
             --enable-all-modules
-            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl ||
-              tail -n 1000 config.log
+            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       after_script:
         - ccache -s
-    - dist: trusty
+    - env: e=trusty
+      dist: trusty
       sudo: required
-      compiler:
-        - gcc
-#        - clang
       install:
+        - gcc --version || exit $?
         - sudo apt-get update -qq
         - sudo apt-get install -qq curl
         - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
@@ -127,8 +128,7 @@ matrix:
             --enable-systemd-journal=optional
             --enable-manpages
             --enable-all-modules
-            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl ||
-              tail -n 1000 config.log
+            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
 script:
   - if [ "$CC" = "clang" ]; then
       export COPYRIGHTVERBOSITY=1;
