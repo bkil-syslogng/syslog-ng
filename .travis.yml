@@ -103,7 +103,7 @@ matrix:
       sudo: required
       install:
         - cat /etc/apt/sources.list
-        - sudo sed -ri "s~^(deb(-src)?) http://us\.(.*)$~\1 mirror://mirrors\3~" /etc/apt/sources.list
+        - sudo sed -ri "s~^(deb(-src)?) http://us(\..*)$~\1 mirror://mirrors\3~" /etc/apt/sources.list
         - cat /etc/apt/sources.list
         - sudo apt-get update -qq
         - sudo apt-get install -qq curl
