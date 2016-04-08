@@ -93,6 +93,7 @@ matrix:
             --enable-manpages
             --disable-sql
             --disable-redis
+            --disable-riemann
             --enable-all-modules
             --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       after_script:
@@ -102,7 +103,7 @@ matrix:
       sudo: required
       install:
         - cat /etc/apt/sources.list
-        - sed -i "s~^deb http://us\.\(.*\)$~deb mirror://mirrors\1~" /etc/apt/sources.list
+        - sudo sed -ri "s~^deb http://us\.(.*)$~deb(-src)? mirror://mirrors\1~" /etc/apt/sources.list
         - sudo apt-get update -qq
         - sudo apt-get install -qq curl
         - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
