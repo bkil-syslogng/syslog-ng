@@ -1,10 +1,10 @@
 language: c
 
+compiler:
+  - gcc
+#  - clang
+
 matrix:
-  include:
-    compiler:
-      - gcc
-#      - clang
   include:
     - env: E=precise_container
       sudo: false
