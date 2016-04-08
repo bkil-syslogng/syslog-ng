@@ -1,10 +1,10 @@
 language: c
 
-compiler:
-  - gcc
-#  - clang
-
 matrix:
+  include:
+    compiler:
+      - gcc
+#      - clang
   include:
     - env: E=precise_container
       sudo: false
@@ -40,6 +40,7 @@ matrix:
             - libevtlog0
             - libnet1-dev
             - libglib2.0-dev
+            - libhiredis-dev
             - libdbi-dev # old libdbi0-dev ?
             - libssl-dev
             - libjson0-dev
@@ -60,7 +61,6 @@ matrix:
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
       install:
-        - gcc --version || exit $?
         - export PATH=/usr/lib/ccache:$PATH
         - export PATH=$HOME/.local/bin:$PATH
         - ccache -z
@@ -97,11 +97,10 @@ matrix:
             --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       after_script:
         - ccache -s
-    - env: e=trusty
+    - env: E=trusty
       dist: trusty
       sudo: required
       install:
-        - gcc --version || exit $?
         - sudo apt-get update -qq
         - sudo apt-get install -qq curl
         - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
