@@ -25,7 +25,8 @@
 
 #include "driver.h"
 
-gboolean afmongodb_dd_check_address(LogDriver *d, gboolean local);
+gboolean afmongodb_dd_validate_socket_combination(LogDriver *d);
+gboolean afmongodb_dd_validate_network_combination(LogDriver *d);
 void afmongodb_dd_set_servers(LogDriver *d, GList *servers);
 void afmongodb_dd_set_host(LogDriver *d, const gchar *host);
 void afmongodb_dd_set_port(LogDriver *d, gint port);
