@@ -153,8 +153,7 @@ _dd_connect(MongoDBDestDriver *self, gboolean reconnect)
     {
       msg_error("Error connecting to MongoDB",
                 evt_tag_str("driver", self->super.super.super.id),
-                evt_tag_str("reason", error.message),
-                NULL);
+                evt_tag_str("reason", error.message));
       return FALSE;
     }
 
