@@ -24,22 +24,26 @@
 #include "afmongodb-legacy-private.h"
 
 gboolean
-afmongodb_dd_check_address(LogDriver *d, gboolean local)
+afmongodb_dd_validate_socket_combination(LogDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  if (local)
-    {
-      if ((self->port != 0 || self->port != MONGO_CONN_LOCAL) && self->address != NULL)
-        return FALSE;
-      if (self->servers)
-        return FALSE;
-    }
-  else
-    {
-      if (self->port == MONGO_CONN_LOCAL && self->address != NULL)
-        return FALSE;
-    }
+  if ((self->port != 0 || self->port != MONGO_CONN_LOCAL) && self->address != NULL)
+    return FALSE;
+  if (self->servers)
+    return FALSE;
+
+  return TRUE;
+}
+
+gboolean
+afmongodb_dd_validate_network_combination(LogDriver *d)
+{
+  MongoDBDestDriver *self = (MongoDBDestDriver *)d;
+
+  if (self->port == MONGO_CONN_LOCAL && self->address != NULL)
+    return FALSE;
+
   return TRUE;
 }
 
