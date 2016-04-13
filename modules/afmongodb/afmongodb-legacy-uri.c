@@ -213,6 +213,49 @@ _check_auth_options(MongoDBDestDriver *self)
 }
 
 gboolean
+_build_uri_from_legacy_options(MongoDBDestDriver *self)
+{
+    if (!_append_legacy_servers(self))
+      return FALSE;
+
+    self->uri_str = g_string_new("mongodb://");
+    if (!self->uri_str)
+      return FALSE;
+
+    if (self->user && self->password)
+      {
+        g_string_append_printf(self->uri_str, "%s:%s@", self->user, self->password);
+      }
+
+    if (!self->recovery_cache)
+      {
+        msg_error("Error in host server list", evt_tag_str("driver", self->super.super.super.id), NULL);
+        return FALSE;
+      }
+
+    gboolean have_uri;
+    if (!_append_servers(self->uri_str, self->recovery_cache, &have_uri))
+      return FALSE;
+
+    if (have_uri)
+      g_string_append_printf(self->uri_str, "/%s", self->db);
+
+    if (self->safe_mode)
+      g_string_append_printf(self->uri_str,
+                             "?wtimeoutMS=%d",
+                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+    else
+      g_string_append(self->uri_str, "?w=0&safe=false");
+
+    g_string_append_printf(self->uri_str,
+                           "&socketTimeoutMS=%d&connectTimeoutMS=%d",
+                           SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS,
+                           SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
+
+    return TRUE;
+}
+
+gboolean
 afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
 {
   if (!_check_auth_options(self))
@@ -226,46 +269,9 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
       return FALSE;
     }
   else if (self->is_legacy)
-    {
-      if (!_append_legacy_servers(self))
-        return FALSE;
-
-      self->uri_str = g_string_new("mongodb://");
-      if (!self->uri_str)
-        return FALSE;
-
-      if (self->user && self->password)
-        {
-          g_string_append_printf(self->uri_str, "%s:%s@", self->user, self->password);
-        }
-
-      if (!self->recovery_cache)
-        {
-          msg_error("Error in host server list", evt_tag_str("driver", self->super.super.super.id), NULL);
-          return FALSE;
-        }
-
-      gboolean have_uri;
-      if (!_append_servers(self->uri_str, self->recovery_cache, &have_uri))
-        return FALSE;
-
-      if (have_uri)
-        g_string_append_printf(self->uri_str, "/%s", self->db);
-
-      if (self->safe_mode)
-        g_string_append_printf(self->uri_str,
-                               "?wtimeoutMS=%d",
-                               SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
-      else
-        g_string_append(self->uri_str, "?w=0&safe=false");
-
-      g_string_append_printf(self->uri_str,
-                             "&socketTimeoutMS=%d&connectTimeoutMS=%d",
-                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS,
-                             SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS);
-    }
-
-  return TRUE;
+    return _build_uri_from_legacy_options(self);
+  else
+    return TRUE;
 }
 
 void
