@@ -143,6 +143,7 @@ matrix:
             - libhiredis-dev
 #            - libdbi0-dev # TODO: waiting for whitelisting
             - libssl-dev
+            - libjson0-dev
             - libwrap0-dev
             - libpcre3-dev
             - libcap-dev
