@@ -11,6 +11,7 @@ env: CONFIGURE_OPTS="
   --enable-linux-caps
 
   --disable-sun-streams
+  --enable-pacct
   --enable-all-modules
 
   --enable-manpages
