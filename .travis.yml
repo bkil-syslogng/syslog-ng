@@ -60,6 +60,8 @@ addons:
             - openjdk-7-jdk
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
+#            - libsystemd-journal-dev # TODO: compile
+#            - libsystemd-daemon-dev # TODO: compile
 install:
         - export PATH=/usr/lib/ccache:$PATH
         - export PATH=$HOME/.local/bin:$PATH
