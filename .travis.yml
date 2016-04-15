@@ -1,58 +1,223 @@
 language: c
-install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq curl
-  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-  - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq pkg-config flex bison xsltproc docbook-xsl libevtlog-dev libnet1-dev libglib2.0-dev libssl-dev libjson0-dev libwrap0-dev libpcre3-dev libcap-dev libesmtp-dev libgeoip-dev libhiredis-dev sqlite3 libdbd-sqlite3 libriemann-client-dev openjdk-7-jdk gradle-2.2.1 autoconf-archive
-  - sudo pip install -r requirements.txt
-  - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
-    if ! pkg-config --exists dbi; then
-      git clone --quiet --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
-      cd libdbi &&
-        {
-          ./autogen.sh &&
-          ./configure --prefix=$HOME/.local/
-           --disable-docs --disable-dependency-tracking &&
-          make -j install;
-          S=$?;
-          cd .. &&
-          rm -Rf libdbi;
-          [ $S -eq 0 ] || exit 1;
-        };
-    fi;
-before_script:
-  - ./autogen.sh
-  - unset PYTHON_CFLAGS # HACK
-  - ./configure
-     CFLAGS=-Werror
-     --prefix=$HOME/install/syslog-ng
-     --with-ivykis=internal
-     --with-mongoc=internal
-     --with-librabbitmq=internal
-     --with-jsonc=system
-     --disable-env-wrapper
-     --disable-memtrace
-     --enable-tcp-wrapper
-     --enable-linux-caps
-     --disable-sun-streams
-     --enable-all-modules
-     --enable-pacct
-     --enable-manpages
-     --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-  - if [ "$CC" = "clang" ]; then export COPYRIGHTVERBOSITY=1; make check-copyright; fi
-  - make -j || make V=1 --keep-going # to make error messages more readable on error
-script:
-  - if [ "$CC" = "gcc" ]; then
-      make distcheck V=1;
-    else
-      make install &&
-      make func-test V=1;
-    fi
+
+git:
+  submodules: false
+
+env:
+  - E=precise_container TEST=distcheck
+  - E=precise_container TEST=func-test
+
 compiler:
   - gcc
   - clang
+
+sudo: false
+cache:
+        directories:
+          - $HOME/.local/bin
+          - $HOME/.local/gradle-2.9
+          - $HOME/.local/include
+          - $HOME/.local/lib
+          - $HOME/.local/man
+          - $HOME/.cache/pip
+          - $HOME/.ccache
+          - $HOME/.gradle/caches
+          - .autoconf
+          - autom4te.cache
+before_cache:
+        - rm -f $HOME/.cache/pip/log/debug.log
+        - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
+        - ccache -s
+        - ls -la $HOME $HOME/.[^.]* $HOME/..?*
+addons:
+        apt:
+          packages:
+            - wget
+            - ccache
+            - pkg-config
+            - flex
+            - bison
+            - xsltproc
+            - docbook-xsl
+            - libevtlog-dev
+            - libnet1-dev
+            - libglib2.0-dev
+            - libhiredis-dev
+#            - libdbi-dev # TODO: compile
+            - libssl-dev
+            - libjson0-dev
+            - libwrap0-dev
+            - libpcre3-dev
+            - libcap-dev
+            - libesmtp-dev
+            - libssl1.0.0
+            - libgeoip-dev
+            - sqlite3
+            - libdbd-sqlite3
+      #      - libriemann-client-dev # TODO: compile
+            - libprotobuf-c0-dev
+            - openjdk-7-jdk
+      #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
+            - autoconf-archive
+#            - libsystemd-journal-dev # TODO: compile
+#            - libsystemd-daemon-dev # TODO: compile
+install:
+        - export PATH=$HOME/.local/bin:$PATH
+      #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
+        - echo "max_size = 150M" > ~/.ccache/ccache.conf
+        - if [ "$CC" = "clang" ]; then
+            printf "run_second_cpp = true\nprefix_command = -Qunused-arguments\n" >>
+              ~/.ccache/ccache.conf;
+          fi
+          # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
+      #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+      #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+        - pip install --user -r requirements.txt
+        - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
+          if false; then
+          if ! pkg-config --exists eventlog; then
+            apt-get source eventlog &&
+            cd eventlog-* &&
+            {
+              ./autogen.sh &&
+              ./configure --prefix=$HOME/.local/ &&
+              make -j install &&
+              cd .. &&
+              rm -R eventlog* ;
+            };
+          fi; fi
+        - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
+          export PATH=$GRADLE_HOME/bin:$PATH;
+          if ! which gradle; then
+            wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip &&
+            {
+              unzip gradle-2.9-bin.zip -d $HOME/.local/ &&
+              rm -v gradle-2.9-bin.zip;
+            };
+          fi
+after_script:
+        - ccache -s
+
+matrix:
+  exclude:
+    - env: E=precise_container TEST=distcheck
+      compiler: clang
+    - env: E=precise_container TEST=func-test
+      compiler: gcc
+  include:
+    - env: E=copyright_check
+      sudo: false
+      cache:
+      before_cache:
+      addons:
+      compiler: gcc
+      install:
+      script:
+      - export COPYRIGHTVERBOSITY=1;
+        tests/copyright/check.sh . .
+      after_script:
+    - env: E=trusty TEST=distcheck
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - curl
+            - ccache
+            - pkg-config
+            - flex
+            - bison
+            - xsltproc
+            - docbook-xsl
+            - libevtlog-dev
+            - libnet1-dev
+            - libglib2.0-dev
+            - libhiredis-dev
+#            - libdbi0-dev # TODO: waiting for whitelisting
+            - libssl-dev
+            - libjson0-dev
+            - libwrap0-dev
+            - libpcre3-dev
+            - libcap-dev
+            - libesmtp-dev
+            - libssl1.0.0
+            - libgeoip-dev
+            - sqlite3
+            - libdbd-sqlite3
+#            - libriemann-client-dev # TODO: compile
+            - libprotobuf-c0-dev
+            - openjdk-7-jdk
+            - gradle
+            - autoconf-archive
+#            - libsystemd-journal-dev # TODO: waiting for whitelisting
+#            - libsystemd-daemon-dev # TODO: waiting for whitelisting
+      install:
+#        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
+        - cat /etc/apt/sources.list
+        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        - sudo apt-get update -qq
+        - sudo apt-get install --force-yes -qq
+           libdbi0-dev
+           libsystemd-journal-dev
+           libsystemd-daemon-dev
+           libriemann-client-dev
+           # gradle-2.2.1
+        - sudo pip install -r requirements.txt
+    # HACK
+    # --keep-going
+        # to make error messages more readable on error
+#        --disable-redis
+script:
+  - export PATH=/usr/lib/ccache:$PATH;
+    ccache -z;
+    ./autogen.sh || return $?;
+    env;
+    unset PYTHON_CFLAGS;
+    if [ "$E" = "trusty" ]; then
+      CONFIGURE_OPTS="
+        --enable-systemd
+        --with-systemd-journal=system";
+    else
+      CONFIGURE_OPTS="
+        --disable-systemd
+        --with-systemd-journal=optional
+        --with-libhiredis=/usr
+        --disable-sql
+        --disable-riemann";
+    fi;
+    ./configure
+      $CONFIGURE_OPTS
+      CFLAGS=-Werror
+      --with-ivykis=internal
+      --with-mongoc=internal
+      --with-librabbitmq=internal
+      --with-jsonc=system
+      --disable-env-wrapper
+      --disable-memtrace
+      --enable-tcp-wrapper
+      --enable-linux-caps
+      --disable-sun-streams
+      --enable-pacct
+      --enable-all-modules
+      --enable-manpages
+      --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
+      --prefix=$HOME/install/syslog-ng || return $?;
+    make -j ||
+      {
+        make V=1;
+        return 1;
+      };
+    if [ "$TEST" = "distcheck" ]; then
+      make distcheck V=1;
+    elif [ "$TEST" = "func-test" ]; then
+      make install &&
+        make func-test V=1;
+    else
+      true;
+    fi
 branches:
   except:
     - /wip/
