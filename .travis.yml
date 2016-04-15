@@ -2,10 +2,6 @@ language: c
 
 matrix:
   include:
-    compiler:
-      - gcc
-#      - clang
-  include:
     - env: E=copyright_check
       sudo: false
       script:
@@ -13,6 +9,9 @@ matrix:
         tests/copyright/check.sh . .
     - env: E=precise_container
       sudo: false
+      compiler:
+        - gcc
+        - clang
       cache:
         directories:
           - $HOME/.local/bin
@@ -90,6 +89,7 @@ matrix:
     - env: E=trusty
       dist: trusty
       sudo: required
+      compiler: gcc
       addons:
         apt:
           packages:
