@@ -175,6 +175,7 @@ matrix:
     # HACK
     # --keep-going
         # to make error messages more readable on error
+#        --disable-redis
 script:
   - ./autogen.sh || return $?;
     env;
@@ -189,8 +190,8 @@ script:
         --with-jsonc=system
         --disable-systemd
         --with-systemd-journal=optional
+        --with-libhiredis=/usr
         --disable-sql
-        --disable-redis
         --disable-riemann";
     fi;
     ./configure
