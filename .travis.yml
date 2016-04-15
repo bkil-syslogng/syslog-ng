@@ -190,7 +190,7 @@ script:
       make install &&
         make func-test V=1;
     else
-      true
+      true;
     fi
 branches:
   except:
