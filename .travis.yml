@@ -141,8 +141,7 @@ matrix:
             - libsystemd-journal-dev
             - libsystemd-daemon-dev
       install:
-        - cat /etc/apt/sources.list
-        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
+#        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
         - cat /etc/apt/sources.list
 #        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
 #        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
