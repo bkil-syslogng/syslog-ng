@@ -1,4 +1,22 @@
 language: c
+env: CONFIGURE_OPTS="
+  CFLAGS=-Werror
+  --with-ivykis=internal
+  --with-mongoc=internal
+  --with-librabbitmq=internal
+
+  --disable-env-wrapper
+  --disable-memtrace
+  --enable-tcp-wrapper
+  --enable-linux-caps
+
+  --disable-sun-streams
+  --enable-all-modules
+
+  --enable-manpages
+  --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
+  --prefix=$HOME/install/syslog-ng
+  "
 
 matrix:
   include:
@@ -79,25 +97,13 @@ matrix:
         - env
         - unset PYTHON_CFLAGS # HACK
         - ./configure
-            CFLAGS=-Werror
-            --with-ivykis=internal
-            --with-mongoc=internal
-            --with-librabbitmq=internal
+            $CONFIGURE_OPTS
             --with-jsonc=system
-            --prefix=$HOME/install/syslog-ng
-            --disable-env-wrapper
-            --disable-memtrace
-            --enable-tcp-wrapper
-            --disable-sun-streams
-            --enable-linux-caps
             --disable-systemd
             --with-systemd-journal=optional
-            --enable-manpages
             --disable-sql
             --disable-redis
             --disable-riemann
-            --enable-all-modules
-            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       after_script:
         - ccache -s
     - env: E=trusty
@@ -156,22 +162,10 @@ matrix:
         - ./autogen.sh
         - unset PYTHON_CFLAGS # HACK
         - ./configure
-            CFLAGS=-Werror
-            --with-ivykis=internal
-            --with-mongoc=internal
-            --with-librabbitmq=internal
+            $CONFIGURE_OPTS
             --with-jsonc=internal
-            --prefix=$HOME/install/syslog-ng
-            --disable-env-wrapper
-            --disable-memtrace
-            --enable-tcp-wrapper
-            --disable-sun-streams
-            --enable-linux-caps
             --enable-systemd
             --with-systemd-journal=system
-            --enable-manpages
-            --enable-all-modules
-            --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
 script:
   - make -j ||
       make V=1 --keep-going # to make error messages more readable on error
