@@ -1,18 +1,16 @@
 language: c
 
-matrix:
-  include:
-    - env: E=copyright_check
-      sudo: false
-      script:
-      - export COPYRIGHTVERBOSITY=1;
-        tests/copyright/check.sh . .
-    - env: E=precise_container
-      sudo: false
-        compiler:
-          - gcc
-          - clang
-      cache:
+env:
+  - TEST=distcheck
+  - TEST=func-test
+
+compiler:
+  - gcc
+  - clang
+
+env: E=precise_container
+sudo: false
+cache:
         directories:
           - $HOME/.local/bin
           - $HOME/.local/gradle-2.9
@@ -24,12 +22,12 @@ matrix:
           - $HOME/.gradle/caches
           - .autoconf
           - autom4te.cache
-      before_cache:
+before_cache:
         - rm -f $HOME/.cache/pip/log/debug.log
         - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
         - ls -la $HOME $HOME/.[^.]* $HOME/..?*
-      addons:
+addons:
         apt:
           packages:
             - ccache
@@ -60,7 +58,7 @@ matrix:
             - openjdk-7-jdk
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
-      install:
+install:
         - export PATH=/usr/lib/ccache:$PATH
         - export PATH=$HOME/.local/bin:$PATH
         - ccache -z
@@ -73,7 +71,7 @@ matrix:
         - pip install --user -r requirements.txt
         - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH; if ! pkg-config --exists eventlog; then apt-get source eventlog && cd eventlog-* && { ./autogen.sh && ./configure --prefix=$HOME/.local/ && make -j install && cd .. && rm -R eventlog* ; }; fi
         - export GRADLE_HOME=$HOME/.local/gradle-2.9 && export PATH=$GRADLE_HOME/bin:$PATH; if ! which gradle; then wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip && { unzip gradle-2.9-bin.zip -d $HOME/.local/ && rm -v gradle-2.9-bin.zip; }; fi
-      before_script:
+before_script:
         - ./autogen.sh
         - env
         - unset PYTHON_CFLAGS # HACK
@@ -84,8 +82,16 @@ matrix:
             --disable-sql
             --disable-redis
             --disable-riemann"
-      after_script:
+after_script:
         - ccache -s
+
+matrix:
+  include:
+    - env: E=copyright_check
+      sudo: false
+      script:
+      - export COPYRIGHTVERBOSITY=1;
+        tests/copyright/check.sh . .
     - env: E=trusty
       dist: trusty
       sudo: required
@@ -108,7 +114,6 @@ matrix:
             - libhiredis-dev
 #            - libdbi0-dev # TODO: waiting for whitelisting
             - libssl-dev
-#            - libjson0-dev
             - libwrap0-dev
             - libpcre3-dev
             - libcap-dev
@@ -168,9 +173,9 @@ script:
       --prefix=$HOME/install/syslog-ng
   - make -j ||
       make V=1 --keep-going # to make error messages more readable on error
-  - if [ "$CC" = "gcc" ]; then
+  - if [ "$TEST" = "distcheck" ]; then
       make distcheck V=1;
-    else
+    elif [ "$TEST" = "func-test" ]; then
       make install &&
         make func-test V=1;
     fi
