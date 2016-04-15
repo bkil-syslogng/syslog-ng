@@ -29,6 +29,7 @@ before_cache:
 addons:
         apt:
           packages:
+            - wget
             - ccache
             - pkg-config
             - flex
@@ -63,13 +64,37 @@ install:
         - ccache -z
       #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
         - echo "max_size = 150M" > ~/.ccache/ccache.conf
-        - if [ "$CC" = "clang" ]; then printf "run_second_cpp = true\nprefix_command = -Qunused-arguments\n" >> ~/.ccache/ccache.conf; fi
-        - rm $HOME/.local/bin/clang; true; # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
+        - if [ "$CC" = "clang" ]; then
+            printf "run_second_cpp = true\nprefix_command = -Qunused-arguments\n" >>
+              ~/.ccache/ccache.conf;
+          fi
+        - rm $HOME/.local/bin/clang;
+          true;
+          # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
       #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
       #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
         - pip install --user -r requirements.txt
-        - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH; if ! pkg-config --exists eventlog; then apt-get source eventlog && cd eventlog-* && { ./autogen.sh && ./configure --prefix=$HOME/.local/ && make -j install && cd .. && rm -R eventlog* ; }; fi
-        - export GRADLE_HOME=$HOME/.local/gradle-2.9 && export PATH=$GRADLE_HOME/bin:$PATH; if ! which gradle; then wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip && { unzip gradle-2.9-bin.zip -d $HOME/.local/ && rm -v gradle-2.9-bin.zip; }; fi
+        - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
+          if ! pkg-config --exists eventlog; then
+            apt-get source eventlog &&
+            cd eventlog-* &&
+            {
+              ./autogen.sh &&
+              ./configure --prefix=$HOME/.local/ &&
+              make -j install &&
+              cd .. &&
+              rm -R eventlog* ;
+            };
+          fi
+        - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
+          export PATH=$GRADLE_HOME/bin:$PATH;
+          if ! which gradle; then
+            wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip &&
+            {
+              unzip gradle-2.9-bin.zip -d $HOME/.local/ &&
+              rm -v gradle-2.9-bin.zip;
+            };
+          fi
 before_script:
         - ./autogen.sh
         - env
@@ -112,7 +137,6 @@ matrix:
         apt:
           packages:
             - curl
-            - wget
             - ccache
             - pkg-config
             - flex
