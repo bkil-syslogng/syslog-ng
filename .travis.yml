@@ -203,10 +203,14 @@ script:
       --enable-all-modules
       --enable-manpages
       --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-      --prefix=$HOME/install/syslog-ng
-  - make -j ||
-      make V=1 # --keep-going # to make error messages more readable on error
-  - if [ "$TEST" = "distcheck" ]; then
+      --prefix=$HOME/install/syslog-ng || return 1;
+    make -j ||
+      {
+        make V=1;
+        return 1;
+      };
+    # --keep-going # to make error messages more readable on error
+    if [ "$TEST" = "distcheck" ]; then
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
       make install &&
