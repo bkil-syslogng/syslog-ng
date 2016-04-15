@@ -87,7 +87,7 @@ matrix:
             --disable-sun-streams
             --enable-linux-caps
             --disable-systemd
-            --enable-systemd-journal=optional
+            --with-systemd-journal=optional
             --enable-manpages
             --disable-sql
             --disable-redis
@@ -126,7 +126,7 @@ matrix:
             --disable-sun-streams
             --enable-linux-caps
             --disable-systemd
-            --enable-systemd-journal=optional
+            --with-systemd-journal=system
             --enable-manpages
             --enable-all-modules
             --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
