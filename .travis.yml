@@ -44,7 +44,7 @@ matrix:
             - libnet1-dev
             - libglib2.0-dev
             - libhiredis-dev
-#            - libdbi-dev # old libdbi0-dev ?
+#            - libdbi-dev # TODO: compile
             - libssl-dev
             - libjson0-dev
             - libwrap0-dev
@@ -56,8 +56,8 @@ matrix:
             - libgeoip-dev
             - sqlite3
             - libdbd-sqlite3
-      #      - libriemann-client-dev # disallowed
-      #      - libriemann-client0 # dep disallowed
+      #      - libriemann-client-dev # TODO: compile
+      #      - libriemann-client0 # TODO: compile
             - libprotobuf-c0-dev
             - openjdk-7-jdk
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
