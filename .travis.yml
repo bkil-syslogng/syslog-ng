@@ -40,7 +40,6 @@ addons:
             - xsltproc
             - docbook-xsl
             - libevtlog-dev
-            - libevtlog0
             - libnet1-dev
             - libglib2.0-dev
             - libhiredis-dev
