@@ -88,8 +88,8 @@ matrix:
   exclude:
     - env: E=precise_container TEST=distcheck
       compiler: clang
-    - env: E=precise_container TEST=distcheck
-      compiler: clang
+    - env: E=precise_container TEST=func-test
+      compiler: gcc
   include:
     - env: E=copyright_check
       sudo: false
