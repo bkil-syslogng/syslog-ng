@@ -79,7 +79,7 @@ matrix:
             --with-ivykis=internal
             --with-mongoc=internal
             --with-librabbitmq=internal
-            --with-jsonc=internal
+            --with-jsonc=system
             --prefix=$HOME/install/syslog-ng
             --disable-env-wrapper
             --disable-memtrace
