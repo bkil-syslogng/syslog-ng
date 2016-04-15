@@ -119,11 +119,10 @@ matrix:
       - export COPYRIGHTVERBOSITY=1;
         tests/copyright/check.sh . .
       after_script:
-    - env: E=trusty
+    - env: E=trusty TEST=distcheck
       dist: trusty
       sudo: required
       compiler: clang
-      env: TEST=distcheck
       addons:
         apt:
           packages:
