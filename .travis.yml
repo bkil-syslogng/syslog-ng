@@ -1,14 +1,13 @@
 language: c
 
 env:
-  - TEST=distcheck
-  - TEST=func-test
+  - E=precise_container TEST=distcheck
+  - E=precise_container TEST=func-test
 
 compiler:
   - gcc
   - clang
 
-env: E=precise_container
 sudo: false
 cache:
         directories:
