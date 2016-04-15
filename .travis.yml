@@ -57,7 +57,6 @@ matrix:
             - sqlite3
             - libdbd-sqlite3
       #      - libriemann-client-dev # TODO: compile
-      #      - libriemann-client0 # TODO: compile
             - libprotobuf-c0-dev
             - openjdk-7-jdk
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
@@ -132,8 +131,7 @@ matrix:
             - libgeoip-dev
             - sqlite3
             - libdbd-sqlite3
-            - libriemann-client-dev # disallowed
-            - libriemann-client0 # dep disallowed
+#            - libriemann-client-dev # TODO: compile
             - libprotobuf-c0-dev
             - openjdk-7-jdk
             - gradle
@@ -143,11 +141,16 @@ matrix:
       install:
 #        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
         - cat /etc/apt/sources.list
-#        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-#        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
-#          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
         - sudo apt-get update -qq
-        - sudo apt-get install --force-yes -qq libdbi0-dev libsystemd-journal-dev libsystemd-daemon-dev # gradle-2.2.1
+        - sudo apt-get install --force-yes -qq
+           libdbi0-dev
+           libsystemd-journal-dev
+           libsystemd-daemon-dev
+           libriemann-client-dev
+           # gradle-2.2.1
         - sudo pip install -r requirements.txt
       before_script:
         - ./autogen.sh
