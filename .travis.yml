@@ -6,6 +6,11 @@ matrix:
       - gcc
 #      - clang
   include:
+    - env: E=copyright_check
+      sudo: false
+    - script:
+      - export COPYRIGHTVERBOSITY=1;
+        tests/copyright/check.sh . .
     - env: E=precise_container
       sudo: false
       cache:
@@ -131,10 +136,6 @@ matrix:
             --enable-all-modules
             --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
 script:
-  - if [ "$CC" = "clang" ]; then
-      export COPYRIGHTVERBOSITY=1;
-      make check-copyright;
-    fi
   - make -j ||
       make V=1 --keep-going # to make error messages more readable on error
   - if [ "$CC" = "gcc" ]; then
