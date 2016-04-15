@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #############################################################################
 # Copyright (c) 2007-2016 Balabit
 #
@@ -41,12 +41,12 @@ autogen_submodules()
 
 	if [ -n "$GIT" ] && [ -f .gitmodules ] && [ -d .git ] && [ $submod_initialized = 0 ]; then
 		# only clone submodules if none of them present
-		git submodule update --init
+		time git submodule update --init
 		sed -e "s#git://#https://#" \
 			< modules/afamqp/rabbitmq-c/.gitmodules \
 			> modules/afamqp/rabbitmq-c/.gitmodules.new && \
 			mv modules/afamqp/rabbitmq-c/.gitmodules.new modules/afamqp/rabbitmq-c/.gitmodules
-		git submodule update --init --recursive
+		time git submodule update --init --recursive
 	fi
 
 	for submod in $SUBMODULES; do
@@ -55,10 +55,10 @@ autogen_submodules()
 		if [ -x autogen.sh ]; then
 			# NOCONFIGURE needed by mongo-c-driver
 			export NOCONFIGURE=1
-			./autogen.sh
+			time ./autogen.sh
 			unset NOCONFIGURE
 		elif [ -f configure.in ] || [ -f configure.ac ]; then
-			autoreconf -i
+			time autoreconf -i
 		else
 			echo "Don't know how to bootstrap submodule '$submod'" >&2
 			exit 1
@@ -84,12 +84,12 @@ case `uname -s` in
 esac
 
 $LIBTOOLIZE --force --copy
-aclocal -I m4 --install
+time aclocal -I m4 --install
 sed -i -e 's/PKG_PROG_PKG_CONFIG(\[0\.16\])/PKG_PROG_PKG_CONFIG([0.14])/g' aclocal.m4
 
-autoheader
-automake --foreign --add-missing --copy
-autoconf
+time autoheader
+time automake --foreign --add-missing --copy
+time autoconf
 
 if grep AX_PREFIX_CONFIG_H configure > /dev/null; then
 	cat <<EOF
