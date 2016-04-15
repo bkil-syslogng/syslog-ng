@@ -9,9 +9,9 @@ matrix:
         tests/copyright/check.sh . .
     - env: E=precise_container
       sudo: false
-      compiler:
-        - gcc
-        - clang
+        compiler:
+          - gcc
+          - clang
       cache:
         directories:
           - $HOME/.local/bin
