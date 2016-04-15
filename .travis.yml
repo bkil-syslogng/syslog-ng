@@ -106,7 +106,8 @@ matrix:
     - env: E=trusty
       dist: trusty
       sudo: required
-      compiler: gcc
+      compiler: clang
+      env: TEST=distcheck
       addons:
         apt:
           packages:
