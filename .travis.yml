@@ -95,17 +95,6 @@ install:
               rm -v gradle-2.9-bin.zip;
             };
           fi
-before_script:
-        - ./autogen.sh
-        - env
-        - unset PYTHON_CFLAGS # HACK
-        - CONFIGURE_OPTS="
-            --with-jsonc=system
-            --disable-systemd
-            --with-systemd-journal=optional
-            --disable-sql
-            --disable-redis
-            --disable-riemann"
 after_script:
         - ccache -s
 
@@ -123,7 +112,6 @@ matrix:
       addons:
       compiler: gcc
       install:
-      before_script:
       script:
       - export COPYRIGHTVERBOSITY=1;
         tests/copyright/check.sh . .
@@ -180,15 +168,27 @@ matrix:
            libriemann-client-dev
            # gradle-2.2.1
         - sudo pip install -r requirements.txt
-      before_script:
-        - ./autogen.sh
-        - unset PYTHON_CFLAGS # HACK
-        - CONFIGURE_OPTS="
-            --with-jsonc=internal
-            --enable-systemd
-            --with-systemd-journal=system"
+      after_script:
 script:
-  - ./configure
+  - ./autogen.sh || return $?;
+    env;
+    # HACK
+    unset PYTHON_CFLAGS;
+    if [ "$E" = "trusty" ]; then
+      CONFIGURE_OPTS="
+        --with-jsonc=internal
+        --enable-systemd
+        --with-systemd-journal=system"
+    else
+      CONFIGURE_OPTS="
+        --with-jsonc=system
+        --disable-systemd
+        --with-systemd-journal=optional
+        --disable-sql
+        --disable-redis
+        --disable-riemann"
+    fi;
+    ./configure
       $CONFIGURE_OPTS
       CFLAGS=-Werror
       --with-ivykis=internal
@@ -203,13 +203,14 @@ script:
       --enable-all-modules
       --enable-manpages
       --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-      --prefix=$HOME/install/syslog-ng || return 1;
+      --prefix=$HOME/install/syslog-ng || return $?;
+    # --keep-going
     make -j ||
       {
+        # to make error messages more readable on error
         make V=1;
         return 1;
       };
-    # --keep-going # to make error messages more readable on error
     if [ "$TEST" = "distcheck" ]; then
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
