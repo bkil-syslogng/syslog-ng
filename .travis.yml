@@ -8,7 +8,7 @@ matrix:
   include:
     - env: E=copyright_check
       sudo: false
-    - script:
+      script:
       - export COPYRIGHTVERBOSITY=1;
         tests/copyright/check.sh . .
     - env: E=precise_container
