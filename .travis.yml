@@ -123,7 +123,7 @@ matrix:
     - env: E=trusty TEST=distcheck
       dist: trusty
       sudo: required
-      compiler: clang
+      compiler: gcc
       addons:
         apt:
           packages:
