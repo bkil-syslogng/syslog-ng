@@ -1,23 +1,4 @@
 language: c
-env: CONFIGURE_OPTS="
-  CFLAGS=-Werror
-  --with-ivykis=internal
-  --with-mongoc=internal
-  --with-librabbitmq=internal
-
-  --disable-env-wrapper
-  --disable-memtrace
-  --enable-tcp-wrapper
-  --enable-linux-caps
-
-  --disable-sun-streams
-  --enable-pacct
-  --enable-all-modules
-
-  --enable-manpages
-  --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-  --prefix=$HOME/install/syslog-ng
-  "
 
 matrix:
   include:
@@ -97,14 +78,13 @@ matrix:
         - ./autogen.sh
         - env
         - unset PYTHON_CFLAGS # HACK
-        - ./configure
-            $CONFIGURE_OPTS
+        - CONFIGURE_OPTS="
             --with-jsonc=system
             --disable-systemd
             --with-systemd-journal=optional
             --disable-sql
             --disable-redis
-            --disable-riemann
+            --disable-riemann"
       after_script:
         - ccache -s
     - env: E=trusty
@@ -162,12 +142,30 @@ matrix:
       before_script:
         - ./autogen.sh
         - unset PYTHON_CFLAGS # HACK
-        - ./configure
-            $CONFIGURE_OPTS
+        - CONFIGURE_OPTS="
             --with-jsonc=internal
             --enable-systemd
-            --with-systemd-journal=system
+            --with-systemd-journal=system"
 script:
+  - ./configure
+      $CONFIGURE_OPTS
+      CFLAGS=-Werror
+      --with-ivykis=internal
+      --with-mongoc=internal
+      --with-librabbitmq=internal
+
+      --disable-env-wrapper
+      --disable-memtrace
+      --enable-tcp-wrapper
+      --enable-linux-caps
+
+      --disable-sun-streams
+      --enable-pacct
+      --enable-all-modules
+
+      --enable-manpages
+      --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
+      --prefix=$HOME/install/syslog-ng
   - make -j ||
       make V=1 --keep-going # to make error messages more readable on error
   - if [ "$CC" = "gcc" ]; then
