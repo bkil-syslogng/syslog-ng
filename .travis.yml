@@ -71,12 +71,14 @@ install:
               ~/.ccache/ccache.conf;
           fi
         - rm $HOME/.local/bin/clang;
+          rm -Rf $HOME/.local;
           true;
           # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
       #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
       #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
         - pip install --user -r requirements.txt
         - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
+          if false; then
           if ! pkg-config --exists eventlog; then
             apt-get source eventlog &&
             cd eventlog-* &&
@@ -87,7 +89,7 @@ install:
               cd .. &&
               rm -R eventlog* ;
             };
-          fi
+          fi; fi
         - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
           export PATH=$GRADLE_HOME/bin:$PATH;
           if ! which gradle; then
