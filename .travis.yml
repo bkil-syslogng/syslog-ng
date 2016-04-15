@@ -138,6 +138,8 @@ matrix:
             - openjdk-7-jdk
             - gradle
             - autoconf-archive
+            - libsystemd-journal-dev
+            - libsystemd-daemon-dev
       install:
         - cat /etc/apt/sources.list
         - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
@@ -163,7 +165,7 @@ matrix:
             --enable-tcp-wrapper
             --disable-sun-streams
             --enable-linux-caps
-            --disable-systemd
+            --enable-systemd
             --with-systemd-journal=system
             --enable-manpages
             --enable-all-modules
