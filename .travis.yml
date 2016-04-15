@@ -169,10 +169,12 @@ matrix:
            # gradle-2.2.1
         - sudo pip install -r requirements.txt
       after_script:
+    # HACK
+    # --keep-going
+        # to make error messages more readable on error
 script:
   - ./autogen.sh || return $?;
     env;
-    # HACK
     unset PYTHON_CFLAGS;
     if [ "$E" = "trusty" ]; then
       CONFIGURE_OPTS="
@@ -204,10 +206,8 @@ script:
       --enable-manpages
       --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       --prefix=$HOME/install/syslog-ng || return $?;
-    # --keep-going
     make -j ||
       {
-        # to make error messages more readable on error
         make V=1;
         return 1;
       };
