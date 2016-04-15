@@ -93,6 +93,9 @@ matrix:
   include:
     - env: E=copyright_check
       sudo: false
+      cache:
+      before_cache:
+      addons:
       compiler: gcc
       install:
       before_script:
