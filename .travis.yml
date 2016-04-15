@@ -180,7 +180,7 @@ script:
       CONFIGURE_OPTS="
         --with-jsonc=internal
         --enable-systemd
-        --with-systemd-journal=system"
+        --with-systemd-journal=system";
     else
       CONFIGURE_OPTS="
         --with-jsonc=system
@@ -188,7 +188,7 @@ script:
         --with-systemd-journal=optional
         --disable-sql
         --disable-redis
-        --disable-riemann"
+        --disable-riemann";
     fi;
     ./configure
       $CONFIGURE_OPTS
