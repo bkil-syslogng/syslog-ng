@@ -86,9 +86,9 @@ after_script:
 
 matrix:
   exclude:
-    - env: TEST=distcheck
+    - env: E=precise_container TEST=distcheck
       compiler: clang
-    - env: TEST=distcheck
+    - env: E=precise_container TEST=distcheck
       compiler: clang
   include:
     - env: E=copyright_check
