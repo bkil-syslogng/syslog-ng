@@ -182,6 +182,8 @@ script:
     elif [ "$TEST" = "func-test" ]; then
       make install &&
         make func-test V=1;
+    else
+      true
     fi
 branches:
   except:
