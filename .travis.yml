@@ -28,8 +28,6 @@ matrix:
       addons:
         apt:
           packages:
-            - curl
-            - wget
             - ccache
             - pkg-config
             - flex
@@ -41,7 +39,7 @@ matrix:
             - libnet1-dev
             - libglib2.0-dev
             - libhiredis-dev
-            - libdbi-dev # old libdbi0-dev ?
+#            - libdbi-dev # old libdbi0-dev ?
             - libssl-dev
             - libjson0-dev
             - libwrap0-dev
