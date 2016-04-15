@@ -85,6 +85,11 @@ after_script:
         - ccache -s
 
 matrix:
+  exclude:
+    - env: TEST=distcheck
+      compiler: clang
+    - env: TEST=distcheck
+      compiler: clang
   include:
     - env: E=copyright_check
       sudo: false
