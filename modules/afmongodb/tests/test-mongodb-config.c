@@ -172,6 +172,7 @@ static void
 _setup(void)
 {
   msg_init(FALSE);
+  g_thread_init(NULL);
   syntax_only = FALSE;
   debug_flag = TRUE;
   verbose_flag = TRUE;
