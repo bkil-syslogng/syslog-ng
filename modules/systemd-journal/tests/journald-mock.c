@@ -182,11 +182,7 @@ journald_mock_new()
   Journald *self = g_new0(Journald, 1);
 
   int result = pipe(self->fds);
-  if (result < 0)
-    {
-      g_free(self);
-      return NULL;
-    }
+  g_assert(result == 0);
   g_fd_set_nonblock(self->fds[0], TRUE);
   g_fd_set_nonblock(self->fds[1], TRUE);
 
