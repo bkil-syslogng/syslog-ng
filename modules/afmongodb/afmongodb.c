@@ -168,6 +168,10 @@ _dd_connect(MongoDBDestDriver *self, gboolean reconnect)
           msg_error("Error getting specified MongoDB collection",
                     evt_tag_str("collection", self->coll),
                     evt_tag_str("driver", self->super.super.super.id));
+
+          mongoc_client_destroy(self->client);
+          self->client = NULL;
+
           return FALSE;
         }
     }
@@ -183,6 +187,12 @@ _dd_connect(MongoDBDestDriver *self, gboolean reconnect)
       msg_error("Error connecting to MongoDB",
                 evt_tag_str("driver", self->super.super.super.id),
                 evt_tag_str("reason", error.message));
+
+      mongoc_collection_destroy(self->coll_obj);
+      self->coll_obj = NULL;
+      mongoc_client_destroy(self->client);
+      self->client = NULL;
+
       return FALSE;
     }
 
