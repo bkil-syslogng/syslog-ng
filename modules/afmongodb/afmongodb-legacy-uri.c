@@ -47,9 +47,9 @@ _parse_addr(const char *str, char **host, gint *port)
   if (!hosts || hosts->next)
     {
       if (hosts)
-        msg_error("No host found in MongoDB URI", evt_tag_str("uri", proto_str));
-      else
         msg_error("Multiple hosts found in MongoDB URI", evt_tag_str("uri", proto_str));
+      else
+        msg_error("No host found in MongoDB URI", evt_tag_str("uri", proto_str));
       g_free(proto_str);
       mongoc_uri_destroy(uri);
       return FALSE;
