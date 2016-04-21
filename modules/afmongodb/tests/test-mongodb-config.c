@@ -188,8 +188,22 @@ _test_legacy_error(void)
 {
   afmongodb_dd_set_safe_mode(mongodb, FALSE);
   afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.1:27017/syslog");
-  _expect_text_in_log("uri_safe_mode", "Error: either specify a MongoDB URI "
+  _expect_error_in_log("uri_safe_mode", "Error: either specify a MongoDB URI "
                       "(and optional collection) or only legacy options;");
+
+  afmongodb_dd_set_host(mongodb, "?");
+  _expect_error_in_log("host_invalid", "Cannot parse MongoDB URI; uri=");
+
+  afmongodb_dd_set_host(mongodb, "localhost,127.0.0.1");
+  _expect_error_in_log("host_multi", "Multiple hosts found in MongoDB URI; uri=");
+
+  GList *servers = g_list_append(NULL, g_strdup("localhost,127.0.0.1"));
+  afmongodb_dd_set_servers(mongodb, servers);
+  _expect_error_in_log("servers_multi", "Multiple hosts found in MongoDB URI; uri=");
+
+  servers = g_list_append(NULL, g_strdup(""));
+  afmongodb_dd_set_servers(mongodb, servers);
+  _expect_error_in_log("servers_none", "Cannot parse MongoDB URI; uri=");
 }
 #endif
 
