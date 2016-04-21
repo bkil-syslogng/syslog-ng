@@ -84,7 +84,7 @@ _append_host(GList **list, const char *host, gint port)
   MongoDBHostPort *hp = g_new0(MongoDBHostPort, 1);
   hp->host = g_strdup(host);
   hp->port = port;
-  *list = g_list_prepend(*list, hp);
+  *list = g_list_append(*list, hp);
   return TRUE;
 }
 

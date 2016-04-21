@@ -117,7 +117,7 @@ _test_legacy_correct(void)
   GList *servers = g_list_append(NULL, g_strdup("127.0.0.2:27018"));
   servers = g_list_append(servers, g_strdup("localhost:1234"));
   afmongodb_dd_set_servers(mongodb, servers);
-  _expect_uri_in_log("servers_multi", "localhost:1234,127.0.0.2:27018/syslog" SAFEOPTS,
+  _expect_uri_in_log("servers_multi", "127.0.0.2:27018,localhost:1234/syslog" SAFEOPTS,
                      "syslog", "messages");
 
   servers = g_list_append(NULL, g_strdup("127.0.0.2"));
