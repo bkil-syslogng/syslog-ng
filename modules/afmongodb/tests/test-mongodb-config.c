@@ -28,6 +28,7 @@
 static int _tests_failed = 0;
 static GlobalConfig *test_cfg;
 static LogDriver *mongodb;
+static gboolean uri_init_ok;
 
 #define SAFEOPTS "?wtimeoutMS=60000&socketTimeoutMS=60000&connectTimeoutMS=60000"
 
@@ -41,7 +42,7 @@ _before_test(void)
 static void
 _after_test(void)
 {
-  afmongodb_dd_private_uri_init(mongodb);
+  uri_init_ok = afmongodb_dd_private_uri_init(mongodb);
   stop_grabbing_messages();
 }
 
@@ -73,6 +74,24 @@ _expect_text_in_log(const gchar *testcase, const gchar *pattern)
 }
 
 static void
+_log_error(const gchar *message)
+{
+  fprintf(stderr, "error: %s\n", message);
+}
+
+static void
+_expect_error_in_log(const gchar *testcase, const gchar *pattern)
+{
+  _expect_text_in_log(testcase, pattern);
+
+  if (uri_init_ok)
+    {
+      _log_error("expected the subject to fail, but it succeeded");
+      _tests_failed = 1;
+    }
+}
+
+static void
 _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, const gchar *coll)
 {
   GString *pattern = g_string_sized_new(0);
@@ -81,6 +100,12 @@ _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, con
                          uri, db, coll);
   _expect_text_in_log(testcase, pattern->str);
   g_string_free(pattern, TRUE);
+
+  if (!uri_init_ok)
+    {
+      _log_error("expected the subject to succeed, but it failed");
+      _tests_failed = 1;
+    }
 }
 
 static void
@@ -102,10 +127,10 @@ static void
 _test_uri_error(void)
 {
   afmongodb_dd_set_uri(mongodb, "INVALID-URI");
-  _expect_text_in_log("invalid_uri", "Error parsing MongoDB URI; uri='INVALID-URI'");
+  _expect_error_in_log("invalid_uri", "Error parsing MongoDB URI; uri='INVALID-URI'");
 
   afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.1:27017/");
-  _expect_text_in_log("missing_db", "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/'");
+  _expect_error_in_log("missing_db", "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/'");
 }
 
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
