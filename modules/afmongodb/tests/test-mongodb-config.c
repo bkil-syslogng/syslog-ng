@@ -194,6 +194,9 @@ _test_legacy_error(void)
   afmongodb_dd_set_host(mongodb, "?");
   _expect_error_in_log("host_invalid", "Cannot parse MongoDB URI; uri=");
 
+  afmongodb_dd_set_host(mongodb, "");
+  _expect_error_in_log("host_none", "Cannot parse the primary host; primary=\'\'");
+
   afmongodb_dd_set_host(mongodb, "localhost,127.0.0.1");
   _expect_error_in_log("host_multi", "Multiple hosts found in MongoDB URI; uri=");
 

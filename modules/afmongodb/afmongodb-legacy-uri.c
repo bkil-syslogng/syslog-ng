@@ -95,8 +95,19 @@ _append_legacy_servers(MongoDBDestDriver *self)
     {
       if (self->address || self->port)
         {
-          gint port = (self->port) ? self->port : MONGOC_DEFAULT_PORT;
-          const gchar *address = (self->address) ? self->address : DEFAULTHOST;
+          gchar *host = NULL;
+          gint port = 0;
+          if (!_parse_addr(self->address, &host, &port) || (!host))
+            {
+              msg_error("Cannot parse the primary host",
+                        evt_tag_str("primary", self->address),
+                        evt_tag_str("driver", self->super.super.super.id));
+              return FALSE;
+            }
+          g_free(host);
+
+          port = self->port ? self->port : MONGOC_DEFAULT_PORT;
+          const gchar *address = self->address ? self->address : DEFAULTHOST;
           gchar *srv = g_strdup_printf("%s:%d", address, port);
           self->servers = g_list_prepend(self->servers, srv);
           g_free(self->address);
