@@ -43,7 +43,6 @@ addons:
             - libnet1-dev
             - libglib2.0-dev
             - libhiredis-dev
-#            - libdbi-dev # TODO: compile
             - libssl-dev
             - libjson0-dev
             - libwrap0-dev
@@ -91,11 +90,11 @@ install:
             cd libdbi &&
             {
              ./autogen.sh &&
-             ./configure --prefix=$HOME/.local/ --disable-docs --enable-silent-rules
-              --disable-dependency-tracking &&
+             ./configure --prefix=$HOME/.local/
+              --disable-docs --enable-silent-rules --disable-dependency-tracking &&
              make -j install;
              S=$?;
-             cd ..;
+             cd .. &&
              rm -Rf libdbi;
              [ $S -eq 0 ] || exit 1;
             };
