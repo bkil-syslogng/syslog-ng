@@ -18,7 +18,10 @@ AM_CPPFLAGS		= -I$(top_srcdir)/lib -I$(top_srcdir)/modules -I$(top_builddir)/lib
 
 AM_CFLAGS =
 if ENABLE_EXTRA_WARNINGS
-AM_CFLAGS += -Wall -Wshadow
+AM_CFLAGS +=	\
+	-Wshadow	\
+	-Wall
+
 endif
 
 TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS)
