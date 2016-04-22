@@ -204,11 +204,6 @@ script:
       --enable-manpages
       --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       --prefix=$HOME/install/syslog-ng || return $?;
-    make -j ||
-      {
-        make V=1;
-        return 1;
-      };
     if [ "$TEST" = "distcheck" ]; then
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
