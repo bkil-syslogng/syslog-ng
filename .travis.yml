@@ -86,12 +86,12 @@ install:
             };
           fi; fi;
           if ! pkg-config --exists dbi; then
-            git clone --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
+            git clone --quiet --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
             {
              ./autogen.sh &&
              ./configure --prefix=$HOME/.local/
-              --disable-docs --enable-silent-rules --disable-dependency-tracking &&
+              --disable-docs --disable-dependency-tracking &&
              make -j install;
              S=$?;
              cd .. &&
