@@ -185,7 +185,6 @@ script:
         --disable-systemd
         --with-systemd-journal=optional
         --with-libhiredis=/usr
-        --disable-sql
         --disable-riemann";
     fi;
     ./configure
