@@ -126,7 +126,9 @@ matrix:
       compiler: gcc
       install:
       script:
-      - export COPYRIGHTVERBOSITY=1;
+      - locate libjvm.so;
+        find / -type f -iname libjvm.so;
+        export COPYRIGHTVERBOSITY=1;
         tests/copyright/check.sh . .
       after_script:
     - env: E=trusty TEST=distcheck
