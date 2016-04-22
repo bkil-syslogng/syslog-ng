@@ -85,7 +85,7 @@ install:
               cd .. &&
               rm -R eventlog* ;
             };
-          fi; fi
+          fi; fi;
           if ! pkg-config --exists dbi; then
             git clone --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
