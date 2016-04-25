@@ -61,7 +61,8 @@ addons:
 #            - libsystemd-journal-dev # TODO: compile
 #            - libsystemd-daemon-dev # TODO: compile
 install:
-        - export PATH=$HOME/.local/bin:$PATH
+        - export PATH=$HOME/.local/bin:$PATH;
+          export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
       #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
         - echo "max_size = 150M" > ~/.ccache/ccache.conf
         - if [ "$CC" = "clang" ]; then
@@ -72,7 +73,6 @@ install:
       #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
       #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
         - pip install --user -r requirements.txt
-        - export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
           if false; then
           if ! pkg-config --exists eventlog; then
             apt-get source eventlog &&
@@ -99,7 +99,6 @@ install:
              cd .. &&
              rm -Rf libdbi;
              [ $S -eq 0 ] || exit 1;
-             export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH";
             };
           fi;
         - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
@@ -226,7 +225,10 @@ script:
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
       make install &&
+      {
+        LD_LIBRARY_PATH2="$HOME/.local/lib:$LD_LIBRARY_PATH"
         make func-test V=1;
+      };
     else
       true;
     fi
