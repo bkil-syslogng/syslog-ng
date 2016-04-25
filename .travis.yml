@@ -15,6 +15,7 @@ sudo: false
 cache:
         directories:
           - $HOME/.local/bin
+          - $HOME/.local/deps
           - $HOME/.local/gradle-2.9
           - $HOME/.local/include
           - $HOME/.local/lib
@@ -29,7 +30,7 @@ before_cache:
         - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
         - ls -la $HOME $HOME/.[^.]* $HOME/..?*
-        - find $HOME/.local
+        - find $HOME/.local $HOME/install
 addons:
         apt:
           packages:
@@ -85,23 +86,41 @@ install:
               rm -R eventlog* ;
             };
           fi; fi;
-          dpkg -l libdbd-sqlite3 && exit 1;
           dpkg -l libdbi1 && exit 1;
+          dpkg -l libdbd-sqlite3 && exit 1;
           if ! pkg-config --exists "dbi >= 0.9.0"; then
-            git clone --quiet --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
+            OPWD="$PWD";
+            mkdir -p "$HOME/.local/deps" || exit 1;
+            cd "$HOME/.local/deps" || exit 1;
+            if [ ! -d "libdbi-drivers" ]; then
+              git clone --quiet --branch libdbi-drivers-0.9.0
+                git://git.code.sf.net/p/libdbi-drivers/libdbi-drivers || exit 1;
+            fi;
+            libdbi-drivers || exit 1;
+            if [ ! -f configure ]; then
+              ./autogen.sh || exit 1;
+            fi;
+            if [ ! -f Makefile ]; then
+              ./configure --prefix=$HOME/install/syslog-ng --with-sqlite3
+                --disable-docs --disable-dependency-tracking || exit 1;
+            fi;
+            make -j install-exec || exit 1;
+            cd "$OPWD";
+            git clone --quiet --branch libdbi-0.9.0
+              git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
             {
              ./autogen.sh &&
              ./configure --prefix=$HOME/.local/
                --disable-docs --disable-dependency-tracking &&
-             make -j install;
+             make -j install-exec;
              S=$?;
              cd .. &&
              rm -Rf libdbi;
              [ $S -eq 0 ] || exit 1;
             };
           fi;
-        - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
+        - export GRADLE_HOME=$HOME/.local/gradle-2.9;
           export PATH=$GRADLE_HOME/bin:$PATH;
           if ! which gradle; then
             wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip &&
