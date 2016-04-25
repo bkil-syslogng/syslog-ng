@@ -115,7 +115,7 @@ AC_ARG_ENABLE(debug,
               [  --enable-debug      Enable debugging code.],, enable_debug="no")
 
 AC_ARG_ENABLE(extra-warnings,
-              [  --disable-extra-warnings      Disable extra compiler warnings.],, enable_extra_warnings="yes")
+              [  --enable-extra-warnings      Enable extra compiler warnings (recommended).],, enable_extra_warnings="no")
 
 AC_ARG_ENABLE(env-wrapper,
               [  --enable-env-wrapper    Enable wrapper program to set up various environment variables],, enable_env_wrapper=auto)

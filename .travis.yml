@@ -10,7 +10,7 @@ install:
 before_script:
   - ./autogen.sh
   - unset PYTHON_CFLAGS # HACK
-  - ./configure CFLAGS=-Werror --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl 
+  - ./configure CFLAGS=-Werror --with-ivykis=internal --prefix=$HOME/install/syslog-ng --enable-pacct --enable-manpages --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl --enable-extra-warnings
   - . tests/build-log-cflags-propagation.sh;
     exec_prop_check "make -j V=1";
     S=$?;
