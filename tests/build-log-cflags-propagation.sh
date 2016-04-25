@@ -9,13 +9,7 @@ exec_prop_check() {
     echo $?
   } |
   tee "$BUILDLOG" |
-  grep --line-buffered --invert-match --extended-regexp "^(\
-libtool: (link|relink|install): |\
-depbase=|\
-(test -z|rm|\./lib/merge-grammar.pl|\./doc/mallard2man\.py) |\
-`printf "\t"`?/bin/bash |\
-`printf "\t"`?(gcc|mv) \
-)"
+  reduce_verbosity
 
   S=`tail -n 1 "$BUILDLOG"`
   if [ "$S" -eq 0 ]; then
@@ -31,6 +25,16 @@ depbase=|\
 
 ####
 # private functions:
+
+reduce_verbosity() {
+  grep --line-buffered --invert-match --extended-regexp "^(\
+libtool: (link|relink|install): |\
+depbase=|\
+(test -z|rm|\./lib/merge-grammar.pl|\./doc/mallard2man\.py) |\
+`printf "\t"`?/bin/bash |\
+`printf "\t"`?(gcc|mv) \
+)"
+}
 
 build_log_cflags_propagation() {
   local BUILDLOG="$1"
