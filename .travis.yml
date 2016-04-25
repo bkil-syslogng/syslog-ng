@@ -29,6 +29,7 @@ before_cache:
         - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
         - ls -la $HOME $HOME/.[^.]* $HOME/..?*
+        - find $HOME/.local
 addons:
         apt:
           packages:
@@ -52,7 +53,6 @@ addons:
             - libssl1.0.0
             - libgeoip-dev
             - sqlite3
-            - libdbd-sqlite3
       #      - libriemann-client-dev # TODO: compile
             - libprotobuf-c0-dev
             - openjdk-7-jdk
@@ -85,18 +85,21 @@ install:
               rm -R eventlog* ;
             };
           fi; fi;
-          if ! pkg-config --exists dbi; then
+          dpkg -l libdbd-sqlite3 && exit 1;
+          dpkg -l libdbi1 && exit 1;
+          if ! pkg-config --exists "dbi >= 0.9.0"; then
             git clone --quiet --branch libdbi-0.9.0 git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
             {
              ./autogen.sh &&
              ./configure --prefix=$HOME/.local/
-              --disable-docs --disable-dependency-tracking &&
+               --disable-docs --disable-dependency-tracking &&
              make -j install;
              S=$?;
              cd .. &&
              rm -Rf libdbi;
              [ $S -eq 0 ] || exit 1;
+             export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH";
             };
           fi;
         - export GRADLE_HOME=$HOME/.local/gradle-2.9 &&
