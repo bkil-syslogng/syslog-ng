@@ -30,7 +30,8 @@ before_cache:
         - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
         - ls -la $HOME $HOME/.[^.]* $HOME/..?*
-        - find $HOME/.local $HOME/install
+        - find $HOME/.local
+        - find $HOME/install
 addons:
         apt:
           packages:
@@ -88,7 +89,7 @@ install:
           fi; fi;
           dpkg -l libdbi1 && exit 1;
           dpkg -l libdbd-sqlite3 && exit 1;
-          if ! pkg-config --exists "dbi >= 0.9.0"; then
+          if [ ! -d "$HOME/install/syslog-ng/lib/dbd" ]; then
             OPWD="$PWD";
             mkdir -p "$HOME/.local/deps" || exit 1;
             cd "$HOME/.local/deps" || exit 1;
@@ -106,6 +107,7 @@ install:
             fi;
             make -j install-exec || exit 1;
             cd "$OPWD";
+          elif ! pkg-config --exists "dbi >= 0.9.0"; then
             git clone --quiet --branch libdbi-0.9.0
               git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
