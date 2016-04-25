@@ -72,7 +72,7 @@ install:
           # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
       #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
       #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
-        - pip install --user -r requirements.txt
+        - pip install --user -r requirements.txt;
           if false; then
           if ! pkg-config --exists eventlog; then
             apt-get source eventlog &&
