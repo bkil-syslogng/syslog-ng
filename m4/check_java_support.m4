@@ -83,7 +83,7 @@ AC_DEFUN([AX_CHECK_JAVA_VERSION],
       JNI_LIBDIR=`find $JNI_HOME \( -name "libjvm.so" -or -name "libjvm.dylib" \) \
         | sed "s-/libjvm\.so-/-" \
         | sed "s-/libjvm\.dylib-/-" | head -n 1`
-      JNI_LIBS="-L$JNI_LIBDIR -ljvm -Wl,-rpath=$JNI_LIBDIR" # RUNPATH: ,--enable-new-dtags
+      JNI_LIBS="-L$JNI_LIBDIR -ljvm -Wl,-rpath=$JNI_LIBDIR,--enable-new-dtags" # RUNPATH: ,--enable-new-dtags
       JNI_INCLUDE_DIR=`find $JNI_HOME -name "jni.h" |  sed "s/\(.*\)jni.h/\1/" | head -n 1`
       JNI_CFLAGS="-I$JNI_INCLUDE_DIR"
 
