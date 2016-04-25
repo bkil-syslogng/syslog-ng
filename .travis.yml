@@ -22,7 +22,7 @@ before_script:
 script:
   - if [ "$CC" = "gcc" ]; then
       . tests/build-log-cflags-propagation.sh;
-      export CFLAGS="$CFLAGS -Werror";
+      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings";
       exec_prop_check "make distcheck V=1 --keep-going";
     else
       make func-test V=1;
