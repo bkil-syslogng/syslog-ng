@@ -117,11 +117,14 @@ install:
               sed -i "s~^ac_dbi_libdir=\"no\"$~\# & \# syslog-ng HACK~" configure.in || exit 1;
               ./autogen.sh || exit 1;
             fi;
+            find $HOME/.local;
             if [ ! -f Makefile ]; then
-              DBIDIR="`pkg-config --variable=libdir dbi`" || exit 1;
-              [ -n "$DBIDIR" ] || exit 1;
+              DBIINC="`pkg-config --variable=includedir dbi`" || exit 1;
+              DBILIB="`pkg-config --variable=libdir dbi`" || exit 1;
+              [ -n "$DBILIB" ] || exit 1;
               ./configure --prefix=$HOME/install/syslog-ng --with-sqlite3
-                --with-dbi-incdir="$DBIDIR"
+                --with-dbi-libir="$DBILIB"
+                --with-dbi-incdir="$DBIINC"
                 --disable-docs --disable-dependency-tracking || exit 1;
             fi;
             make -j install-exec || exit 1;
