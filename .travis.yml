@@ -123,8 +123,8 @@ install:
               DBILIB="`pkg-config --variable=libdir dbi`" || exit 1;
               [ -n "$DBILIB" ] || exit 1;
               ./configure --prefix=$HOME/install/syslog-ng --with-sqlite3
-                --with-dbi-libir="$DBILIB"
-                --with-dbi-incdir="$DBIINC"
+                --with-dbi-libdir="$DBILIB"
+                --with-dbi-incdir="$DBIINC/.."
                 --disable-docs --disable-dependency-tracking || exit 1;
             fi;
             make -j install-exec || exit 1;
