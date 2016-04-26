@@ -89,6 +89,21 @@ install:
           fi; fi;
           dpkg -l libdbi1 && exit 1;
           dpkg -l libdbd-sqlite3 && exit 1;
+          if ! pkg-config --exists "dbi >= 0.9.0"; then
+            git clone --quiet --branch libdbi-0.9.0
+              git://git.code.sf.net/p/libdbi/libdbi &&
+            cd libdbi &&
+            {
+             ./autogen.sh &&
+             ./configure --prefix=$HOME/.local/
+               --disable-docs --disable-dependency-tracking &&
+             make -j install-exec;
+             S=$?;
+             cd .. &&
+             rm -Rf libdbi;
+             [ $S -eq 0 ] || exit 1;
+            };
+          fi;
           if [ ! -d "$HOME/install/syslog-ng/lib/dbd" ]; then
             OPWD="$PWD";
             mkdir -p "$HOME/.local/deps" || exit 1;
@@ -107,20 +122,6 @@ install:
             fi;
             make -j install-exec || exit 1;
             cd "$OPWD";
-          elif ! pkg-config --exists "dbi >= 0.9.0"; then
-            git clone --quiet --branch libdbi-0.9.0
-              git://git.code.sf.net/p/libdbi/libdbi &&
-            cd libdbi &&
-            {
-             ./autogen.sh &&
-             ./configure --prefix=$HOME/.local/
-               --disable-docs --disable-dependency-tracking &&
-             make -j install-exec;
-             S=$?;
-             cd .. &&
-             rm -Rf libdbi;
-             [ $S -eq 0 ] || exit 1;
-            };
           fi;
         - export GRADLE_HOME=$HOME/.local/gradle-2.9;
           export PATH=$GRADLE_HOME/bin:$PATH;
