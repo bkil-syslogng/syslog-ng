@@ -117,7 +117,9 @@ install:
               ./autogen.sh || exit 1;
             fi;
             if [ ! -f Makefile ]; then
+              DBIDIR="`pkg-config --variable=libdir dbi`"
               ./configure --prefix=$HOME/install/syslog-ng --with-sqlite3
+                --with-dbi-incdir="$DBIDIR"
                 --disable-docs --disable-dependency-tracking || exit 1;
             fi;
             make -j install-exec || exit 1;
