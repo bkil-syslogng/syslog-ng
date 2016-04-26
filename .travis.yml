@@ -97,7 +97,7 @@ install:
               git clone --quiet --branch libdbi-drivers-0.9.0
                 git://git.code.sf.net/p/libdbi-drivers/libdbi-drivers || exit 1;
             fi;
-            libdbi-drivers || exit 1;
+            cd libdbi-drivers || exit 1;
             if [ ! -f configure ]; then
               ./autogen.sh || exit 1;
             fi;
