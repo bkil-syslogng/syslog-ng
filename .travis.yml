@@ -58,6 +58,7 @@ addons:
       #      - libriemann-client-dev # TODO: compile
             - libprotobuf-c0-dev
             - openjdk-7-jdk
+            - strace
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
 #            - libsystemd-journal-dev # TODO: compile
@@ -255,8 +256,22 @@ script:
     elif [ "$TEST" = "func-test" ]; then
       make install &&
       {
-        LD_LIBRARY_PATH2="$HOME/.local/lib:$LD_LIBRARY_PATH"
-        make func-test V=1;
+        LD_LIBRARY_PATH2="$HOME/.local/lib:$LD_LIBRARY_PATH";
+
+        printf '#!/bin/bash\n
+         '"$HOME"'/install/syslog-ng/sbin/syslog-ng "$@" &
+         PID=$!;
+         trap "kill --signal 15 $PID" 15;
+         exec strace -o '"$PWD"'/strace.log -f -p $PID;
+         \n' > "$PWD"/x.sh &&
+        chmod +x "$PWD"/x.sh &&
+        SYSLOG_NG_BINARY="$PWD"/x.sh
+         make func-test V=1;
+        S=$?;
+        if [ $S != 0 ]; then
+         cat strace.log;
+         exit $?;
+        fi;
       };
     else
       true;
