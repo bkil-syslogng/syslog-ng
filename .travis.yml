@@ -272,7 +272,7 @@ script:
         S=$?;
         if [ $S != 0 ]; then
          cat strace.log;
-         exit $?;
+         exit $S;
         fi;
       };
     else
