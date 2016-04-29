@@ -21,6 +21,7 @@
 #############################################################################
 
 import os
+import time
 
 def is_running_in_build_tree():
     return 'SYSLOG_NG_BINARY' not in os.environ
@@ -67,6 +68,7 @@ else:
     logstore_store_supported = False
     wildcard_file_source_supported = False
 
+time.sleep(1) # TODO: just grab the first available port, otherwise need to wait between executions
 port_number = os.getpid() % 30000 + 33000
 ssl_port_number = port_number + 1
 port_number_syslog = port_number + 2
