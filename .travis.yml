@@ -153,72 +153,72 @@ matrix:
     - env: E=precise_container TEST=distcheck
       compiler: clang
       compiler: gcc
-  include:
-    - env: E=copyright_check
-      sudo: false
-      cache:
-      before_cache:
-      addons:
-      compiler: gcc
-      install:
-      script:
-      - export COPYRIGHTVERBOSITY=1;
-        tests/copyright/check.sh . .
-      after_script:
-    - env: E=trusty TEST=distcheck
-      dist: trusty
-      sudo: required
-      compiler: gcc
-      addons:
-        apt:
-          packages:
-            - curl
-            - ccache
-            - pkg-config
-            - flex
-            - bison
-            - xsltproc
-            - docbook-xsl
-            - libevtlog-dev
-            - libnet1-dev
-            - libglib2.0-dev
-            - libhiredis-dev
-#            - libdbi0-dev # TODO: waiting for whitelisting
-            - libssl-dev
-            - libjson0-dev
-            - libwrap0-dev
-            - libpcre3-dev
-            - libcap-dev
-            - libesmtp-dev
-            - libssl1.0.0
-            - libgeoip-dev
-            - sqlite3
-            - libdbd-sqlite3
-#            - libriemann-client-dev # TODO: compile
-            - libprotobuf-c0-dev
-            - openjdk-7-jdk
-            - gradle
-            - autoconf-archive
-#            - libsystemd-journal-dev # TODO: waiting for whitelisting
-#            - libsystemd-daemon-dev # TODO: waiting for whitelisting
-      install:
-#        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
-        - cat /etc/apt/sources.list
-        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
-          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-        - sudo apt-get update -qq
-        - sudo apt-get install --force-yes -qq
-           libdbi0-dev
-           libsystemd-journal-dev
-           libsystemd-daemon-dev
-           libriemann-client-dev
-           # gradle-2.2.1
-        - sudo pip install -r requirements.txt
-    # HACK
-    # --keep-going
-        # to make error messages more readable on error
-#        --disable-redis
+  #~ include:
+    #~ - env: E=copyright_check
+      #~ sudo: false
+      #~ cache:
+      #~ before_cache:
+      #~ addons:
+      #~ compiler: gcc
+      #~ install:
+      #~ script:
+      #~ - export COPYRIGHTVERBOSITY=1;
+        #~ tests/copyright/check.sh . .
+      #~ after_script:
+    #~ - env: E=trusty TEST=distcheck
+      #~ dist: trusty
+      #~ sudo: required
+      #~ compiler: gcc
+      #~ addons:
+        #~ apt:
+          #~ packages:
+            #~ - curl
+            #~ - ccache
+            #~ - pkg-config
+            #~ - flex
+            #~ - bison
+            #~ - xsltproc
+            #~ - docbook-xsl
+            #~ - libevtlog-dev
+            #~ - libnet1-dev
+            #~ - libglib2.0-dev
+            #~ - libhiredis-dev
+#~ #            - libdbi0-dev # TODO: waiting for whitelisting
+            #~ - libssl-dev
+            #~ - libjson0-dev
+            #~ - libwrap0-dev
+            #~ - libpcre3-dev
+            #~ - libcap-dev
+            #~ - libesmtp-dev
+            #~ - libssl1.0.0
+            #~ - libgeoip-dev
+            #~ - sqlite3
+            #~ - libdbd-sqlite3
+#~ #            - libriemann-client-dev # TODO: compile
+            #~ - libprotobuf-c0-dev
+            #~ - openjdk-7-jdk
+            #~ - gradle
+            #~ - autoconf-archive
+#~ #            - libsystemd-journal-dev # TODO: waiting for whitelisting
+#~ #            - libsystemd-daemon-dev # TODO: waiting for whitelisting
+      #~ install:
+#~ #        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
+        #~ - cat /etc/apt/sources.list
+        #~ - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        #~ - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          #~ sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        #~ - sudo apt-get update -qq
+        #~ - sudo apt-get install --force-yes -qq
+           #~ libdbi0-dev
+           #~ libsystemd-journal-dev
+           #~ libsystemd-daemon-dev
+           #~ libriemann-client-dev
+           #~ # gradle-2.2.1
+        #~ - sudo pip install -r requirements.txt
+    #~ # HACK
+    #~ # --keep-going
+        #~ # to make error messages more readable on error
+#~ #        --disable-redis
 script:
   - export PATH=/usr/lib/ccache:$PATH;
     ccache -z;
