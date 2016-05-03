@@ -134,32 +134,23 @@ tf_num_mod(LogMessage *msg, gint argc, GString *argv[], GString *result)
 TEMPLATE_FUNCTION_SIMPLE(tf_num_mod);
 
 
-static GString *
-_make_gstring_buffer(const LogTemplateInvokeArgs *args)
-{
-  if (args->bufs->len == 0)
-    g_ptr_array_add(args->bufs, g_string_sized_new(64));
-
-  return (GString *) g_ptr_array_index(args->bufs, 0);
-}
-
 static gboolean
 _tf_num_parse_arg_with_message(const TFSimpleFuncState *state,
                                LogMessage *message,
                                const LogTemplateInvokeArgs *args,
                                gint64 *number)
 {
-  GString *formatted_template_result = _make_gstring_buffer(args);
+  GString *formatted_template = log_template_invoke_args_get_gstring_buffer(args, 64);
   gint on_error = args->opts->on_error;
 
   log_template_format(state->argv[0], message, args->opts, args->tz,
-    args->seq_num, args->context_id, formatted_template_result);
+    args->seq_num, args->context_id, formatted_template);
 
-  if (!parse_number_with_suffix(formatted_template_result->str, number))
+  if (!parse_number_with_suffix(formatted_template->str, number))
     {
       if (!(on_error & ON_ERROR_SILENT))
         msg_error("Parsing failed, template function's argument is not a number",
-                  evt_tag_str("arg", formatted_template_result->str));
+                  evt_tag_str("arg", formatted_template->str));
       return FALSE;
     }
 
