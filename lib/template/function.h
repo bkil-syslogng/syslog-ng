@@ -52,6 +52,16 @@ typedef struct _LogTemplateInvokeArgs
   const gchar *context_id;
 } LogTemplateInvokeArgs;
 
+static inline GString *
+log_template_invoke_args_get_gstring_buffer(const LogTemplateInvokeArgs *args,
+                                            gsize initial_capacity)
+{
+  if (args->bufs->len == 0)
+    g_ptr_array_add(args->bufs, g_string_sized_new(initial_capacity));
+
+  return (GString *) g_ptr_array_index(args->bufs, 0);
+}
+
 typedef struct _LogTemplateFunction LogTemplateFunction;
 struct _LogTemplateFunction
 {
