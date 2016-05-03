@@ -194,7 +194,8 @@ assert_template_format_with_context(const gchar *template, const gchar *expected
 }
 
 void
-assert_template_format_with_context_msgs(const gchar *template, const gchar *expected, LogMessage **msgs, gint num_messages)
+assert_template_format_with_context_msgs(const gchar *template, const gchar *expected,
+                                         LogMessage **msgs, gint num_messages)
 {
   LogTemplate *templ = compile_template(template, FALSE);
   if (!templ)
