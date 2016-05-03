@@ -21,7 +21,7 @@
  *
  */
 
-typedef gboolean (*extremum_func)(gint64, gint64);
+typedef gboolean (*ExtremumFunc)(gint64, gint64);
 
 static gboolean
 tf_num_parse(gint argc, GString *argv[],
@@ -224,7 +224,7 @@ _tf_num_get_first_valid_arg(const TFSimpleFuncState *state,
 static gboolean
 _tf_num_extremum(const TFSimpleFuncState *state,
                  const LogTemplateInvokeArgs *args,
-                 extremum_func extremum_compare, gint64 *extremum)
+                 ExtremumFunc extremum_compare, gint64 *extremum)
 {
   gint64 number;
 
