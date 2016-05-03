@@ -175,7 +175,7 @@ tf_num_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent,
   if (argc != 2)
     {
       g_set_error(error, LOG_TEMPLATE_ERROR, LOG_TEMPLATE_ERROR_COMPILE,
-        "Template function requires only one argument");
+        "$(%s) requires only one argument", argv[0]);
       return FALSE;
     }
 
