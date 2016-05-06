@@ -35,29 +35,18 @@ before_cache:
 addons:
         apt:
           packages:
-            - wget
-            - ccache
-            - pkg-config
-            - flex
-            - bison
             - xsltproc
             - docbook-xsl
             - libevtlog-dev
             - libnet1-dev
-            - libglib2.0-dev
             - libhiredis-dev
-            - libssl-dev
             - libjson0-dev
             - libwrap0-dev
-            - libpcre3-dev
             - libcap-dev
             - libesmtp-dev
-            - libssl1.0.0
             - libgeoip-dev
-            - sqlite3
       #      - libriemann-client-dev # TODO: compile
-            - libprotobuf-c0-dev
-            - openjdk-7-jdk
+            - protobuf-c-compiler
             - strace
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - autoconf-archive
