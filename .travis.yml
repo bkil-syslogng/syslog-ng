@@ -72,6 +72,7 @@ install:
         - . scripts/get-gradle.sh || exit $?
         - find $HOME/.local
         - export GRADLE_OPTS="-Dorg.gradle.daemon=true" # -Dorg.gradle.parallel=true
+        - export GRADLE_CMDLINE="--no-color --stacktrace" # --quiet
 after_script:
         - ccache -s
 
