@@ -65,7 +65,8 @@ addons:
 #            - libsystemd-daemon-dev # TODO: compile
 install:
         - export PATH=$HOME/.local/bin:$PATH;
-          export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$PKG_CONFIG_PATH;
+          SLNG="$HOME/install/syslog-ng"
+          export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
       #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
         - echo "max_size = 150M" > ~/.ccache/ccache.conf
         - if [ "$CC" = "clang" ]; then
@@ -90,13 +91,14 @@ install:
           fi; fi;
           dpkg -l libdbi1 && exit 1;
           dpkg -l libdbd-sqlite3 && exit 1;
+          OURDBD="$SLNG/lib/dbd";
           if ! pkg-config --exists "dbi >= 0.9.0"; then
             git clone --quiet --branch libdbi-0.9.0
               git://git.code.sf.net/p/libdbi/libdbi &&
             cd libdbi &&
             {
              ./autogen.sh &&
-             ./configure --prefix=$HOME/.local/
+             ./configure --prefix="$SLNG"
                --disable-docs --disable-dependency-tracking &&
              make -j install-exec;
              S=$?;
@@ -105,7 +107,7 @@ install:
              [ $S -eq 0 ] || exit 1;
             };
           fi;
-          if [ ! -d "$HOME/install/syslog-ng/lib/dbd" ]; then
+          if [ ! -d "$OURDBD" ]; then
             OPWD="$PWD";
             mkdir -p "$HOME/.local/deps" || exit 1;
             cd "$HOME/.local/deps" || exit 1;
@@ -118,12 +120,11 @@ install:
               sed -i "s~^ac_dbi_libdir=\"no\"$~\# & \# syslog-ng HACK~" configure.in || exit 1;
               ./autogen.sh || exit 1;
             fi;
-            find $HOME/.local;
             if [ ! -f Makefile ]; then
               DBIINC="`pkg-config --variable=includedir dbi`" || exit 1;
               DBILIB="`pkg-config --variable=libdir dbi`" || exit 1;
               [ -n "$DBILIB" ] || exit 1;
-              ./configure --prefix=$HOME/install/syslog-ng --with-sqlite3
+              ./configure --prefix="$SLNG" --with-sqlite3
                 --with-dbi-libdir="$DBILIB"
                 --with-dbi-incdir="$DBIINC/.."
                 --disable-docs --disable-dependency-tracking || exit 1;
@@ -131,6 +132,7 @@ install:
             make -j install-exec || exit 1;
             cd "$OPWD";
           fi;
+          find $HOME/.local;
           if ! pkg-config --exists "riemann-client >= 1.6.0"; then
             git clone https://github.com/algernon/riemann-c-client.git || exit 1;
             cd riemann-c-client || exit 1;
