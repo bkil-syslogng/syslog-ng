@@ -4,11 +4,11 @@ build_dbi() {
   dpkg -l libdbi1 && exit 1
   dpkg -l libdbd-sqlite3 && exit 1
 
-  build_libdbi || exit 1
-  build_libdbd || exit 1
+  build_dbi_core || exit 1
+  build_dbd || exit 1
 }
 
-build_libdbi() {
+build_dbi_core() {
   if ! pkg-config --exists "dbi >= 0.9.0"; then
     OPWD="$PWD"
     mkdir -p "$SLNG_CACHE/deps" || exit 1
@@ -34,7 +34,7 @@ build_libdbi() {
   fi
 }
 
-build_libdbd() {
+build_dbd() {
   if [ ! -d "$SLNG/lib/dbd" ]; then
     local OPWD="$PWD"
     mkdir -p "$SLNG_CACHE/deps" || exit 1
