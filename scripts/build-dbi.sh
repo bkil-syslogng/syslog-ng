@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 build_dbi() {
   dpkg -l libdbi1 && exit 1

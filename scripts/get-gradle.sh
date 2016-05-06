@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 get_gradle() {
   export GRADLE_HOME=$SLNG_CACHE/gradle-2.9
