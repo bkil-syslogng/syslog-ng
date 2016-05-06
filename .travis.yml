@@ -46,6 +46,7 @@ addons:
             - libesmtp-dev
             - libgeoip-dev
       #      - libriemann-client-dev # TODO: compile
+            - libprotobuf-c0-dev
             - protobuf-c-compiler
             - strace
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
