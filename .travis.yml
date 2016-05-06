@@ -189,7 +189,7 @@ script:
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
       make install &&
-      ./scripts/strace_func_test.sh || exit $?;
+      ./scripts/strace-func-test.sh || exit $?;
     else
       true;
     fi
