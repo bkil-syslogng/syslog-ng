@@ -189,11 +189,11 @@ script:
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
       make install &&
-      make func-test V=1 || exit $?
-#      ./scripts/strace-func-test.sh || exit $?
+      make func-test V=1 || exit $?;
     else
       true;
     fi
+#      ./scripts/strace-func-test.sh || exit $?
 branches:
   except:
     - /wip/
