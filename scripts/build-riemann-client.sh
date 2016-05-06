@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
 build_riemann_client() {
-  build_protobufc || exit 1
+#  build_protobufc || exit 1
   build_riemann_client_core || exit 1
 }
 
