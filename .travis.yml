@@ -35,24 +35,23 @@ before_cache:
 addons:
         apt:
           packages:
-            - xsltproc
+            - autoconf-archive
             - docbook-xsl
-            - libevtlog-dev
-            - libnet1-dev
-            - libhiredis-dev
-            - libjson0-dev
-            - libwrap0-dev
+      #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
             - libcap-dev
             - libesmtp-dev
+            - libevtlog-dev
             - libgeoip-dev
-      #      - libriemann-client-dev # TODO: compile
+            - libhiredis-dev
+            - libjson0-dev
+            - libnet1-dev
             - libprotobuf-c0-dev
-            - protobuf-c-compiler
-            - strace
-      #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
-            - autoconf-archive
 #            - libsystemd-journal-dev # TODO: compile
 #            - libsystemd-daemon-dev # TODO: compile
+            - libwrap0-dev
+            - protobuf-c-compiler
+            - strace
+            - xsltproc
 install:
         - export SLNG_CACHE="$HOME/.local"
           export SLNG="$HOME/install/syslog-ng";
