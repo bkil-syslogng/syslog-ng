@@ -93,19 +93,23 @@ install:
           dpkg -l libdbd-sqlite3 && exit 1;
           OURDBD="$SLNG/lib/dbd";
           if ! pkg-config --exists "dbi >= 0.9.0"; then
-            git clone --quiet --branch libdbi-0.9.0
-              git://git.code.sf.net/p/libdbi/libdbi &&
-            cd libdbi &&
-            {
-             ./autogen.sh &&
+            OPWD="$PWD";
+            mkdir -p "$HOME/.local/deps" || exit 1;
+            cd "$OPWD";
+            if [ ! -d "libdbi" ]; then
+              git clone --quiet --branch libdbi-0.9.0
+                git://git.code.sf.net/p/libdbi/libdbi || exit 1;
+            fi;
+            cd libdbi || exit 1;
+            if [ ! -f configure ]; then
+             ./autogen.sh || exit 1;
+            fi;
+            if [ ! -f Makefile ]; then
              ./configure --prefix="$SLNG"
-               --disable-docs --disable-dependency-tracking &&
-             make -j install-exec;
-             S=$?;
-             cd .. &&
-             rm -Rf libdbi;
-             [ $S -eq 0 ] || exit 1;
-            };
+               --disable-docs --disable-dependency-tracking || exit 1;
+            fi
+            make -j install-exec || exit 1;
+            cd "$OPWD";
           fi;
           if [ ! -d "$OURDBD" ]; then
             OPWD="$PWD";
