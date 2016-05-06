@@ -71,6 +71,7 @@ install:
         - ./scripts/build-riemann-client.sh || exit $?
         - . scripts/get-gradle.sh || exit $?
         - find $HOME/.local
+        - export GRADLE_OPTS="-Dorg.gradle.parallel=true -Dorg.gradle.daemon=true"
 after_script:
         - ccache -s
 
