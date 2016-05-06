@@ -65,7 +65,7 @@ addons:
 #            - libsystemd-daemon-dev # TODO: compile
 install:
         - export PATH=$HOME/.local/bin:$PATH;
-          SLNG="$HOME/install/syslog-ng"
+          export SLNG="$HOME/install/syslog-ng";
           export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
       #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
         - echo "max_size = 150M" > ~/.ccache/ccache.conf
