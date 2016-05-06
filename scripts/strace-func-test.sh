@@ -1,8 +1,7 @@
 #!/bin/sh -x
 
 strace_func_test() {
-  printf '
-    #!/bin/bash\n
+  printf '#!/bin/bash\n
     '"$HOME"'/install/syslog-ng/sbin/syslog-ng "$@" &
     PID=$!;
     trap "kill --signal 15 $PID" 15;
