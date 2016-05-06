@@ -64,9 +64,10 @@ addons:
 #            - libsystemd-journal-dev # TODO: compile
 #            - libsystemd-daemon-dev # TODO: compile
 install:
-        - export PATH=$HOME/.local/bin:$PATH;
+        - export SLNG_CACHE="$HOME/.local"
           export SLNG="$HOME/install/syslog-ng";
-          export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
+          export PATH="$SLNG_CACHE"/bin:$PATH;
+          export PKG_CONFIG_PATH=$SLNG_CACHE/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
       #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
         - echo "max_size = 150M" > ~/.ccache/ccache.conf
         - if [ "$CC" = "clang" ]; then
@@ -76,84 +77,11 @@ install:
           # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
       #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
       #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
-        - pip install --user -r requirements.txt;
-          if false; then
-          if ! pkg-config --exists eventlog; then
-            apt-get source eventlog &&
-            cd eventlog-* &&
-            {
-              ./autogen.sh &&
-              ./configure --prefix=$HOME/.local/ &&
-              make -j install &&
-              cd .. &&
-              rm -R eventlog* ;
-            };
-          fi; fi;
-          dpkg -l libdbi1 && exit 1;
-          dpkg -l libdbd-sqlite3 && exit 1;
-          OURDBD="$SLNG/lib/dbd";
-          if ! pkg-config --exists "dbi >= 0.9.0"; then
-            OPWD="$PWD";
-            mkdir -p "$HOME/.local/deps" || exit 1;
-            cd "$OPWD";
-            if [ ! -d "libdbi" ]; then
-              git clone --quiet --branch libdbi-0.9.0
-                git://git.code.sf.net/p/libdbi/libdbi || exit 1;
-            fi;
-            cd libdbi || exit 1;
-            if [ ! -f configure ]; then
-             ./autogen.sh || exit 1;
-            fi;
-            if [ ! -f Makefile ]; then
-             ./configure --prefix="$SLNG"
-               --disable-docs --disable-dependency-tracking || exit 1;
-            fi
-            make -j install-exec || exit 1;
-            cd "$OPWD";
-          fi;
-          if [ ! -d "$OURDBD" ]; then
-            OPWD="$PWD";
-            mkdir -p "$HOME/.local/deps" || exit 1;
-            cd "$HOME/.local/deps" || exit 1;
-            if [ ! -d "libdbi-drivers" ]; then
-              git clone --quiet --branch libdbi-drivers-0.9.0
-                git://git.code.sf.net/p/libdbi-drivers/libdbi-drivers || exit 1;
-            fi;
-            cd libdbi-drivers || exit 1;
-            if [ ! -f configure ]; then
-              sed -i "s~^ac_dbi_libdir=\"no\"$~\# & \# syslog-ng HACK~" configure.in || exit 1;
-              ./autogen.sh || exit 1;
-            fi;
-            if [ ! -f Makefile ]; then
-              DBIINC="`pkg-config --variable=includedir dbi`" || exit 1;
-              DBILIB="`pkg-config --variable=libdir dbi`" || exit 1;
-              [ -n "$DBILIB" ] || exit 1;
-              ./configure --prefix="$SLNG" --with-sqlite3
-                --with-dbi-libdir="$DBILIB"
-                --with-dbi-incdir="$DBIINC/.."
-                --disable-docs --disable-dependency-tracking || exit 1;
-            fi;
-            make -j install-exec || exit 1;
-            cd "$OPWD";
-          fi;
-          find $HOME/.local;
-          if ! pkg-config --exists "riemann-client >= 1.6.0"; then
-            git clone https://github.com/algernon/riemann-c-client.git || exit 1;
-            cd riemann-c-client || exit 1;
-            autoreconf -i || exit 1;
-            ./configure  --prefix=$HOME/.local/
-              --disable-dependency-tracking || exit 1;
-            make install || exit 1;
-          fi;
-        - export GRADLE_HOME=$HOME/.local/gradle-2.9;
-          export PATH=$GRADLE_HOME/bin:$PATH;
-          if ! which gradle; then
-            wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip &&
-            {
-              unzip gradle-2.9-bin.zip -d $HOME/.local/ &&
-              rm -v gradle-2.9-bin.zip;
-            };
-          fi
+        - pip install --user -r requirements.txt
+        - ./scripts/build-dbi.sh || exit $?
+        - ./scripts/build-riemann-client.sh || exit $?
+        - . scripts/get-gradle.sh || exit $?
+        - find $HOME/.local
 after_script:
         - ccache -s
 
@@ -197,7 +125,7 @@ matrix:
             #~ - libnet1-dev
             #~ - libglib2.0-dev
             #~ - libhiredis-dev
-#~ #            - libdbi0-dev # TODO: waiting for whitelisting
+            #~ - libdbi-dev
             #~ - libssl-dev
             #~ - libjson0-dev
             #~ - libwrap0-dev
@@ -266,29 +194,12 @@ script:
       --enable-all-modules
       --enable-manpages
       --with-docbook-dir=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-      --prefix=$HOME/install/syslog-ng || return $?;
+      --prefix="$SLNG" || return $?;
     if [ "$TEST" = "distcheck" ]; then
       make distcheck V=1;
     elif [ "$TEST" = "func-test" ]; then
       make install &&
-      {
-        LD_LIBRARY_PATH2="$HOME/.local/lib:$LD_LIBRARY_PATH";
-
-        printf '#!/bin/bash\n
-         '"$HOME"'/install/syslog-ng/sbin/syslog-ng "$@" &
-         PID=$!;
-         trap "kill --signal 15 $PID" 15;
-         exec strace -s 64 -o '"$PWD"'/strace.log -f -p $PID;
-         \n' > "$PWD"/x.sh &&
-        chmod +x "$PWD"/x.sh &&
-        SYSLOG_NG_BINARY="$PWD"/x.sh
-         make func-test V=1;
-        S=$?;
-        if [ $S != 0 ]; then
-         cat strace.log;
-         exit $S;
-        fi;
-      };
+      ./scripts/strace_func_test.sh || exit $?;
     else
       true;
     fi
