@@ -226,8 +226,6 @@ _build_uri_from_legacy_options(MongoDBDestDriver *self)
       return FALSE;
 
     self->uri_str = g_string_new("mongodb://");
-    if (!self->uri_str)
-      return FALSE;
 
     if (self->user && self->password)
       {
