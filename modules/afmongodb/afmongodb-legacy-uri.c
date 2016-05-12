@@ -228,9 +228,7 @@ _build_uri_from_legacy_options(MongoDBDestDriver *self)
     self->uri_str = g_string_new("mongodb://");
 
     if (self->user && self->password)
-      {
-        g_string_append_printf(self->uri_str, "%s:%s@", self->user, self->password);
-      }
+      g_string_append_printf(self->uri_str, "%s:%s@", self->user, self->password);
 
     if (!self->recovery_cache)
       {
@@ -296,4 +294,3 @@ afmongodb_dd_free_legacy(MongoDBDestDriver *self)
   g_list_free_full(self->recovery_cache, (GDestroyNotify)&_free_host_port);
   self->recovery_cache = NULL;
 }
-
