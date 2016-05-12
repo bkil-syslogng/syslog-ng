@@ -148,7 +148,7 @@ _worker_disconnect(LogThrDestDriver *s)
 }
 
 static gboolean
-_dd_connect(MongoDBDestDriver *self, gboolean reconnect)
+_connect(MongoDBDestDriver *self, gboolean reconnect)
 {
   if (!self->client)
     {
@@ -377,7 +377,7 @@ _worker_insert(LogThrDestDriver *s, LogMessage *msg)
   gboolean success;
   gboolean drop_silently = self->template_options.on_error & ON_ERROR_SILENT;
 
-  if (!_dd_connect(self, TRUE))
+  if (!_connect(self, TRUE))
     return WORKER_INSERT_RESULT_NOT_CONNECTED;
 
   bson_reinit(self->bson);
@@ -479,7 +479,7 @@ _worker_thread_init(LogThrDestDriver *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  _dd_connect(self, FALSE);
+  _connect(self, FALSE);
 
   self->current_value = g_string_sized_new(256);
 
@@ -517,7 +517,7 @@ _init_value_pairs_dot_to_underscore_transformation(MongoDBDestDriver *self)
 }
 
 static gboolean
-_logpipe_init(LogPipe *s)
+_init(LogPipe *s)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
@@ -536,7 +536,7 @@ _logpipe_init(LogPipe *s)
 }
 
 static void
-_logpipe_free(LogPipe *d)
+_free(LogPipe *d)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
@@ -583,8 +583,8 @@ afmongodb_dd_new(GlobalConfig *cfg)
 
   log_threaded_dest_driver_init_instance(&self->super, cfg);
 
-  self->super.super.super.super.init = _logpipe_init;
-  self->super.super.super.super.free_fn = _logpipe_free;
+  self->super.super.super.super.init = _init;
+  self->super.super.super.super.free_fn = _free;
   self->super.queue_method = _logthrdest_queue_method;
 
   self->super.worker.thread_init = _worker_thread_init;
