@@ -178,11 +178,13 @@ _test_legacy_correct(void)
 
   afmongodb_dd_set_user(mongodb, "user");
   afmongodb_dd_set_password(mongodb, "password");
-  _expect_uri_in_log("user_password", "user:password@127.0.0.1:27017/syslog" SAFEOPTS, "syslog", "messages");
+  _expect_uri_in_log("user_password", "user:password@127.0.0.1:27017/syslog" SAFEOPTS,
+                     "syslog", "messages");
 
   afmongodb_dd_set_collection(mongodb, "messages2");
   afmongodb_dd_set_safe_mode(mongodb, FALSE);
-  _expect_uri_in_log("collection_safe_mode", "127.0.0.1:27017/syslog" UNSAFEOPTS, "syslog", "messages2");
+  _expect_uri_in_log("collection_safe_mode", "127.0.0.1:27017/syslog" UNSAFEOPTS,
+                     "syslog", "messages2");
 }
 
 static void
