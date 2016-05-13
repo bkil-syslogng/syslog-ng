@@ -52,8 +52,8 @@ afmongodb_dd_set_user(LogDriver *d, const gchar *user)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once(
-      "WARNING: Using username() option is deprecated in mongodb driver, please use uri() instead");
+  msg_warning_once("WARNING: Using username() option is deprecated in mongodb driver,"
+      " please use uri() instead");
 
   g_free(self->user);
   self->user = g_strdup(user);
@@ -65,8 +65,8 @@ afmongodb_dd_set_password(LogDriver *d, const gchar *password)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once(
-      "WARNING: Using password() option is deprecated in mongodb driver, please use uri() instead");
+  msg_warning_once("WARNING: Using password() option is deprecated in mongodb driver,"
+      " please use uri() instead");
 
   g_free(self->password);
   self->password = g_strdup(password);
@@ -130,8 +130,8 @@ afmongodb_dd_set_database(LogDriver *d, const gchar *database)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once(
-      "WARNING: Using database() option is deprecated in mongodb driver, please use uri() instead");
+  msg_warning_once("WARNING: Using database() option is deprecated in mongodb driver,"
+      " please use uri() instead");
 
   g_free(self->db);
   self->db = g_strdup(database);
@@ -143,8 +143,8 @@ afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state)
 {
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
-  msg_warning_once(
-      "WARNING: Using safe_mode() option is deprecated in mongodb driver, please use uri() instead");
+  msg_warning_once("WARNING: Using safe_mode() option is deprecated in mongodb driver,"
+      " please use uri() instead");
 
   self->safe_mode = state;
   self->is_legacy = TRUE;
