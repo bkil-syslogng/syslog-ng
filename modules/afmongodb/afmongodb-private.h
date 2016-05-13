@@ -28,6 +28,10 @@
 #include "string-list.h"
 #include "value-pairs/value-pairs.h"
 
+#if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
+#include "host-list.h"
+#endif
+
 typedef struct _MongoDBDestDriver
 {
   LogThrDestDriver super;
@@ -55,7 +59,7 @@ typedef struct _MongoDBDestDriver
 
   /* Writer-only stuff */
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
-  GList *recovery_cache;
+  HostList *recovery_cache;
   gboolean is_legacy;
   gchar *db;
 #endif
