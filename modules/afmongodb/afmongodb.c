@@ -61,8 +61,9 @@ afmongodb_dd_set_uri(LogDriver *d, const gchar *uri)
   MongoDBDestDriver *self = (MongoDBDestDriver *)d;
 
   if (self->uri_str)
-    g_string_free(self->uri_str, TRUE);
-  self->uri_str = g_string_new(uri);
+    g_string_assign(self->uri_str, uri);
+  else
+    self->uri_str = g_string_new(uri);
 }
 
 void
