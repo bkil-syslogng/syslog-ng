@@ -22,6 +22,7 @@
 
 #include "afmongodb-legacy-uri.h"
 #include "afmongodb-legacy-private.h"
+#include "host-list.h"
 
 #define DEFAULTHOST "127.0.0.1"
 #define SOCKET_TIMEOUT_FOR_MONGO_CONNECTION_IN_MILLISECS 60000
@@ -64,27 +65,6 @@ _parse_addr(const char *str, char **host, gint *port)
       return FALSE;
     }
   g_free(proto_str);
-  return TRUE;
-}
-
-static void
-_free_host_port(gpointer data)
-{
-  MongoDBHostPort *hp = (MongoDBHostPort *)data;
-  g_free(hp->host);
-  hp->host = NULL;
-  g_free(hp);
-}
-
-static gboolean
-_append_host(GList **list, const char *host, gint port)
-{
-  if (!list)
-    return FALSE;
-  MongoDBHostPort *hp = g_new0(MongoDBHostPort, 1);
-  hp->host = g_strdup(host);
-  hp->port = port;
-  *list = g_list_append(*list, hp);
   return TRUE;
 }
 
@@ -131,7 +111,7 @@ _append_legacy_servers(MongoDBDestDriver *self)
                               evt_tag_str("driver", self->super.super.super.id));
                   continue;
                 }
-              _append_host(&self->recovery_cache, host, port);
+              host_list_append(&self->recovery_cache, host, port);
               msg_verbose("Added MongoDB server seed",
                           evt_tag_str("host", host),
                           evt_tag_int("port", port),
@@ -143,7 +123,7 @@ _append_legacy_servers(MongoDBDestDriver *self)
         {
           gchar *localhost = g_strdup_printf(DEFAULTHOST ":%d", MONGOC_DEFAULT_PORT);
           self->servers = g_list_append(NULL, localhost);
-          _append_host(&self->recovery_cache, DEFAULTHOST, MONGOC_DEFAULT_PORT);
+          host_list_append(&self->recovery_cache, DEFAULTHOST, MONGOC_DEFAULT_PORT);
         }
 
       if (!_parse_addr(g_list_nth_data(self->servers, 0), &self->address, &self->port))
@@ -163,46 +143,52 @@ _append_legacy_servers(MongoDBDestDriver *self)
                     evt_tag_str("driver", self->super.super.super.id));
           return FALSE;
         }
-      _append_host(&self->recovery_cache, self->address, 0);
+      host_list_append(&self->recovery_cache, self->address, 0);
+    }
+  return TRUE;
+}
+
+typedef struct _AppendServerState {
+  GString *uri_str;
+  gboolean *have_uri;
+  gboolean have_path;
+} AppendServerState;
+
+static gboolean
+_append_server(gpointer user_data, const char *host, gint port)
+{
+  AppendServerState *state = (AppendServerState *)user_data;
+  if (state->have_path || *state->have_uri)
+    g_string_append_printf(state->uri_str, ",");
+  if (port)
+    {
+      *state->have_uri = TRUE;
+      if (state->have_path)
+        {
+          msg_warning("Cannot specify both a domain socket and address");
+          return FALSE;
+        }
+      g_string_append_printf(state->uri_str, "%s:%d", host, port);
+    }
+  else
+    {
+      state->have_path = TRUE;
+      if (*state->have_uri)
+        {
+          msg_warning("Cannot specify both a domain socket and address");
+          return FALSE;
+        }
+      g_string_append_printf(state->uri_str, "%s", host);
     }
   return TRUE;
 }
 
 static gboolean
-_append_servers(GString *uri_str, const GList *recovery_cache, gboolean *have_uri)
+_append_servers(GString *uri_str, const HostList *host_list, gboolean *have_uri)
 {
-  const GList *iterator = recovery_cache;
   *have_uri = FALSE;
-  gboolean have_path = FALSE;
-  do
-    {
-      const MongoDBHostPort *hp = (const MongoDBHostPort *)iterator->data;
-      if (hp->port)
-        {
-          *have_uri = TRUE;
-          if (have_path)
-            {
-              msg_warning("Cannot specify both a domain socket and address");
-              return FALSE;
-            }
-          g_string_append_printf(uri_str, "%s:%d", hp->host, hp->port);
-        }
-      else
-        {
-          have_path = TRUE;
-          if (*have_uri)
-            {
-              msg_warning("Cannot specify both a domain socket and address");
-              return FALSE;
-            }
-          g_string_append_printf(uri_str, "%s", hp->host);
-        }
-      iterator = iterator->next;
-      if (iterator)
-        g_string_append_printf(uri_str, ",");
-    }
-  while (iterator);
-  return TRUE;
+  AppendServerState state = {uri_str, have_uri, FALSE};
+  return host_list_iterate(host_list, _append_server, &state);
 }
 
 static gboolean
@@ -291,6 +277,6 @@ afmongodb_dd_free_legacy(MongoDBDestDriver *self)
   g_free(self->password);
   g_free(self->address);
   string_list_free(self->servers);
-  g_list_free_full(self->recovery_cache, (GDestroyNotify)&_free_host_port);
+  host_list_free(self->recovery_cache);
   self->recovery_cache = NULL;
 }
