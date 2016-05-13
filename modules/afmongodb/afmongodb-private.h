@@ -23,6 +23,7 @@
 #ifndef AFMONGODB_PRIVATE_H_
 #define AFMONGODB_PRIVATE_H_
 
+#include "syslog-ng.h"
 #include "mongoc.h"
 #include "logthrdestdrv.h"
 #include "string-list.h"
