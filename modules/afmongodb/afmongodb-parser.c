@@ -29,9 +29,9 @@ extern int afmongodb_debug;
 int afmongodb_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
 static CfgLexerKeyword afmongodb_keywords[] = {
-  { "mongodb",			KW_MONGODB },
-  { "uri",                      KW_URI },
-  { "collection",		KW_COLLECTION },
+  { "mongodb", KW_MONGODB },
+  { "uri", KW_URI },
+  { "collection", KW_COLLECTION },
 #if SYSLOG_NG_ENABLE_LEGACY_MONGODB_OPTIONS
   { "servers",                  KW_SERVERS, KWS_OBSOLETE, "Use the uri() option instead of servers()" },
   { "database",			KW_DATABASE, KWS_OBSOLETE, "Use the uri() option instead of database()" },
@@ -42,7 +42,7 @@ static CfgLexerKeyword afmongodb_keywords[] = {
   { "port",                     KW_PORT, KWS_OBSOLETE, "Use the uri() option instead of host() and port()" },
   { "path",                     KW_PATH, KWS_OBSOLETE, "Use the uri() option instead of path()" },
 #endif
-  { NULL }
+  { }
 };
 
 CfgParser afmongodb_parser =
