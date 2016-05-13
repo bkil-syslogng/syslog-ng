@@ -23,6 +23,7 @@
 #ifndef AFMONGODB_LEGACY_URI_H_
 #define AFMONGODB_LEGACY_URI_H_
 
+#include "syslog-ng.h"
 #include "afmongodb-private.h"
 
 void afmongodb_dd_init_legacy(MongoDBDestDriver *self);
