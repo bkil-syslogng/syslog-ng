@@ -56,7 +56,7 @@ host_list_append(HostList **list, const char *host, gint port)
 }
 
 gboolean
-host_list_iterate(const HostList *host_list, host_list_processor processor, gpointer user_data)
+host_list_iterate(const HostList *host_list, HostListProcessor processor, gpointer user_data)
 {
   for (const GList *iterator = host_list; iterator; iterator = iterator->next)
     {
