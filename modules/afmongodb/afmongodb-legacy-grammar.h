@@ -23,6 +23,7 @@
 #ifndef AFMONGODB_LEGACY_GRAMMAR_H_
 #define AFMONGODB_LEGACY_GRAMMAR_H_
 
+#include "syslog-ng.h"
 #include "driver.h"
 
 gboolean afmongodb_dd_validate_socket_combination(LogDriver *d);

@@ -23,6 +23,7 @@
 #ifndef AFMONGODB_LEGACY_PRIVATE_H_
 #define AFMONGODB_LEGACY_PRIVATE_H_
 
+#include "syslog-ng.h"
 #include "afmongodb-private.h"
 
 #define MONGO_CONN_LOCAL -1
