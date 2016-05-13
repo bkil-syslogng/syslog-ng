@@ -252,8 +252,8 @@ afmongodb_dd_create_uri_from_legacy(MongoDBDestDriver *self)
 
   if (self->uri_str && self->is_legacy)
     {
-      msg_error("Error: either specify a MongoDB URI (and optional collection) or only legacy options",
-                evt_tag_str("driver", self->super.super.super.id));
+      msg_error("Error: either specify a MongoDB URI (and optional collection)"
+          " or only legacy options", evt_tag_str("driver", self->super.super.super.id));
       return FALSE;
     }
   else if (self->is_legacy)
