@@ -23,6 +23,7 @@
 #ifndef HOST_LIST_H_
 #define HOST_LIST_H_
 
+#include "syslog-ng.h"
 #include <glib.h>
 
 typedef GList HostList;
