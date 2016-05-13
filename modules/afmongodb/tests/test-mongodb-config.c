@@ -96,7 +96,8 @@ _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, con
 {
   GString *pattern = g_string_sized_new(0);
   g_string_append_printf(pattern,
-                         "Initializing MongoDB destination; uri='mongodb://%s', db='%s', collection='%s'",
+                         "Initializing MongoDB destination;"
+                         " uri='mongodb://%s', db='%s', collection='%s'",
                          uri, db, coll);
   _expect_text_in_log(testcase, pattern->str);
   g_string_free(pattern, TRUE);
@@ -130,7 +131,8 @@ _test_uri_error(void)
   _expect_error_in_log("invalid_uri", "Error parsing MongoDB URI; uri='INVALID-URI'");
 
   afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.1:27017/");
-  _expect_error_in_log("missing_db", "Missing DB name from MongoDB URI; uri='mongodb://127.0.0.1:27017/'");
+  _expect_error_in_log("missing_db", "Missing DB name from MongoDB URI;"
+                       " uri='mongodb://127.0.0.1:27017/'");
 }
 
 static void
