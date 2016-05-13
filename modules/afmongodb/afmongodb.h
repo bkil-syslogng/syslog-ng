@@ -24,6 +24,7 @@
 #ifndef AFMONGODB_H_INCLUDED
 #define AFMONGODB_H_INCLUDED
 
+#include "syslog-ng.h"
 #include "driver.h"
 #include "value-pairs/value-pairs.h"
 
