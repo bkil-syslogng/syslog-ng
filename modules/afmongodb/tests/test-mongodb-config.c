@@ -21,6 +21,7 @@
  *
  */
 
+#include "syslog-ng.h"
 #include "testutils.h"
 #include "mainloop.h"
 #include "modules/afmongodb/afmongodb-parser.h"
