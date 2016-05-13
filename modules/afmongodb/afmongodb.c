@@ -156,7 +156,8 @@ _connect(MongoDBDestDriver *self, gboolean reconnect)
 
       if (!self->client)
         {
-          msg_error("Error creating MongoDB URI", evt_tag_str("driver", self->super.super.super.id));
+          msg_error("Error creating MongoDB URI",
+                    evt_tag_str("driver", self->super.super.super.id));
           return FALSE;
         }
     }
@@ -367,7 +368,8 @@ _worker_retry_over_message(LogThrDestDriver *s, LogMessage *msg)
       "message dropped",
       evt_tag_str("driver", self->super.super.super.id),
       evt_tag_int("number_of_retries", s->retries.max),
-      evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num, LTZ_SEND, &self->template_options));
+      evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num,
+                          LTZ_SEND, &self->template_options));
 }
 
 static worker_insert_result_t
@@ -396,8 +398,8 @@ _worker_insert(LogThrDestDriver *s, LogMessage *msg)
       if (!drop_silently)
         {
           msg_error("Failed to format message for MongoDB, dropping message",
-                    evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num, LTZ_SEND,
-                                        &self->template_options),
+                    evt_tag_value_pairs("message", self->vp, msg, self->super.seq_num,
+                                        LTZ_SEND, &self->template_options),
                     evt_tag_str("driver", self->super.super.super.id));
         }
       return WORKER_INSERT_RESULT_DROP;
@@ -409,8 +411,8 @@ _worker_insert(LogThrDestDriver *s, LogMessage *msg)
             evt_tag_str("driver", self->super.super.super.id));
 
   bson_error_t error;
-  success = mongoc_collection_insert(self->coll_obj, MONGOC_INSERT_NONE, (const bson_t *)self->bson,
-                                     NULL, &error);
+  success = mongoc_collection_insert(self->coll_obj, MONGOC_INSERT_NONE,
+                                     (const bson_t *)self->bson, NULL, &error);
   if (!success)
     {
       if (error.domain == MONGOC_ERROR_STREAM)
