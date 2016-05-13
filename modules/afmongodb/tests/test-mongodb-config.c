@@ -233,6 +233,26 @@ _test_legacy_correct(void)
   afmongodb_dd_set_safe_mode(mongodb, FALSE);
   _expect_uri_in_log("collection_safe_mode", "127.0.0.1:27017/syslog" UNSAFEOPTS,
                      "syslog", "messages2");
+
+  afmongodb_dd_set_user(mongodb, "");
+  afmongodb_dd_set_password(mongodb, "password");
+  _expect_uri_in_log("empty_user", ":password@127.0.0.1:27017/syslog" SAFEOPTS,
+                     "syslog", "messages");
+
+  afmongodb_dd_set_user(mongodb, "user");
+  afmongodb_dd_set_password(mongodb, "");
+  _expect_uri_in_log("empty_password", "user:@127.0.0.1:27017/syslog" SAFEOPTS,
+                     "syslog", "messages");
+
+  afmongodb_dd_set_user(mongodb, "");
+  afmongodb_dd_set_password(mongodb, "");
+  _expect_uri_in_log("empty_user_password", ":@127.0.0.1:27017/syslog" SAFEOPTS,
+                     "syslog", "messages");
+
+  afmongodb_dd_set_user(mongodb, "127.0.0.1:27017/syslog?dont-care=");
+  afmongodb_dd_set_password(mongodb, "");
+  _expect_uri_in_log("hijacked_user", "127.0.0.1:27017/syslog?dont-care=:@127.0.0.1:27017/syslog"
+                     SAFEOPTS, "syslog", "messages");
 }
 
 static void
@@ -259,6 +279,12 @@ _test_legacy_error(void)
   servers = g_list_append(NULL, g_strdup(""));
   afmongodb_dd_set_servers(mongodb, servers);
   _expect_error_in_log("servers_none", "Cannot parse MongoDB URI; uri=");
+
+  afmongodb_dd_set_password(mongodb, "password");
+  _expect_error_in_log("missing_user", "Neither the username, nor the password can be empty;");
+
+  afmongodb_dd_set_user(mongodb, "user");
+  _expect_error_in_log("missing_password", "Neither the username, nor the password can be empty;");
 }
 #endif
 
