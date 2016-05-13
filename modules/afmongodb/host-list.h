@@ -28,10 +28,10 @@
 
 typedef GList HostList;
 
-typedef gboolean (*host_list_processor)(gpointer user_data, const char *host, gint port);
+typedef gboolean (*HostListProcessor)(gpointer user_data, const char *host, gint port);
 
 gboolean host_list_append(HostList **list, const char *host, gint port);
-gboolean host_list_iterate(const HostList *host_list, host_list_processor processor, gpointer user_data);
+gboolean host_list_iterate(const HostList *host_list, HostListProcessor processor, gpointer user_data);
 void host_list_free(HostList *host_list);
 
 #endif
