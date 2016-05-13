@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 Balabit
+ * Copyright (c) 2016 Balabit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -20,11 +20,17 @@
  *
  */
 
-#ifndef AFMONGODB_LEGACY_PRIVATE_H_
-#define AFMONGODB_LEGACY_PRIVATE_H_
+#ifndef HOST_LIST_H_
+#define HOST_LIST_H_
 
-#include "afmongodb-private.h"
+#include <glib.h>
 
-#define MONGO_CONN_LOCAL -1
+typedef GList HostList;
+
+typedef gboolean (*host_list_processor)(gpointer user_data, const char *host, gint port);
+
+gboolean host_list_append(HostList **list, const char *host, gint port);
+gboolean host_list_iterate(const HostList *host_list, host_list_processor processor, gpointer user_data);
+void host_list_free(HostList *host_list);
 
 #endif
