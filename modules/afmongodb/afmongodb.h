@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Balabit
+ * Copyright (c) 2010-2016 Balabit
  * Copyright (c) 2010-2013 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -24,25 +24,18 @@
 #ifndef AFMONGODB_H_INCLUDED
 #define AFMONGODB_H_INCLUDED
 
+#include "syslog-ng.h"
 #include "driver.h"
 #include "value-pairs.h"
 
 LogDriver *afmongodb_dd_new(GlobalConfig *cfg);
 
-void afmongodb_dd_set_servers(LogDriver *d, GList *servers);
-void afmongodb_dd_set_host(LogDriver *d, const gchar *host);
-void afmongodb_dd_set_port(LogDriver *d, gint port);
-void afmongodb_dd_set_database(LogDriver *d, const gchar *database);
+void afmongodb_dd_set_uri(LogDriver *d, const gchar *uri);
 void afmongodb_dd_set_collection(LogDriver *d, const gchar *collection);
-void afmongodb_dd_set_user(LogDriver *d, const gchar *user);
-void afmongodb_dd_set_password(LogDriver *d, const gchar *password);
 void afmongodb_dd_set_value_pairs(LogDriver *d, ValuePairs *vp);
-void afmongodb_dd_set_safe_mode(LogDriver *d, gboolean state);
-void afmongodb_dd_set_path(LogDriver *d, const gchar *path);
-void afmongodb_dd_set_retries(LogDriver *d, gint retries);
-
-gboolean afmongodb_dd_check_address(LogDriver *d, gboolean local);
 
 LogTemplateOptions *afmongodb_dd_get_template_options(LogDriver *s);
+
+gboolean afmongodb_dd_private_uri_init(LogDriver *self);
 
 #endif
