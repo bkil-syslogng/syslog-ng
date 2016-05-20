@@ -8,6 +8,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_MACOSX_RPATH 1)
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
