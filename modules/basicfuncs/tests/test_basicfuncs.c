@@ -190,8 +190,6 @@ test_numeric_aggregate_simple(void)
         { "$(sum ${NUMBER})", "3" },
         { "$(min ${NUMBER})", "-1" },
         { "$(max ${NUMBER})", "3" },
-        { "$(mean ${NUMBER})", "1" },
-        { "$(avg ${NUMBER})", "1" },
         { "$(average ${NUMBER})", "1" },
         { }
       });
@@ -207,8 +205,6 @@ test_numeric_aggregate_invalid_values(void)
         { "$(sum ${NUMBER})", "3" },
         { "$(min ${NUMBER})", "1" },
         { "$(max ${NUMBER})", "2" },
-        { "$(mean ${NUMBER})", "1" },
-        { "$(avg ${NUMBER})", "1" },
         { "$(average ${NUMBER})", "1" },
         { }
       });
@@ -224,8 +220,6 @@ test_numeric_aggregate_full_invalid_values(void)
         { "$(sum ${NUMBER})", "" },
         { "$(min ${NUMBER})", "" },
         { "$(max ${NUMBER})", "" },
-        { "$(mean ${NUMBER})", "" },
-        { "$(avg ${NUMBER})", "" },
         { "$(average ${NUMBER})", "" },
         { }
       });
