@@ -25,6 +25,7 @@
 #include "testutils.h"
 #include "mainloop.h"
 #include "modules/afmongodb/afmongodb-parser.h"
+#include "logthrdestdrv.h"
 
 static int _tests_failed = 0;
 static GlobalConfig *test_cfg;
@@ -58,20 +59,34 @@ _free_test(void)
     }
 }
 
+typedef gboolean (*Checks)(const gchar *user_data);
+
 static void
-_expect_text_in_log(const gchar *testcase, const gchar *pattern)
+_execute(const gchar *testcase, Checks checks, const gchar *user_data)
 {
   _after_test();
 
-  testcase_begin("%s(%s, %s)", __FUNCTION__, testcase, pattern);
-  gboolean ok = assert_grabbed_messages_contain_non_fatal(pattern, "mismatch", NULL);
-  reset_grabbed_messages();
-  if (!ok)
+  testcase_begin("%s(%s, %s)", __FUNCTION__, testcase, user_data);
+  if (!checks(user_data))
     _tests_failed = 1;
+  reset_grabbed_messages();
   testcase_end();
 
   _free_test();
   _before_test();
+}
+
+
+static gboolean
+_check_expect_text_in_log(const gchar *pattern)
+{
+  return assert_grabbed_messages_contain_non_fatal(pattern, "mismatch", NULL);
+}
+
+static void
+_expect_text_in_log(const gchar *testcase, const gchar *pattern)
+{
+  _execute(testcase, _check_expect_text_in_log, pattern);
 }
 
 static void
@@ -108,6 +123,38 @@ _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, con
       _log_error("expected the subject to succeed, but it failed");
       _tests_failed = 1;
     }
+}
+
+static gboolean
+_check_persist_name(const gchar *expected_name)
+{
+  LogThrDestDriver *self = (LogThrDestDriver *)mongodb;
+  const gchar *name = self->format.persist_name(self);
+  return assert_nstring_non_fatal(name, -1, expected_name, -1, "mismatch");
+}
+
+static void
+_test_persist_name(void)
+{
+  afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.2:27018,localhost:1234/syslog"
+                       SAFEOPTS "&replicaSet=x");
+  _execute("persist", _check_persist_name, "afmongodb(127.0.0.2:27018,syslog,x,messages)");
+}
+
+static gboolean
+_check_stats_name(const gchar *expected_name)
+{
+  LogThrDestDriver *self = (LogThrDestDriver *)mongodb;
+  const gchar *name = self->format.stats_instance(self);
+  return assert_nstring_non_fatal(name, -1, expected_name, -1, "mismatch");
+}
+
+static void
+_test_stats_name(void)
+{
+  afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.2:27018,localhost:1234/syslog"
+                       SAFEOPTS "&replicaSet=x");
+  _execute("persist", _check_stats_name, "mongodb,127.0.0.2:27018,syslog,x,messages");
 }
 
 static void
@@ -177,6 +224,8 @@ main(int argc, char **argv)
 {
   _setup();
 
+  _test_persist_name();
+  _test_stats_name();
   _test_uri_correct();
   _test_uri_error();
 
