@@ -387,8 +387,9 @@ dnl ***************************************************************************
 dnl Set up CFLAGS
 
 if test "x$ac_compiler_gnu" = "xyes"; then
+        CFLAGS="${CFLAGS} -Wall"
         if test "x$enable_debug" = "xyes"; then
-                CFLAGS="${ac_cv_env_CFLAGS_value} -g"
+                CFLAGS="${ac_cv_env_CFLAGS_value} -Wall -g"
         fi
 
         if test "x$enable_gprof" = "xyes"; then
