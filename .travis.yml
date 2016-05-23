@@ -5,11 +5,11 @@ git:
 env: B=autotools
 
 install:
-  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+  - travis_retry curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
   - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq pkg-config flex bison xsltproc docbook-xsl libivykis-dev libevtlog-dev libnet1-dev libglib2.0-dev libdbi0-dev libjson0-dev libwrap0-dev libcap-dev libesmtp-dev libgeoip-dev libhiredis-dev sqlite3 libdbd-sqlite3 libriemann-client-dev gradle-2.2.1 autoconf-archive
-  - sudo pip install -r requirements.txt
+  - travis_retry sudo apt-get update -qq
+  - travis_retry sudo apt-get install -qq pkg-config flex bison xsltproc docbook-xsl libivykis-dev libevtlog-dev libnet1-dev libglib2.0-dev libdbi0-dev libjson0-dev libwrap0-dev libcap-dev libesmtp-dev libgeoip-dev libhiredis-dev sqlite3 libdbd-sqlite3 libriemann-client-dev gradle-2.2.1 autoconf-archive ninja-build
+  - travis_retry sudo pip install -r requirements.txt
 before_script:
   - ./autogen.sh
   - unset PYTHON_CFLAGS # HACK
@@ -52,8 +52,8 @@ matrix:
       script:
         - mkdir build
         - cd build
-        - cmake -DCMAKE_C_FLAGS=-Werror -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
-        - make -j install
+        - cmake -GNinja -DCMAKE_C_FLAGS=-Werror -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng ..
+        - ninja install
 
 branches:
   except:
