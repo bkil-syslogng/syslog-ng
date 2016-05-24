@@ -30,7 +30,6 @@
 static int _tests_failed = 0;
 static GlobalConfig *test_cfg;
 static LogDriver *mongodb;
-static gboolean uri_init_ok;
 
 #define SAFEOPTS "?wtimeoutMS=60000&socketTimeoutMS=60000&connectTimeoutMS=60000"
 
@@ -41,11 +40,12 @@ _before_test(void)
   mongodb = afmongodb_dd_new(test_cfg);
 }
 
-static void
+static gboolean
 _after_test(void)
 {
-  uri_init_ok = afmongodb_dd_private_uri_init(mongodb);
+  gboolean uri_init_ok = afmongodb_dd_private_uri_init(mongodb);
   stop_grabbing_messages();
+  return uri_init_ok;
 }
 
 static void
@@ -61,10 +61,10 @@ _free_test(void)
 
 typedef gboolean (*Checks)(const gchar *user_data);
 
-static void
+static gboolean
 _execute(const gchar *testcase, Checks checks, const gchar *user_data)
 {
-  _after_test();
+  gboolean uri_init_ok = _after_test();
 
   testcase_begin("%s(%s, %s)", __FUNCTION__, testcase, user_data);
   if (!checks(user_data))
@@ -74,19 +74,13 @@ _execute(const gchar *testcase, Checks checks, const gchar *user_data)
 
   _free_test();
   _before_test();
+  return uri_init_ok;
 }
-
 
 static gboolean
-_check_expect_text_in_log(const gchar *pattern)
+_execute_find_text_in_log(const gchar *pattern)
 {
   return assert_grabbed_messages_contain_non_fatal(pattern, "mismatch", NULL);
-}
-
-static void
-_expect_text_in_log(const gchar *testcase, const gchar *pattern)
-{
-  _execute(testcase, _check_expect_text_in_log, pattern);
 }
 
 static void
@@ -96,15 +90,29 @@ _log_error(const gchar *message)
 }
 
 static void
-_expect_error_in_log(const gchar *testcase, const gchar *pattern)
+_execute_correct(const gchar *testcase, Checks checks, const gchar *user_data)
 {
-  _expect_text_in_log(testcase, pattern);
+  if (!_execute(testcase, checks, user_data))
+    {
+      _log_error("expected the subject to succeed, but it failed");
+      _tests_failed = 1;
+    }
+}
 
-  if (uri_init_ok)
+static void
+_execute_failing(const gchar *testcase, Checks checks, const gchar *user_data)
+{
+  if (_execute(testcase, checks, user_data))
     {
       _log_error("expected the subject to fail, but it succeeded");
       _tests_failed = 1;
     }
+}
+
+static void
+_expect_error_in_log(const gchar *testcase, const gchar *pattern)
+{
+  _execute_failing(testcase, _execute_find_text_in_log, pattern);
 }
 
 static void
@@ -115,18 +123,12 @@ _expect_uri_in_log(const gchar *testcase, const gchar *uri, const gchar *db, con
                          "Initializing MongoDB destination;"
                          " uri='mongodb://%s', db='%s', collection='%s'",
                          uri, db, coll);
-  _expect_text_in_log(testcase, pattern->str);
+  _execute_correct(testcase, _execute_find_text_in_log, pattern->str);
   g_string_free(pattern, TRUE);
-
-  if (!uri_init_ok)
-    {
-      _log_error("expected the subject to succeed, but it failed");
-      _tests_failed = 1;
-    }
 }
 
 static gboolean
-_check_persist_name(const gchar *expected_name)
+_execute_compare_persist_name(const gchar *expected_name)
 {
   LogThrDestDriver *self = (LogThrDestDriver *)mongodb;
   const gchar *name = self->format.persist_name(self);
@@ -138,11 +140,12 @@ _test_persist_name(void)
 {
   afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.2:27018,localhost:1234/syslog"
                        SAFEOPTS "&replicaSet=x");
-  _execute("persist", _check_persist_name, "afmongodb(127.0.0.2:27018,syslog,x,messages)");
+  _execute_correct("persist", _execute_compare_persist_name,
+                   "afmongodb(127.0.0.2:27018,syslog,x,messages)");
 }
 
 static gboolean
-_check_stats_name(const gchar *expected_name)
+_execute_compare_stats_name(const gchar *expected_name)
 {
   LogThrDestDriver *self = (LogThrDestDriver *)mongodb;
   const gchar *name = self->format.stats_instance(self);
@@ -154,7 +157,8 @@ _test_stats_name(void)
 {
   afmongodb_dd_set_uri(mongodb, "mongodb://127.0.0.2:27018,localhost:1234/syslog"
                        SAFEOPTS "&replicaSet=x");
-  _execute("persist", _check_stats_name, "mongodb,127.0.0.2:27018,syslog,x,messages");
+  _execute_correct("stats", _execute_compare_stats_name,
+                   "mongodb,127.0.0.2:27018,syslog,x,messages");
 }
 
 static void
