@@ -61,6 +61,8 @@ script:
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
       if [ "$S" = "0" ]; then
+        . scripts/get-libjvm-path.sh || return $?;
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
         make func-test V=1;
       elif [ "$S" = "42" ]; then
         return $S;
