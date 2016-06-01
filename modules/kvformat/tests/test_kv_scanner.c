@@ -149,6 +149,8 @@ static void
 test_kv_scanner_stray_words_are_ignored(void)
 {
   TEST_KV_SCAN("lorem ipsum foo=bar", "foo", "bar");
+  TEST_KV_SCAN("lorem ipsum/dolor @sitamen foo=bar", "foo", "bar");
+  TEST_KV_SCAN("lorem ipsum/dolor = foo=bar\"", "", "", "foo", "bar");
   TEST_KV_SCAN("foo=bar lorem ipsum key=value some more values", "foo", "bar", "key", "value");
 }
 
@@ -171,6 +173,30 @@ test_kv_scanner_with_comma_separated_values(void)
 {
   TEST_KV_SCAN("key1=value1, key2=value2, key3=value3",
                "key1", "value1", "key2", "value2", "key3", "value3");
+}
+
+static void
+test_kv_scanner_with_comma_separated_values_and_multiple_spaces(void)
+{
+  TEST_KV_SCAN("key1=value1,   key2=value2  ,    key3=value3",
+               "key1", "value1",
+               "key2", "value2",
+               "key3", "value3");
+}
+
+static void
+test_kv_scanner_with_comma_separated_values_without_space(void)
+{
+  TEST_KV_SCAN("key1=value1,key2=value2,key3=value3",
+               "key1", "value1,key2=value2,key3=value3");
+}
+
+static void
+test_kv_scanner_tab_separated_values(void)
+{
+  TEST_KV_SCAN("key1=value1\tkey2=value2 key3=value3",
+               "key1", "value1\tkey2=value2",
+               "key3", "value3");
 }
 
 static void
@@ -206,6 +232,30 @@ test_kv_scanner_quoted_values_are_unquoted_like_c_strings(void)
   TEST_KV_SCAN("key1='\\p'", "key1", "\\p");
 }
 
+static void
+test_kv_scanner_keys_without_values(void)
+{
+  TEST_KV_SCAN("key1 key2=value2, key3, key4=value4",
+               "key2", "value2",
+               "key4", "value4");
+
+  TEST_KV_SCAN("key1= key2=value2, key3=, key4=value4 key5= , key6=value6",
+               "key1", "",
+               "key2", "value2",
+               "key3", "",
+               "key4", "value4",
+               "key5", "",
+               "key6", "value6");
+}
+
+static void
+test_kv_scanner_quoted_values_with_special_characters(void)
+{
+  TEST_KV_SCAN("key1=\"value foo, foo2 =@,\\\"\" key2='value foo,  a='",
+               "key1", "value foo, foo2 =@,\"",
+               "key2", "value foo,  a=");
+}
+
 static gboolean
 _parse_value_by_incrementing_all_bytes(KVScanner *self)
 {
@@ -239,6 +289,20 @@ test_kv_scanner_quotation_is_stored_in_the_was_quoted_value_member(void)
   assert_next_kv_is(scanner, "foo", "bar");
   assert_false(scanner->value_was_quoted, "expected value_was_quoted to be FALSE");
   assert_no_more_tokens(scanner);
+  kv_scanner_free(scanner);
+}
+
+static void
+test_kv_scanner_value_separator_with_whitespaces_around(void)
+{
+  KVScanner *scanner = kv_scanner_new();
+  kv_scanner_set_value_separator(scanner, ':');
+
+  TEST_KV_SCANNER(scanner, "key1: value1 key2 : value2 key3 :value3 ",
+                  "key1", "",
+                  "", "",
+                  "", "value3");
+
   kv_scanner_free(scanner);
 }
 
@@ -280,11 +344,17 @@ test_kv_scanner(void)
   KV_SCANNER_TESTCASE(test_kv_scanner_with_multiple_key_values_return_multiple_pairs);
   KV_SCANNER_TESTCASE(test_kv_scanner_spaces_between_values_are_ignored);
   KV_SCANNER_TESTCASE(test_kv_scanner_with_comma_separated_values);
+  KV_SCANNER_TESTCASE(test_kv_scanner_with_comma_separated_values_and_multiple_spaces);
+  KV_SCANNER_TESTCASE(test_kv_scanner_with_comma_separated_values_without_space);
+  KV_SCANNER_TESTCASE(test_kv_scanner_tab_separated_values);
   KV_SCANNER_TESTCASE(test_kv_scanner_quoted_values_are_unquoted_like_c_strings);
+  KV_SCANNER_TESTCASE(test_kv_scanner_keys_without_values);
+  KV_SCANNER_TESTCASE(test_kv_scanner_quoted_values_with_special_characters);
   KV_SCANNER_TESTCASE(test_kv_scanner_transforms_values_if_parse_value_is_set);
   KV_SCANNER_TESTCASE(test_kv_scanner_quotation_is_stored_in_the_was_quoted_value_member);
   KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_is_used_to_separate_key_from_value);
   KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_clone);
+  KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_with_whitespaces_around);
 }
 
 int main(int argc, char *argv[])
