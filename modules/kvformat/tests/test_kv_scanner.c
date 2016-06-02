@@ -123,9 +123,15 @@ _scan_kv_pairs_auto(const gchar *input, ...)
 }
 
 #define TEST_KV_SCAN(input, ...) \
-  _scan_kv_pairs_auto(input, ##__VA_ARGS__, NULL);
+  do { \
+  fprintf(stderr, "TEST_KV_SCAN(%s,...)\n", input); \
+  _scan_kv_pairs_auto(input, ##__VA_ARGS__, NULL); \
+  } while (0)
 #define TEST_KV_SCANNER(scanner, input, ...) \
-  _scan_kv_pairs_scanner(scanner, input, ##__VA_ARGS__, NULL);
+  do { \
+  fprintf(stderr, "TEST_KV_SCAN(%s,...)\n", input); \
+  _scan_kv_pairs_scanner(scanner, input, ##__VA_ARGS__, NULL); \
+  } while (0)
 
 static void
 test_kv_scanner_incomplete_string_returns_no_pairs(void)
@@ -197,6 +203,17 @@ test_kv_scanner_tab_separated_values(void)
   TEST_KV_SCAN("key1=value1\tkey2=value2 key3=value3",
                "key1", "value1\tkey2=value2",
                "key3", "value3");
+  TEST_KV_SCAN("key1=value1,\tkey2=value2 key3=value3",
+               "key1", "value1,\tkey2=value2",
+               "key3", "value3");
+  TEST_KV_SCAN("key1=value1\t key2=value2 key3=value3",
+               "key1", "value1\t",
+               "key2", "value2",
+               "key3", "value3");
+  TEST_KV_SCAN("k=\t",
+               "k", "\t");
+  TEST_KV_SCAN("k=,\t",
+               "k", ",\t");
 }
 
 static void
@@ -230,6 +247,11 @@ test_kv_scanner_quoted_values_are_unquoted_like_c_strings(void)
 
   /* unknown backslash escape is left as is */
   TEST_KV_SCAN("key1='\\p'", "key1", "\\p");
+
+  TEST_KV_SCAN("key1=\\b\\f\\n\\r\\t\\\\",
+               "key1", "\\b\\f\\n\\r\\t\\\\");
+  TEST_KV_SCAN("key1=\b\f\n\r\\",
+               "key1", "\b\f\n\r\\");
 }
 
 static void
@@ -336,6 +358,44 @@ test_kv_scanner_value_separator_clone(void)
 }
 
 static void
+_test_fuzz(void)
+{
+  TEST_KV_SCAN("=", "", "");
+  TEST_KV_SCAN("==", "", "=");
+  TEST_KV_SCAN("===", "", "==");
+  TEST_KV_SCAN("k=\xc3", "k", "\xc3");
+  TEST_KV_SCAN("k=\xc3v", "k", "\xc3v");
+  TEST_KV_SCAN("k=\xff", "k", "\xff");
+  TEST_KV_SCAN("k=\xffv", "k", "\xffv");
+  TEST_KV_SCAN("k=\"\xc3", "k", "\xc3");
+  TEST_KV_SCAN("k=\"\xc3v", "k", "\xc3v");
+  TEST_KV_SCAN("k=\"\xff", "k", "\xff");
+  TEST_KV_SCAN("k=\"\xffv", "k", "\xffv");
+  TEST_KV_SCAN("k=\"a", "k", "a");
+  TEST_KV_SCAN("k=\\", "k", "\\");
+  TEST_KV_SCAN("k=\"\\", "k", "");
+  TEST_KV_SCAN(", k=v", "k", "v");
+  TEST_KV_SCAN(",k=v", "k", "v");
+  TEST_KV_SCAN("k=v,", "k", "v,");
+  TEST_KV_SCAN("k=v, ", "k", "v");
+  TEST_KV_SCAN("=v", "", "v");
+  TEST_KV_SCAN("k*=v", "", "v");
+  TEST_KV_SCAN("*k=v", "k", "v");
+  TEST_KV_SCAN("x *k=v", "k", "v");
+  TEST_KV_SCAN("k==", "k", "=");
+  TEST_KV_SCAN("k-j=v", "k-j", "v");
+
+  KVScanner *scanner = kv_scanner_new();
+  kv_scanner_set_value_separator(scanner, '-');
+
+  TEST_KV_SCANNER(scanner, "k-v", "k", "v");
+  TEST_KV_SCANNER(scanner, "k--v", "k", "-v");
+  TEST_KV_SCANNER(scanner, "---", "", "--");
+
+  kv_scanner_free(scanner);
+}
+
+static void
 test_kv_scanner(void)
 {
   KV_SCANNER_TESTCASE(test_kv_scanner_incomplete_string_returns_no_pairs);
@@ -355,6 +415,7 @@ test_kv_scanner(void)
   KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_is_used_to_separate_key_from_value);
   KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_clone);
   KV_SCANNER_TESTCASE(test_kv_scanner_value_separator_with_whitespaces_around);
+  KV_SCANNER_TESTCASE(_test_fuzz);
 }
 
 int main(int argc, char *argv[])
