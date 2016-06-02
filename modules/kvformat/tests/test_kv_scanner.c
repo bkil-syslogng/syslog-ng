@@ -194,7 +194,9 @@ static void
 test_kv_scanner_with_comma_separated_values_without_space(void)
 {
   TEST_KV_SCAN("key1=value1,key2=value2,key3=value3",
-               "key1", "value1,key2=value2,key3=value3");
+               "key1", "value1",
+               "key2", "value2",
+               "key3", "value3");
 }
 
 static void
@@ -376,7 +378,7 @@ _test_fuzz(void)
   TEST_KV_SCAN("k=\"\\", "k", "");
   TEST_KV_SCAN(", k=v", "k", "v");
   TEST_KV_SCAN(",k=v", "k", "v");
-  TEST_KV_SCAN("k=v,", "k", "v,");
+  TEST_KV_SCAN("k=v,", "k", "v");
   TEST_KV_SCAN("k=v, ", "k", "v");
   TEST_KV_SCAN("=v");
   TEST_KV_SCAN("k*=v");
