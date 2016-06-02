@@ -156,7 +156,7 @@ test_kv_scanner_stray_words_are_ignored(void)
 {
   TEST_KV_SCAN("lorem ipsum foo=bar", "foo", "bar");
   TEST_KV_SCAN("lorem ipsum/dolor @sitamen foo=bar", "foo", "bar");
-  TEST_KV_SCAN("lorem ipsum/dolor = foo=bar\"", "", "", "foo", "bar");
+  TEST_KV_SCAN("lorem ipsum/dolor = foo=bar\"", "foo", "bar");
   TEST_KV_SCAN("foo=bar lorem ipsum key=value some more values", "foo", "bar", "key", "value");
 }
 
@@ -321,9 +321,7 @@ test_kv_scanner_value_separator_with_whitespaces_around(void)
   kv_scanner_set_value_separator(scanner, ':');
 
   TEST_KV_SCANNER(scanner, "key1: value1 key2 : value2 key3 :value3 ",
-                  "key1", "",
-                  "", "",
-                  "", "value3");
+                  "key1", "");
 
   kv_scanner_free(scanner);
 }
@@ -360,9 +358,9 @@ test_kv_scanner_value_separator_clone(void)
 static void
 _test_fuzz(void)
 {
-  TEST_KV_SCAN("=", "", "");
-  TEST_KV_SCAN("==", "", "=");
-  TEST_KV_SCAN("===", "", "==");
+  TEST_KV_SCAN("=");
+  TEST_KV_SCAN("==");
+  TEST_KV_SCAN("===");
   TEST_KV_SCAN("k=\xc3", "k", "\xc3");
   TEST_KV_SCAN("k=\xc3v", "k", "\xc3v");
   TEST_KV_SCAN("k=\xff", "k", "\xff");
@@ -378,8 +376,8 @@ _test_fuzz(void)
   TEST_KV_SCAN(",k=v", "k", "v");
   TEST_KV_SCAN("k=v,", "k", "v,");
   TEST_KV_SCAN("k=v, ", "k", "v");
-  TEST_KV_SCAN("=v", "", "v");
-  TEST_KV_SCAN("k*=v", "", "v");
+  TEST_KV_SCAN("=v");
+  TEST_KV_SCAN("k*=v");
   TEST_KV_SCAN("*k=v", "k", "v");
   TEST_KV_SCAN("x *k=v", "k", "v");
   TEST_KV_SCAN("k==", "k", "=");
@@ -390,7 +388,7 @@ _test_fuzz(void)
 
   TEST_KV_SCANNER(scanner, "k-v", "k", "v");
   TEST_KV_SCANNER(scanner, "k--v", "k", "-v");
-  TEST_KV_SCANNER(scanner, "---", "", "--");
+  TEST_KV_SCANNER(scanner, "---", "-", "-");
 
   kv_scanner_free(scanner);
 }
