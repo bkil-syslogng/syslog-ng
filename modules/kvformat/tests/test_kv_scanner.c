@@ -201,19 +201,21 @@ static void
 test_kv_scanner_tab_separated_values(void)
 {
   TEST_KV_SCAN("key1=value1\tkey2=value2 key3=value3",
-               "key1", "value1\tkey2=value2",
+               "key1", "value1",
+               "key2", "value2",
                "key3", "value3");
   TEST_KV_SCAN("key1=value1,\tkey2=value2 key3=value3",
-               "key1", "value1,\tkey2=value2",
+               "key1", "value1",
+               "key2", "value2",
                "key3", "value3");
   TEST_KV_SCAN("key1=value1\t key2=value2 key3=value3",
-               "key1", "value1\t",
+               "key1", "value1",
                "key2", "value2",
                "key3", "value3");
   TEST_KV_SCAN("k=\t",
-               "k", "\t");
+               "k", "");
   TEST_KV_SCAN("k=,\t",
-               "k", ",\t");
+               "k", "");
 }
 
 static void

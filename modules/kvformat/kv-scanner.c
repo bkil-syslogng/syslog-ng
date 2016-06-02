@@ -47,9 +47,15 @@ kv_scanner_input(KVScanner *self, const gchar *input)
 }
 
 static gboolean
+_is_whitespace(gchar ch)
+{
+  return (ch == ' ') || (ch == '\t');
+}
+
+static gboolean
 _kv_scanner_skip_space(KVScanner *self)
 {
-  while (self->input[self->input_pos] == ' ')
+  while (_is_whitespace(self->input[self->input_pos]))
     self->input_pos++;
   return TRUE;
 }
@@ -99,7 +105,7 @@ _kv_scanner_extract_value(KVScanner *self)
       switch (self->quote_state)
         {
         case KV_QUOTE_INITIAL:
-          if (*cur == ' ' || strncmp(cur, ", ", 2) == 0)
+          if (_is_whitespace(*cur) || ((*cur == ',') && (_is_whitespace(*(cur+1)))))
             {
               self->quote_state = KV_QUOTE_FINISH;
               break;
