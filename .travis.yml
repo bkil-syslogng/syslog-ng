@@ -138,16 +138,18 @@ script:
         return $S;
       fi;
     elif [ "$T" = "valgrind-memcheck" ]; then
-      make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
+      make -j install || return $?;
+      make V=1 --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
       S=$?;
       F=test-suite-memcheck.log;
       echo "==== $F:";
       cat "$F";
       return $S;
     elif [ "$T" = "valgrind-others" ]; then
+      make -j install || return $?;
       S=0;
       for TOOL in sgcheck drd helgrind; do
-        make --keep-going check-valgrind-tool VALGRIND_TOOL=$TOOL ||
+        make V=1 --keep-going check-valgrind-tool VALGRIND_TOOL=$TOOL ||
           S=1;
       done;
       for TOOL in sgcheck drd helgrind; do
