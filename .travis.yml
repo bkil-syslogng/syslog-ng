@@ -91,7 +91,7 @@ before_script:
       CONFIGURE_OPTS="
         --with-libhiredis=/usr";
     fi;
-  - if [ "$T" = "valgrind" ]; then
+  - if [ "$T" = "valgrind-memcheck" -o "$T" = "valgrind-others" ]; then
       CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
     fi
   - ./configure
