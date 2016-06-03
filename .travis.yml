@@ -148,11 +148,11 @@ script:
     elif [ "$T" = "valgrind-others" ]; then
       make -j install || return $?;
       S=0;
-      for TOOL in sgcheck drd helgrind; do
+      for TOOL in sgcheck helgrind; do
         make V=1 --keep-going check-valgrind-tool VALGRIND_TOOL=$TOOL ||
           S=1;
       done;
-      for TOOL in sgcheck drd helgrind; do
+      for TOOL in sgcheck helgrind; do
         F=test-suite-$TOOL.log;
         echo "==== $F:";
         cat "$F";
