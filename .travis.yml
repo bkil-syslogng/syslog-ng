@@ -139,7 +139,8 @@ script:
       fi;
     elif [ "$T" = "valgrind" ]; then
       make --keep-going check-valgrind;
-      for F in test-suite-*.log; do
+      for F in sgcheck drd helgrind memcheck; do
+        F=test-suite-$TYPE.log;
         echo "==== $F:";
         cat "$F";
     else
