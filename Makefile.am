@@ -152,5 +152,21 @@ include tgz2build/Makefile.am
 TEST_EXTENSIONS = .sh
 @VALGRIND_CHECK_RULES@
 
-VALGRIND_SUPPRESSIONS_FILES = $(top_srcdir)/syslog-ng.supp
-EXTRA_DIST += syslog-ng.supp
+VALGRIND_SUPPRESSIONS_FILES = \
+  $(top_srcdir)/tests/valgrind/memcheck.external.supp \
+  $(top_srcdir)/tests/valgrind/memcheck.bug.supp \
+  $(top_srcdir)/tests/valgrind/memcheck.unknown.supp
+EXTRA_DIST += \
+  tests/valgrind/memcheck.external.supp \
+  tests/valgrind/memcheck.bug.supp \
+  tests/valgrind/memcheck.unknown.supp
+VALGRIND_FLAGS = \
+  --num-callers=30 \
+  --sim-hints=no-nptl-pthread-stackcache \
+  --freelist-vol=200''000''000 \
+  --freelist-big-blocks=10''000''000 \
+  --malloc-fill=55 \
+  --free-fill=AA \
+  --gen-suppressions=all \
+  --fullpath-after="$(top_srcdir)" \
+  --errors-for-leak-kinds=none
