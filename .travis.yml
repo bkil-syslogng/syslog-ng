@@ -137,13 +137,25 @@ script:
         make V=1;
         return $S;
       fi;
-    elif [ "$T" = "valgrind" ]; then
-      make --keep-going check-valgrind;
-      for F in sgcheck drd helgrind memcheck; do
-        F=test-suite-$TYPE.log;
+    elif [ "$T" = "valgrind-memcheck" ]; then
+      make --keep-going check-valgrind-memcheck;
+      S=$?;
+      F=test-suite-memcheck.log;
+      echo "==== $F:";
+      cat "$F";
+      return $S;
+    elif [ "$T" = "valgrind-others" ]; then
+      S=0;
+      for TOOL in sgcheck drd helgrind; do
+        make --keep-going check-valgrind-$TOOL ||
+          S=1;
+      done;
+      for TOOL in sgcheck drd helgrind; do
+        F=test-suite-$TOOL.log;
         echo "==== $F:";
         cat "$F";
       done;
+      return $S;
     else
       true;
     fi
@@ -155,7 +167,9 @@ after_script:
 matrix:
   fast_finish: true
   allow_failures:
-    - env: E=precise T=valgrind
+    - env: E=precise T=valgrind-memcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-others
       compiler: gcc
   exclude:
     - env: E=precise T=distcheck
