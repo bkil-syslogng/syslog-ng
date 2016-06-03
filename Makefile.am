@@ -170,7 +170,6 @@ VALGRIND_memcheck_FLAGS = \
   --freelist-big-blocks=10''000''000 \
   --malloc-fill=55 \
   --free-fill=AA \
-  --errors-for-leak-kinds=none
 VALGRIND_helgrind_FLAGS = \
   --free-is-write=yes
 VALGRIND_drd_FLAGS = \
