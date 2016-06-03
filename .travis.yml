@@ -4,8 +4,8 @@ git:
   submodules: false
 
 env:
-  - E=precise_container TEST=distcheck
-  - E=precise_container TEST=func-test
+  - E=precise T=distcheck
+  - E=precise T=func-test
 
 sudo: false
 
@@ -29,11 +29,11 @@ cache:
 
 before_cache:
         - rm -f $HOME/.cache/pip/log/debug.log
-        - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
-        - ls -la $HOME $HOME/.[^.]* $HOME/..?*
-        - find $HOME/.local
-        - find $HOME/install
+        - echo "du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
+          ls -la $HOME $HOME/.[^.]* $HOME/..?*
+          find $HOME/.local
+          find $HOME/install"
 addons:
         apt:
           packages:
@@ -55,6 +55,7 @@ addons:
             - libwrap0-dev
             - protobuf-c-compiler
             - strace
+            - valgrind
             - xsltproc
 
 install:
@@ -90,6 +91,13 @@ before_script:
       CONFIGURE_OPTS="
         --with-libhiredis=/usr";
     fi;
+  - if [
+         "$T" = "valgrind-memcheck" -o
+         "$T" = "valgrind-sgcheck" -o
+         "$T" = "valgrind-helgrind"
+       ]; then
+      CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
+    fi
   - ./configure
       $CONFIGURE_OPTS
       CFLAGS=-Werror
@@ -112,7 +120,7 @@ before_script:
 
 script:
   - . tests/build-log-cflags-propagation.sh;
-    if [ "$TEST" = "distcheck" ]; then
+    if [ "$T" = "distcheck" ]; then
       export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings";
       exec_prop_check "make distcheck V=1 --keep-going";
       S=$?;
@@ -120,7 +128,7 @@ script:
         find . -iname test-suite.log -exec cat {} +;
       fi;
       return $S;
-    elif [ "$TEST" = "func-test" ]; then
+    elif [ "$T" = "func-test" ]; then
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
       if [ "$S" = "0" ]; then
@@ -133,6 +141,24 @@ script:
         make V=1;
         return $S;
       fi;
+    elif [ "$T" = "valgrind-memcheck" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
+      S=$?;
+      cat test-suite-memcheck.log;
+      return $S;
+    elif [ "$T" = "valgrind-sgcheck" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=sgcheck;
+      S=$?;
+      cat test-suite-sgcheck.log;
+      return $S;
+    elif [ "$T" = "valgrind-helgrind" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=helgrind;
+      S=$?;
+      cat test-suite-helgrind.log;
+      return $S;
     else
       true;
     fi
@@ -142,10 +168,18 @@ after_script:
         - ccache -s
 
 matrix:
+  fast_finish: true
+  allow_failures:
+    - env: E=precise T=valgrind-memcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-sgcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-helgrind
+      compiler: gcc
   exclude:
-    - env: E=precise_container TEST=distcheck
+    - env: E=precise T=distcheck
       compiler: clang
-    - env: E=precise_container TEST=func-test
+    - env: E=precise T=func-test
       compiler: gcc
   include:
     - env: E=copyright_check
@@ -160,7 +194,13 @@ matrix:
         - export COPYRIGHTVERBOSITY=2
         - tests/copyright/check.sh . .
       after_script:
-    - env: E=trusty TEST=cmake
+    - env: E=precise T=valgrind-memcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-sgcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-helgrind
+      compiler: gcc
+    - env: E=trusty T=cmake
       dist: trusty
       sudo: required
       cache:
@@ -208,7 +248,7 @@ matrix:
         - make -j install
       after_script:
 
-    - env: E=trusty TEST=distcheck
+    - env: E=trusty T=distcheck
       dist: trusty
       sudo: required
       cache:
