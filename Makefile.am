@@ -153,11 +153,9 @@ TEST_EXTENSIONS = .sh
 @VALGRIND_CHECK_RULES@
 
 VALGRIND_SUPPRESSIONS_FILES = \
-  $(top_srcdir)/tests/valgrind/memcheck.external.supp \
   $(top_srcdir)/tests/valgrind/memcheck.bug.supp \
   $(top_srcdir)/tests/valgrind/memcheck.unknown.supp
 EXTRA_DIST += \
-  tests/valgrind/memcheck.external.supp \
   tests/valgrind/memcheck.bug.supp \
   tests/valgrind/memcheck.unknown.supp
 VALGRIND_FLAGS = \
