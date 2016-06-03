@@ -143,6 +143,7 @@ script:
         F=test-suite-$TYPE.log;
         echo "==== $F:";
         cat "$F";
+      done;
     else
       true;
     fi
