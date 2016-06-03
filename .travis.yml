@@ -139,6 +139,7 @@ script:
       fi;
     elif [ "$T" = "valgrind" ]; then
       make check;
+      cat test-suite-*.log;
     else
       true;
     fi
