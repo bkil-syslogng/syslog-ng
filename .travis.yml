@@ -138,8 +138,10 @@ script:
         return $S;
       fi;
     elif [ "$T" = "valgrind" ]; then
-      make check;
-      cat test-suite-*.log;
+      make --keep-going check-valgrind;
+      for F in test-suite-*.log; do
+        echo "==== $F:";
+        cat "$F";
     else
       true;
     fi
