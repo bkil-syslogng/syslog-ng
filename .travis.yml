@@ -91,7 +91,11 @@ before_script:
       CONFIGURE_OPTS="
         --with-libhiredis=/usr";
     fi;
-  - if [ "$T" = "valgrind-memcheck" -o "$T" = "valgrind-others" ]; then
+  - if [
+         "$T" = "valgrind-memcheck" -o
+         "$T" = "valgrind-sgcheck" -o
+         "$T" = "valgrind-helgrind"
+       ]; then
       CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
     fi
   - ./configure
@@ -139,24 +143,21 @@ script:
       fi;
     elif [ "$T" = "valgrind-memcheck" ]; then
       make -j install || return $?;
-      make V=1 --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
       S=$?;
-      F=test-suite-memcheck.log;
-      echo "==== $F:";
       cat "$F";
       return $S;
-    elif [ "$T" = "valgrind-others" ]; then
+    elif [ "$T" = "valgrind-sgcheck" ]; then
       make -j install || return $?;
-      S=0;
-      for TOOL in sgcheck helgrind; do
-        make V=1 --keep-going check-valgrind-tool VALGRIND_TOOL=$TOOL ||
-          S=1;
-      done;
-      for TOOL in sgcheck helgrind; do
-        F=test-suite-$TOOL.log;
-        echo "==== $F:";
-        cat "$F";
-      done;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=sgcheck;
+      S=$?;
+      cat "$F";
+      return $S;
+    elif [ "$T" = "valgrind-helgrind" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=helgrind;
+      S=$?;
+      cat "$F";
       return $S;
     else
       true;
@@ -171,7 +172,9 @@ matrix:
   allow_failures:
     - env: E=precise T=valgrind-memcheck
       compiler: gcc
-    - env: E=precise T=valgrind-others
+    - env: E=precise T=valgrind-sgcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-helgrind
       compiler: gcc
   exclude:
     - env: E=precise T=distcheck
@@ -193,7 +196,9 @@ matrix:
       after_script:
     - env: E=precise T=valgrind-memcheck
       compiler: gcc
-    - env: E=precise T=valgrind-others
+    - env: E=precise T=valgrind-sgcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-helgrind
       compiler: gcc
     - env: E=trusty T=cmake
       dist: trusty
