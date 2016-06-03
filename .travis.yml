@@ -189,7 +189,9 @@ matrix:
         - export COPYRIGHTVERBOSITY=2
         - tests/copyright/check.sh . .
       after_script:
-    - env: E=precise T=valgrind
+    - env: E=precise T=valgrind-memcheck
+      compiler: gcc
+    - env: E=precise T=valgrind-others
       compiler: gcc
     - env: E=trusty T=cmake
       dist: trusty
