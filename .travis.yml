@@ -55,6 +55,7 @@ addons:
             - libwrap0-dev
             - protobuf-c-compiler
             - strace
+            - valgrind
             - xsltproc
 
 install:
