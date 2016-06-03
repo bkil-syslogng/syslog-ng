@@ -1,0 +1,238 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_quark_from_static_string
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:scratch_buffer_acquire
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_static_private_get
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_static_private_set
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:stats_register_counter
+   fun:log_msg_global_init
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_mutex_new
+   fun:g_static_mutex_get_mutex_impl
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:msg_format_options_init
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:register_application_hook
+   fun:app_startup
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:crypto_init_threading
+   fun:crypto_init
+   fun:app_startup
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:iv_init
+   fun:app_startup
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:evt_ctx_init
+   fun:msg_init
+   fun:app_startup
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_hash_table_new_full
+   fun:stats_registry_init
+   fun:app_startup
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_string_sized_new
+   fun:test_kv_scanner
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:g_realloc
+   fun:g_string_maybe_expand
+   fun:g_string_insert_len
+   fun:log_macro_expand
+   fun:vp_merge_builtins
+   fun:value_pairs_foreach_sorted
+   fun:value_pairs_walk
+   fun:tf_json_append
+   fun:tf_json_call
+   fun:log_template_append_format_with_context
+   fun:log_template_append_format
+   fun:assert_template_format_with_escaping_msg
+   fun:assert_template_format_with_escaping
+   fun:assert_template_format
+   fun:test_format_json
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:g_realloc
+   fun:g_string_maybe_expand
+   fun:g_string_insert_len
+   fun:vp_walker_name_combine_prefix
+   fun:vp_walker_start_containers_for_name
+   fun:value_pairs_walker
+   fun:vp_foreach_helper
+   fun:g_tree_foreach
+   fun:value_pairs_foreach_sorted
+   fun:value_pairs_walk
+   fun:tf_json_append
+   fun:tf_json_call
+   fun:log_template_append_format_with_context
+   fun:log_template_append_format
+   fun:assert_template_format_with_escaping_msg
+   fun:assert_template_format_with_escaping
+   fun:assert_template_format
+   fun:test_format_json_rekey
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:g_realloc
+   fun:g_string_maybe_expand
+   fun:g_string_insert_len
+   fun:vp_merge_builtins
+   fun:value_pairs_foreach_sorted
+   fun:value_pairs_walk
+   fun:tf_json_append
+   fun:tf_json_call
+   fun:log_template_append_format_with_context
+   fun:log_template_append_format
+   fun:assert_template_format_with_escaping_msg
+   fun:assert_template_format_with_escaping
+   fun:assert_template_format
+   fun:test_format_json
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:g_option_context_parse
+   ...
+   fun:test_format_json
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:log_template_append_format_with_context
+   ...
+   fun:assert_template_format_with_context_msgs
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:cfg_set_global_paths
+}
+

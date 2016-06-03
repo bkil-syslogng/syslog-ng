@@ -1,0 +1,82 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_log_set_handler
+   fun:msg_init
+}
+
+{
+   msg_event_suppress_recursions_and_send
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:msg_get_context
+   fun:msg_limit_internal_message
+   fun:msg_event_send_with_suppression
+   fun:msg_event_suppress_recursions_and_send
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:nv_registry_new
+   fun:log_msg_registry_init
+}
+
+{
+     suppress_syslog_ng_plugin_load_module
+     Memcheck:Leak
+     fun:*alloc
+     ...
+     fun:g_module_open
+     fun:plugin_load_module
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_log
+   fun:g_queue_free_full
+   fun:afinter_global_deinit
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:dns_caching_thread_init
+   fun:app_startup
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_hash_table_new_full
+   fun:child_manager_init
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   fun:g_slice_alloc
+   fun:g_hash_table_new_full
+   fun:stats_registry_init
+}
+
