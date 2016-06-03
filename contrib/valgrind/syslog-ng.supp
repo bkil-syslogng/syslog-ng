@@ -114,16 +114,6 @@
 }
 
 {
-     suppress_syslog_ng_msg_limit_internal_message
-     Memcheck:Leak
-     fun:*alloc
-     ...
-     fun:msg_limit_internal_message
-     ...
-     fun:main
-}
-
-{
      suppress_syslog_ng_main_loop_msg_event_create
      Memcheck:Leak
      fun:*alloc
@@ -154,95 +144,4 @@
      fun:*alloc
      ...
      fun:g_process_change_limits
-}
-
-##################################################################
-### NOTE: These suppressions may shadow actual memory leaks!   ###
-###       Disable them if you wish to debug SSL-related leaks. ###
-##################################################################
-
-## libssl/libcrypto leaks we don't care about
-{
-   suppress_crypto_SSL_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:SSL_*
-}
-
-{
-   suppress_crypto_RSA_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:RSA_*
-}
-
-{
-   suppress_crypto_BIO_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:BIO_*
-}
-
-{
-   suppress_crypto_ERR_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:ERR_*
-}
-
-{
-   suppress_crypto_OCSP_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:OCSP_*
-}
-
-{
-   suppress_crypto_EVP_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   fun:EVP_*
-}
-
-## TLS/SSL related syslog-ng leaks
-{
-   suppress_syslog_ng_crypto_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   ...
-   obj:*/libsyslog-ng-crypto.so
-}
-
-{
-   suppress_syslog_ng_afsocket_ssl_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libssl.so.*
-   ...
-   obj:*/libafsocket-tls.so
-}
-
-{
-   suppress_syslog_ng_afsocket_crypto_leaks
-   Memcheck:Leak
-   fun:*alloc
-   ...
-   obj:*/libcrypto.so.*
-   ...
-   obj:*/libafsocket-tls.so
 }
