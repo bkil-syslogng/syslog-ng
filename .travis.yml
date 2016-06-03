@@ -138,7 +138,7 @@ script:
         return $S;
       fi;
     elif [ "$T" = "valgrind-memcheck" ]; then
-      make --keep-going check-valgrind-memcheck;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
       S=$?;
       F=test-suite-memcheck.log;
       echo "==== $F:";
@@ -147,7 +147,7 @@ script:
     elif [ "$T" = "valgrind-others" ]; then
       S=0;
       for TOOL in sgcheck drd helgrind; do
-        make --keep-going check-valgrind-$TOOL ||
+        make --keep-going check-valgrind-tool VALGRIND_TOOL=$TOOL ||
           S=1;
       done;
       for TOOL in sgcheck drd helgrind; do
