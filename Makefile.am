@@ -153,11 +153,9 @@ TEST_EXTENSIONS = .sh
 @VALGRIND_CHECK_RULES@
 
 VALGRIND_SUPPRESSIONS_FILES = \
-  $(top_srcdir)/tests/valgrind/memcheck.bug.supp \
-  $(top_srcdir)/tests/valgrind/memcheck.unknown.supp
-EXTRA_DIST += \
-  tests/valgrind/memcheck.bug.supp \
-  tests/valgrind/memcheck.unknown.supp
+  $(top_srcdir)/syslog-ng.supp
+EXTRA_DIST += syslog-ng.supp \
+  syslog-ng.supp
 VALGRIND_FLAGS = \
   --num-callers=30 \
   --sim-hints=no-nptl-pthread-stackcache \
@@ -165,8 +163,8 @@ VALGRIND_FLAGS = \
   --fullpath-after="$(top_srcdir)"
 VALGRIND_memcheck_FLAGS = \
   --leak-check=full \
-  --freelist-vol=200''000''000 \
-  --freelist-big-blocks=10''000''000 \
+  --freelist-vol=200000000 \
+  --freelist-big-blocks=10000000 \
   --malloc-fill=55 \
   --free-fill=AA
 VALGRIND_helgrind_FLAGS = \
