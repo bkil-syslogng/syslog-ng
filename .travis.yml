@@ -29,11 +29,11 @@ cache:
 
 before_cache:
         - rm -f $HOME/.cache/pip/log/debug.log
-        - du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
         - ccache -s
-        - ls -la $HOME $HOME/.[^.]* $HOME/..?*
-        - find $HOME/.local
-        - find $HOME/install
+        - echo "du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
+          ls -la $HOME $HOME/.[^.]* $HOME/..?*
+          find $HOME/.local
+          find $HOME/install"
 addons:
         apt:
           packages:
