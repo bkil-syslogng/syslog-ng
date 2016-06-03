@@ -145,19 +145,19 @@ script:
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
       S=$?;
-      cat "$F";
+      cat test-suite-memcheck.log;
       return $S;
     elif [ "$T" = "valgrind-sgcheck" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=sgcheck;
       S=$?;
-      cat "$F";
+      cat test-suite-sgcheck.log;
       return $S;
     elif [ "$T" = "valgrind-helgrind" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=helgrind;
       S=$?;
-      cat "$F";
+      cat test-suite-helgrind.log;
       return $S;
     else
       true;
