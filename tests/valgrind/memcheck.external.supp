@@ -1,0 +1,183 @@
+## Valgrind suppressions for syslog-ng
+## by Gergely Nagy <algernon@balabit.hu>
+##
+## Some of these suppressions may shadow actual leaks (especially the
+## SSL-related ones), use them with caution!
+
+##################################################################
+### NOTE: These suppressions may shadow actual memory leaks!   ###
+###       Disable them if you wish to debug SSL-related leaks. ###
+##################################################################
+
+## libssl/libcrypto leaks we don't care about
+{
+   suppress_crypto_SSL_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:OPENSSL_*
+}
+
+{
+   suppress_crypto_SSL_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:OpenSSL_*
+}
+
+{
+   suppress_crypto_SSL_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:SSL_*
+}
+
+{
+   suppress_crypto_RSA_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:RSA_*
+}
+
+{
+   suppress_crypto_BIO_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:BIO_*
+}
+
+{
+   suppress_crypto_ERR_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:ERR_*
+}
+
+{
+   suppress_crypto_OCSP_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:OCSP_*
+}
+
+{
+   suppress_crypto_EVP_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   fun:EVP_*
+}
+
+## TLS/SSL related syslog-ng leaks
+{
+   suppress_syslog_ng_crypto_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   ...
+   obj:*/libsyslog-ng*.so*
+}
+
+{
+   suppress_syslog_ng_afsocket_ssl_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libssl.so.*
+   ...
+   obj:*/libafsocket-tls.so
+}
+
+{
+   suppress_syslog_ng_afsocket_crypto_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   ...
+   obj:*/libafsocket-tls.so
+}
+
+{
+   suppress_syslog_ng_afmongodb_ssl_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libssl.so.*
+   ...
+   fun:pthread_once
+   fun:mongoc_init
+}
+
+{
+   suppress_syslog_ng_afmongodb_ssl_leaks2
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libcrypto.so.*
+   ...
+   fun:pthread_once
+   fun:mongoc_init
+}
+
+{
+   suppress_syslog_ng_afmongodb_sasl2_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   obj:*/libsasl2.so.*
+   ...
+   fun:pthread_once
+   fun:mongoc_init
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_set_prgname
+   fun:g_option_context_parse
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:g_locale_to_utf8
+   ...
+   fun:g_option_context_parse
+}
+
