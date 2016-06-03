@@ -90,6 +90,9 @@ before_script:
       CONFIGURE_OPTS="
         --with-libhiredis=/usr";
     fi;
+  - if [ "$T" = "valgrind" ]; then
+      CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
+    fi
   - ./configure
       $CONFIGURE_OPTS
       CFLAGS=-Werror
@@ -133,6 +136,8 @@ script:
         make V=1;
         return $S;
       fi;
+    elif [ "$T" = "valgrind" ]; then
+      make check;
     else
       true;
     fi
@@ -142,6 +147,10 @@ after_script:
         - ccache -s
 
 matrix:
+  fast_finish: true
+  allow_failures:
+    - env: E=precise T=valgrind
+      compiler: gcc
   exclude:
     - env: E=precise T=distcheck
       compiler: clang
@@ -160,6 +169,8 @@ matrix:
         - export COPYRIGHTVERBOSITY=2
         - tests/copyright/check.sh . .
       after_script:
+    - env: E=precise T=valgrind
+      compiler: gcc
     - env: E=trusty T=cmake
       dist: trusty
       sudo: required
