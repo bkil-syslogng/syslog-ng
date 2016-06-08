@@ -419,11 +419,21 @@ _test_separator_in_key(void)
 static void
 _test_empty_keys(void)
 {
-  TEST_KV_SCAN("===");
   TEST_KV_SCAN("=v");
   TEST_KV_SCAN("k*=v");
   TEST_KV_SCAN("=");
   TEST_KV_SCAN("==");
+  TEST_KV_SCAN("===");
+  TEST_KV_SCAN(" =");
+  TEST_KV_SCAN(" ==");
+  TEST_KV_SCAN(" ===");
+  TEST_KV_SCAN(" = =");
+  TEST_KV_SCAN(" ==k=", "k", "");
+  TEST_KV_SCAN(" = =k=", "k", "");
+  TEST_KV_SCAN(" =k=", "k", "");
+  TEST_KV_SCAN(" =k=v", "k", "v");
+  TEST_KV_SCAN(" ==k=v", "k", "v");
+  TEST_KV_SCAN(" =k=v=w", "k", "v=w");
 }
 
 static void
