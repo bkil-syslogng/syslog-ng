@@ -85,13 +85,14 @@ _kv_scanner_extract_key(KVScanner *self)
         separator = strchr(separator + 1, self->value_separator);
     }
   while (len < 1);
+
   g_string_assign_len(self->key, start_of_key, len);
   self->input_pos = separator - self->input + 1;
   return TRUE;
 }
 
 static void
-_decode_backslash_escapes(KVScanner *self, gchar ch)
+_decode_backslash_escape(KVScanner *self, gchar ch)
 {
   gchar control;
   switch (ch)
@@ -169,7 +170,7 @@ _kv_scanner_extract_value(KVScanner *self)
             g_string_append_c(self->value, *cur);
           break;
         case KV_QUOTE_BACKSLASH:
-          _decode_backslash_escapes(self, *cur);
+          _decode_backslash_escape(self, *cur);
           self->quote_state = KV_QUOTE_STRING;
           break;
         }
