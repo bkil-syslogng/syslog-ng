@@ -170,8 +170,8 @@ after_script:
 matrix:
   fast_finish: true
   allow_failures:
-    - env: E=precise T=valgrind-memcheck
-      compiler: gcc
+    #~ - env: E=precise T=valgrind-memcheck
+      #~ compiler: gcc
     - env: E=precise T=valgrind-sgcheck
       compiler: gcc
     - env: E=precise T=valgrind-helgrind
@@ -181,119 +181,125 @@ matrix:
       compiler: clang
     - env: E=precise T=func-test
       compiler: gcc
-  include:
-    - env: E=copyright_check
-      sudo: false
+
+    #DEBUG Valgrind
+    - env: E=precise T=distcheck
       compiler: gcc
-      cache:
-      before_cache:
-      addons:
-      install:
-      before_script:
-      script:
-        - export COPYRIGHTVERBOSITY=2
-        - tests/copyright/check.sh . .
-      after_script:
+    - env: E=precise T=func-test
+      compiler: clang
+  include:
+    #~ - env: E=copyright_check
+      #~ sudo: false
+      #~ compiler: gcc
+      #~ cache:
+      #~ before_cache:
+      #~ addons:
+      #~ install:
+      #~ before_script:
+      #~ script:
+        #~ - export COPYRIGHTVERBOSITY=2
+        #~ - tests/copyright/check.sh . .
+      #~ after_script:
     - env: E=precise T=valgrind-memcheck
       compiler: gcc
-    - env: E=precise T=valgrind-sgcheck
-      compiler: gcc
-    - env: E=precise T=valgrind-helgrind
-      compiler: gcc
-    - env: E=trusty T=cmake
-      dist: trusty
-      sudo: required
-      cache:
-      before_cache:
-      compiler: clang
-      addons:
-        apt:
-          packages:
-            - autoconf-archive
-            - docbook-xsl
-            - gradle
-            - libcap-dev
-            - libdbd-sqlite3
-            - libdbi-dev
-            - libesmtp-dev
-            - libevtlog-dev
-            - libgeoip-dev
-            - libhiredis-dev
-            - libivykis-dev
-            - libjson0-dev
-            - libnet1-dev
-            - libprotobuf-c0-dev
-            - libwrap0-dev
-            - libxml2-utils
-            - xsltproc
-
-      install:
-        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
-          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-        - sudo apt-get update -qq
-        - sudo apt-get install --force-yes -qq
-           libsystemd-journal-dev
-           libsystemd-daemon-dev
-           libriemann-client-dev
-        - sudo pip install -r requirements.txt
-      before_script:
-      script:
-        - mkdir build
-        - cd build
-        - cmake
-            -DCMAKE_C_FLAGS=-Werror
-            -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
-            ..
-        - make -j install
-      after_script:
-
-    - env: E=trusty T=distcheck
-      dist: trusty
-      sudo: required
-      cache:
-      before_cache:
-      compiler: gcc
-      addons:
-        apt:
-          packages:
-            - autoconf-archive
-            - docbook-xsl
-            - gradle
-            - libcap-dev
-            - libdbd-sqlite3
-            - libdbi-dev
-            - libesmtp-dev
-            - libevtlog-dev
-            - libgeoip-dev
-            - libhiredis-dev
-            - libjson0-dev
-            - libnet1-dev
-            - libprotobuf-c0-dev
-            - libwrap0-dev
-            - libxml2-utils
-            - xsltproc
-#            - libriemann-client-dev # TODO: compile
-#            - libsystemd-daemon-dev # TODO: waiting for whitelisting
-#            - libsystemd-journal-dev # TODO: waiting for whitelisting
-      install:
-        - export SLNG="$HOME/install/syslog-ng"
-#        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
-        - cat /etc/apt/sources.list
-        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
-          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-        - sudo apt-get update -qq
-        - sudo apt-get install --force-yes -qq
-           libriemann-client-dev
-           libsystemd-daemon-dev
-           libsystemd-journal-dev
-           # gradle-2.2.1
-        - sudo pip install -r requirements.txt
-    # HACK
-    # --keep-going
-        # to make error messages more readable on error
-      after_script:
+    #~ - env: E=precise T=valgrind-sgcheck
+      #~ compiler: gcc
+    #~ - env: E=precise T=valgrind-helgrind
+      #~ compiler: gcc
+    #~ - env: E=trusty T=cmake
+      #~ dist: trusty
+      #~ sudo: required
+      #~ cache:
+      #~ before_cache:
+      #~ compiler: clang
+      #~ addons:
+        #~ apt:
+          #~ packages:
+            #~ - autoconf-archive
+            #~ - docbook-xsl
+            #~ - gradle
+            #~ - libcap-dev
+            #~ - libdbd-sqlite3
+            #~ - libdbi-dev
+            #~ - libesmtp-dev
+            #~ - libevtlog-dev
+            #~ - libgeoip-dev
+            #~ - libhiredis-dev
+            #~ - libivykis-dev
+            #~ - libjson0-dev
+            #~ - libnet1-dev
+            #~ - libprotobuf-c0-dev
+            #~ - libwrap0-dev
+            #~ - libxml2-utils
+            #~ - xsltproc
+#~ 
+      #~ install:
+        #~ - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        #~ - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          #~ sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        #~ - sudo apt-get update -qq
+        #~ - sudo apt-get install --force-yes -qq
+           #~ libsystemd-journal-dev
+           #~ libsystemd-daemon-dev
+           #~ libriemann-client-dev
+        #~ - sudo pip install -r requirements.txt
+      #~ before_script:
+      #~ script:
+        #~ - mkdir build
+        #~ - cd build
+        #~ - cmake
+            #~ -DCMAKE_C_FLAGS=-Werror
+            #~ -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
+            #~ ..
+        #~ - make -j install
+      #~ after_script:
+#~ 
+    #~ - env: E=trusty T=distcheck
+      #~ dist: trusty
+      #~ sudo: required
+      #~ cache:
+      #~ before_cache:
+      #~ compiler: gcc
+      #~ addons:
+        #~ apt:
+          #~ packages:
+            #~ - autoconf-archive
+            #~ - docbook-xsl
+            #~ - gradle
+            #~ - libcap-dev
+            #~ - libdbd-sqlite3
+            #~ - libdbi-dev
+            #~ - libesmtp-dev
+            #~ - libevtlog-dev
+            #~ - libgeoip-dev
+            #~ - libhiredis-dev
+            #~ - libjson0-dev
+            #~ - libnet1-dev
+            #~ - libprotobuf-c0-dev
+            #~ - libwrap0-dev
+            #~ - libxml2-utils
+            #~ - xsltproc
+#~ #            - libriemann-client-dev # TODO: compile
+#~ #            - libsystemd-daemon-dev # TODO: waiting for whitelisting
+#~ #            - libsystemd-journal-dev # TODO: waiting for whitelisting
+      #~ install:
+        #~ - export SLNG="$HOME/install/syslog-ng"
+#~ #        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
+        #~ - cat /etc/apt/sources.list
+        #~ - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        #~ - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          #~ sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        #~ - sudo apt-get update -qq
+        #~ - sudo apt-get install --force-yes -qq
+           #~ libriemann-client-dev
+           #~ libsystemd-daemon-dev
+           #~ libsystemd-journal-dev
+           #~ # gradle-2.2.1
+        #~ - sudo pip install -r requirements.txt
+    #~ # HACK
+    #~ # --keep-going
+        #~ # to make error messages more readable on error
+      #~ after_script:
 
 branches:
   except:
