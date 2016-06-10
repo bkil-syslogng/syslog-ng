@@ -150,25 +150,40 @@ include debian/Makefile.am
 include tgz2build/Makefile.am
 
 TEST_EXTENSIONS = .sh
+
 @VALGRIND_CHECK_RULES@
 
 VALGRIND_SUPPRESSIONS_FILES = \
   $(top_srcdir)/syslog-ng.supp
+
 EXTRA_DIST += syslog-ng.supp \
   syslog-ng.supp
+
 VALGRIND_FLAGS = \
   --num-callers=30 \
   --sim-hints=no-nptl-pthread-stackcache \
   --gen-suppressions=all \
-  --fullpath-after=${top_srcdir}
+
 VALGRIND_memcheck_FLAGS = \
   --leak-check=full \
   --freelist-vol=200000000 \
   --freelist-big-blocks=10000000 \
   --malloc-fill=55 \
   --free-fill=AA
+
+if "${top_srcdir}" = "."
+  VALGRIND_memcheck_FLAGS = \
+    ${VALGRIND_memcheck_FLAGS} \
+    --fullpath-after=${PWD}
+else
+  VALGRIND_memcheck_FLAGS = \
+    ${VALGRIND_memcheck_FLAGS} \
+    --fullpath-after=${top_srcdir}
+endif
+
 VALGRIND_helgrind_FLAGS = \
   --history-level=approx \
   --free-is-write=yes
+
 VALGRIND_drd_FLAGS = \
   --check-stack-var=yes
