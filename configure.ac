@@ -1493,17 +1493,6 @@ journald_mode()
   fi
 }
 
-full_path()
-{
-  case "$1" in
-    /*) echo "$1" ;;
-    *)  echo "$PWD"/"$1"
-  esac |
-  sed "s~\(/\.\)*/~/~g ; s~/\.~~"
-}
-
-TOP_SRCDIR_FULL=`full_path $(top_srcdir)`
-
 AC_DEFINE_UNQUOTED(JOURNALD_OFF, 0, ["Disable systemd-journal source"])
 AC_DEFINE_UNQUOTED(JOURNALD_OPTIONAL, 1, ["Enable systemd-journal source if journald is available"])
 AC_DEFINE_UNQUOTED(JOURNALD_SYSTEM, 2, ["Force systemd-journal source to use system's journald"])
@@ -1620,7 +1609,6 @@ AC_SUBST(JSON_DEPENDENCY)
 AC_SUBST(IVYKIS_SUBDIRS)
 AC_SUBST(RESOLV_LIBS)
 AC_SUBST(CFLAGS_NOWARN_POINTER_SIGN)
-AC_SUBST(TOP_SRCDIR_FULL)
 AC_SUBST(UUID_CFLAGS)
 AC_SUBST(UUID_LIBS)
 
