@@ -170,8 +170,8 @@ after_script:
 matrix:
   fast_finish: true
   allow_failures:
-    - env: E=precise T=valgrind-memcheck
-      compiler: gcc
+    #~ - env: E=precise T=valgrind-memcheck
+      #~ compiler: gcc
     - env: E=precise T=valgrind-sgcheck
       compiler: gcc
     - env: E=precise T=valgrind-helgrind
