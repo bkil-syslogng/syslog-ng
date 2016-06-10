@@ -167,6 +167,7 @@ VALGRIND_memcheck_FLAGS = \
   --freelist-big-blocks=10''000''000 \
   --malloc-fill=55 \
   --free-fill=AA \
+  --errors-for-leak-kinds=definite,possible \
   --fullpath-after=$(TOP_SRCDIR_FULL)
 
 VALGRIND_helgrind_FLAGS = \

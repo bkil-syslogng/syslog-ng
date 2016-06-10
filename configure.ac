@@ -1501,7 +1501,7 @@ full_path()
   esac
 }
 
-TOP_SRCDIR_FULL="full_path $(top_srcdir)"
+TOP_SRCDIR_FULL=`full_path $(top_srcdir)`
 
 AC_DEFINE_UNQUOTED(JOURNALD_OFF, 0, ["Disable systemd-journal source"])
 AC_DEFINE_UNQUOTED(JOURNALD_OPTIONAL, 1, ["Enable systemd-journal source if journald is available"])
@@ -1619,6 +1619,7 @@ AC_SUBST(JSON_DEPENDENCY)
 AC_SUBST(IVYKIS_SUBDIRS)
 AC_SUBST(RESOLV_LIBS)
 AC_SUBST(CFLAGS_NOWARN_POINTER_SIGN)
+AC_SUBST(TOP_SRCDIR_FULL)
 AC_SUBST(UUID_CFLAGS)
 AC_SUBST(UUID_LIBS)
 
