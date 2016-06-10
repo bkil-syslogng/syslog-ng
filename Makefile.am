@@ -167,7 +167,7 @@ VALGRIND_memcheck_FLAGS = \
   --freelist-big-blocks=10''000''000 \
   --malloc-fill=55 \
   --free-fill=AA \
-  --fullpath-after=$(TOP_SRCDIR_FULL)
+  --fullpath-after="$(TOP_SRCDIR_FULL)/"
 
 VALGRIND_helgrind_FLAGS = \
   --history-level=approx \

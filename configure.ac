@@ -1497,8 +1497,9 @@ full_path()
 {
   case "$1" in
     /*) echo "$1" ;;
-    *)  echo "$PWD"/"$1" | sed "s~\(/\.\)*/~/~g ; s~/\.~~"
-  esac
+    *)  echo "$PWD"/"$1"
+  esac |
+  sed "s~\(/\.\)*/~/~g ; s~/\.~~"
 }
 
 TOP_SRCDIR_FULL=`full_path $(top_srcdir)`
