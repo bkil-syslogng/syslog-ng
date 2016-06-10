@@ -172,12 +172,10 @@ VALGRIND_memcheck_FLAGS = \
   --free-fill=AA
 
 if "${top_srcdir}" = "."
-  VALGRIND_memcheck_FLAGS = \
-    ${VALGRIND_memcheck_FLAGS} \
+  VALGRIND_memcheck_FLAGS += \
     --fullpath-after=${PWD}
 else
-  VALGRIND_memcheck_FLAGS = \
-    ${VALGRIND_memcheck_FLAGS} \
+  VALGRIND_memcheck_FLAGS += \
     --fullpath-after=${top_srcdir}
 endif
 
