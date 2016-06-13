@@ -77,15 +77,17 @@ kv_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptions *path_op
 
   log_msg_make_writable(pmsg, path_options);
   /* FIXME: input length */
-  kv_scanner_input(self->kv_scanner, input);
-  while (kv_scanner_scan_next(self->kv_scanner))
+  KVScanner *scanner = kv_scanner_clone(self->kv_scanner);
+  kv_scanner_input(scanner, input);
+  while (kv_scanner_scan_next(scanner))
     {
 
       /* FIXME: value length */
       log_msg_set_value_by_name(*pmsg,
-                                _get_formatted_key(self, kv_scanner_get_current_key(self->kv_scanner)),
-                                kv_scanner_get_current_value(self->kv_scanner), -1);
+                                _get_formatted_key(self, kv_scanner_get_current_key(scanner)),
+                                kv_scanner_get_current_value(scanner), -1);
     }
+  kv_scanner_free(scanner);
   return TRUE;
 }
 
