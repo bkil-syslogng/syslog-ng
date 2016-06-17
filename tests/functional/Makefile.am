@@ -23,13 +23,16 @@ EXTRA_DIST	+= \
 func-test:
 	@$(top_srcdir)/tests/functional/runtests.sh
 
-func-py-checks: func-py-pep8 func-py-pylint
+func-py-checks: func-py-pep8 func-py-pylint func-py-pyflakes
 
 func-py-pep8:
 	pep8 --ignore=E501 $(FUNC_SRCDIR)/*.py
 
 func-py-pylint:
 	pylint -r n --rcfile=$(FUNC_SRCDIR)/pylintrc $(FUNC_SRCDIR)/*.py
+
+func-py-pyflakes:
+	pyflakes $(FUNC_SRCDIR)/*.py
 
 .PHONY: func-test
 
