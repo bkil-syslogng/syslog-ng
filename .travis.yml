@@ -92,9 +92,9 @@ before_script:
         --with-libhiredis=/usr";
     fi;
   - if [
-         "$T" = "valgrind-memcheck" -o
-         "$T" = "valgrind-sgcheck" -o
-         "$T" = "valgrind-helgrind"
+         "$T" = "unit-memcheck" -o
+         "$T" = "unit-sgcheck" -o
+         "$T" = "unit-helgrind"
        ]; then
       CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
     fi
@@ -141,19 +141,19 @@ script:
         make V=1;
         return $S;
       fi;
-    elif [ "$T" = "valgrind-memcheck" ]; then
+    elif [ "$T" = "unit-memcheck" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
       S=$?;
       cat test-suite-memcheck.log;
       return $S;
-    elif [ "$T" = "valgrind-sgcheck" ]; then
+    elif [ "$T" = "unit-sgcheck" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=sgcheck;
       S=$?;
       cat test-suite-sgcheck.log;
       return $S;
-    elif [ "$T" = "valgrind-helgrind" ]; then
+    elif [ "$T" = "unit-helgrind" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=helgrind;
       S=$?;
@@ -170,11 +170,11 @@ after_script:
 matrix:
   fast_finish: true
   allow_failures:
-    - env: E=precise T=valgrind-memcheck
+    - env: E=precise T=unit-memcheck
       compiler: gcc
-    - env: E=precise T=valgrind-sgcheck
+    - env: E=precise T=unit-sgcheck
       compiler: gcc
-    - env: E=precise T=valgrind-helgrind
+    - env: E=precise T=unit-helgrind
       compiler: gcc
   exclude:
     - env: E=precise T=distcheck
@@ -194,11 +194,11 @@ matrix:
         - export COPYRIGHTVERBOSITY=2
         - tests/copyright/check.sh . .
       after_script:
-    - env: E=precise T=valgrind-memcheck
+    - env: E=precise T=unit-memcheck
       compiler: gcc
-    - env: E=precise T=valgrind-sgcheck
+    - env: E=precise T=unit-sgcheck
       compiler: gcc
-    - env: E=precise T=valgrind-helgrind
+    - env: E=precise T=unit-helgrind
       compiler: gcc
     - env: E=trusty T=cmake
       dist: trusty
