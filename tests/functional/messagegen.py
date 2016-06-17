@@ -20,18 +20,22 @@
 #
 #############################################################################
 
-import struct, stat, re
-from socket import *
-from socket import ssl
-import os, sys, errno
+import struct
+import stat
+import socket
+import os
+import sys
+import errno
+import time
 
-from log import *
+from log import print_user
 
 syslog_prefix = "2004-09-07T10:43:21+01:00 bzorp prog[12345]:"
 syslog_new_prefix = "2004-09-07T10:43:21+01:00 bzorp prog 12345 - -"
 session_counter = 0
 need_to_flush = False
 padding = 'x' * 250
+
 
 class MessageSender(object):
     def __init__(self, repeat=100, new_protocol=0, dgram=0):
@@ -43,10 +47,9 @@ class MessageSender(object):
         global session_counter
         global need_to_flush
         global syslog_prefix
-        global syslog_prefix_new
+        global syslog_new_prefix
 
         need_to_flush = True
-
 
         print_user("generating %d messages using transport %s" % (self.repeat, str(self)))
 
@@ -62,13 +65,14 @@ class MessageSender(object):
             # add framing on tcp with new protocol
             if self.dgram == 0 and self.new_protocol == 1:
                 line = '%d %s' % (len(line), line)
-            self.sendMessage(line) # file or socket
+            self.sendMessage(line)  # file or socket
         expected.append((msg, session_counter, self.repeat))
         session_counter = session_counter + 1
         return expected
 
+
 class SocketSender(MessageSender):
-    def __init__(self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n', repeat=100, ssl=0, new_protocol=0):
+    def __init__(self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n', repeat=100, use_ssl=0, new_protocol=0):
         MessageSender.__init__(self, repeat, new_protocol, dgram)
         self.family = family
         self.sock_name = sock_name
@@ -76,22 +80,22 @@ class SocketSender(MessageSender):
         self.dgram = dgram
         self.send_by_bytes = send_by_bytes
         self.terminate_seq = terminate_seq
-        self.ssl = ssl
+        self.ssl = use_ssl
         self.new_protocol = new_protocol
+
     def initSender(self):
         if self.dgram:
-            self.sock = socket(self.family, SOCK_DGRAM)
+            self.sock = socket.socket(self.family, socket.SOCK_DGRAM)
         else:
-            self.sock = socket(self.family, SOCK_STREAM)
+            self.sock = socket.socket(self.family, socket.SOCK_STREAM)
 
         self.sock.connect(self.sock_name)
         if self.dgram:
-                self.sock.send('')
+            self.sock.send('')
         if sys.platform == 'linux2':
-                self.sock.setsockopt(SOL_SOCKET, SO_SNDTIMEO, struct.pack('ll', 3, 0))
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, struct.pack('ll', 3, 0))
         if not self.dgram and self.ssl:
-                self.sock = ssl(self.sock)
-
+            self.sock = socket.ssl(self.sock)
 
     def sendMessage(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
@@ -134,7 +138,7 @@ class SocketSender(MessageSender):
                         raise
 
     def __str__(self):
-        if self.family == AF_UNIX:
+        if self.family == socket.AF_UNIX:
             if self.dgram:
                 return 'unix-dgram(%s)' % (self.sock_name)
             else:
@@ -149,19 +153,16 @@ class SocketSender(MessageSender):
 
 
 class FileSender(MessageSender):
-    def __init__(self, file_name, padding=0, send_by_bytes=0, terminate_seq='\n', repeat=100):
+    def __init__(self, file_name, padding_=0, send_by_bytes=0, terminate_seq='\n', repeat=100):
         MessageSender.__init__(self, repeat)
         self.file_name = file_name
-        self.padding = padding
+        self.padding = padding_
         self.send_by_bytes = send_by_bytes
         self.terminate_seq = terminate_seq
         self.fd = None
 
         try:
-            if stat.S_ISFIFO(os.stat(file_name).st_mode):
-                self.is_pipe = True
-            else:
-                self.is_pipe = False
+            self.is_pipe = stat.S_ISFIFO(os.stat(file_name).st_mode)
         except OSError:
             self.is_pipe = False
 
@@ -201,4 +202,3 @@ class FileSender(MessageSender):
                 return 'pipe(%s)' % (self.file_name,)
         else:
             return 'file(%s)' % (self.file_name,)
-

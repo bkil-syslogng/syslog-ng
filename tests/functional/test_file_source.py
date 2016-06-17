@@ -38,16 +38,17 @@ log { source(s_wildcard); destination(d_wildcard); };
 
 """ % locals()
 
+
 def test_wildcard_files():
     messages = (
-      'wildcard0',
-      'wildcard1',
-      'wildcard2',
-      'wildcard3',
-      'wildcard4',
-      'wildcard5',
-      'wildcard6',
-      'wildcard7',
+        'wildcard0',
+        'wildcard1',
+        'wildcard2',
+        'wildcard3',
+        'wildcard4',
+        'wildcard5',
+        'wildcard6',
+        'wildcard7',
     )
 
     if not wildcard_file_source_supported:

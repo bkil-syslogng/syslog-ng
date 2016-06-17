@@ -24,12 +24,15 @@ import os
 import time
 import random
 
+
 def is_running_in_build_tree():
     return 'SYSLOG_NG_BINARY' not in os.environ
+
 
 def get_module_path_from_binary():
     module_path = os.popen("%s --version | grep \"Module-Path:\" | cut -d ' ' -f 2" % get_syslog_ng_binary(), 'r').read().strip()
     return module_path
+
 
 def format_module_path_for_intree_modules():
     module_path = ''
@@ -38,6 +41,7 @@ def format_module_path_for_intree_modules():
         break
     return module_path
 
+
 def get_module_path():
     if is_running_in_build_tree():
         module_path = format_module_path_for_intree_modules()
@@ -45,14 +49,17 @@ def get_module_path():
         module_path = get_module_path_from_binary()
     return module_path
 
+
 def get_syslog_ng_binary():
     return os.getenv('SYSLOG_NG_BINARY', '../../syslog-ng/syslog-ng')
+
 
 def is_premium():
     version = os.popen('%s -V' % get_syslog_ng_binary(), 'r').read()
     if version.find('premium-edition') != -1:
         return True
     return False
+
 
 def has_module(module):
     avail_mods = os.popen('%s -V | grep ^Available-Modules: ' % get_syslog_ng_binary(), 'r').read()
@@ -61,8 +68,7 @@ def has_module(module):
     return False
 
 
-is_premium_edition = is_premium()
-if is_premium_edition:
+if is_premium():
     logstore_store_supported = True
     wildcard_file_source_supported = True
 else:
@@ -70,8 +76,8 @@ else:
     wildcard_file_source_supported = False
 
 # TODO: just grab the first available port, otherwise need to wait between executions
-#port_number = os.getpid() % 30000 + 33000
-port_number = random.randint(49152,65535-3)
+# port_number = os.getpid() % 30000 + 33000
+port_number = random.randint(49152, 65535 - 3)
 ssl_port_number = port_number + 1
 port_number_syslog = port_number + 2
 port_number_network = port_number + 3
@@ -81,4 +87,3 @@ try:
     src_dir = os.environ["srcdir"]
 except KeyError:
     src_dir = current_dir
-

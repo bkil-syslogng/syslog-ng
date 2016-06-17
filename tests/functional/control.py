@@ -21,10 +21,13 @@
 #############################################################################
 # syslog-ng process control
 
-import os, sys, signal, traceback, time, errno, re
+import os
+import signal
+import time
+import re
 
-from globals import *
-from log import *
+from globals import logstore_store_supported, get_module_path, get_syslog_ng_binary
+from log import print_user
 import messagegen
 
 syslogng_pid = 0
@@ -38,7 +41,7 @@ def start_syslogng(conf, keep_persist=False, verbose=False):
         os.system('rm -f syslog-ng.persist')
 
     if not logstore_store_supported:
-        conf = re.sub('logstore\(.*\);', '', conf)
+        conf = re.sub(r'logstore\(.*\);', '', conf)
 
     f = open('test.conf', 'w')
     f.write(conf)
@@ -53,11 +56,24 @@ def start_syslogng(conf, keep_persist=False, verbose=False):
     if syslogng_pid == 0:
         os.putenv("RANDFILE", "rnd")
         module_path = get_module_path()
-        rc = os.execl(get_syslog_ng_binary(), get_syslog_ng_binary(), '-f', 'test.conf', '--fd-limit', '1024', '-F', verbose_opt, '-p', 'syslog-ng.pid', '-R', 'syslog-ng.persist', '--no-caps', '--enable-core', '--seed', '--module-path', module_path)
-        sys.exit(rc)
+        os.execl(
+            get_syslog_ng_binary(),
+            get_syslog_ng_binary(),
+            '-f', 'test.conf',
+            '--fd-limit', '1024',
+            '-F',
+            verbose_opt,
+            '-p', 'syslog-ng.pid',
+            '-R', 'syslog-ng.persist',
+            '--no-caps',
+            '--enable-core',
+            '--seed',
+            '--module-path', module_path
+        )
     time.sleep(5)
     print_user("Syslog-ng started")
     return True
+
 
 def stop_syslogng():
     global syslogng_pid
@@ -71,7 +87,7 @@ def stop_syslogng():
         pass
     try:
         try:
-            (pid, rc) = os.waitpid(syslogng_pid, 0)
+            (_, rc) = os.waitpid(syslogng_pid, 0)
         except OSError:
             raise
     finally:
@@ -81,6 +97,7 @@ def stop_syslogng():
         return True
     print_user("syslog-ng exited with a non-zero value (%d)" % rc)
     return False
+
 
 def flush_files(settle_time=3):
     global syslogng_pid
