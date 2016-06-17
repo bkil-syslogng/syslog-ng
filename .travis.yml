@@ -129,6 +129,7 @@ script:
       fi;
       return $S;
     elif [ "$T" = "func-test" ]; then
+      make --keep-going python-checks V=1 || return $?;
       make --keep-going func-py-checks V=1 || return $?;
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
@@ -141,7 +142,6 @@ script:
       . scripts/get-libjvm-path.sh || return $?;
       export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
       make func-test V=1 || return $?;
-      make --keep-going python-checks V=1 || return $?;
     elif [ "$T" = "unit-memcheck" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
