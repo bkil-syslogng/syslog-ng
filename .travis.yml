@@ -160,6 +160,14 @@ script:
       S=$?;
       cat test-suite-helgrind.log;
       return $S;
+    elif [ "$T" = "system-memcheck" ]; then
+      make -j install || return $?;
+      . scripts/get-libjvm-path.sh || return $?;
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
+      make --keep-going func-test V=1 VALGRIND_TOOL=memcheck;
+      S=$?;
+      cat test-suite-memcheck.log;
+      return $S;
     else
       true;
     fi
@@ -176,6 +184,8 @@ matrix:
     - env: E=precise T=unit-sgcheck
       compiler: gcc
     - env: E=precise T=unit-helgrind
+      compiler: gcc
+    - env: E=precise T=system-memcheck
       compiler: gcc
   exclude:
     - env: E=precise T=distcheck
@@ -200,6 +210,8 @@ matrix:
     - env: E=precise T=unit-sgcheck
       compiler: gcc
     - env: E=precise T=unit-helgrind
+      compiler: gcc
+    - env: E=precise T=system-memcheck
       compiler: gcc
     - env: E=trusty T=cmake
       dist: trusty
