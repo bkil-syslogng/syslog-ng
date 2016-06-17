@@ -73,6 +73,7 @@ install:
   #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
   #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
   - pip install --user -r requirements.txt
+  - pip install --user pyflakes
   - ./scripts/build-dbi.sh || exit $?
   - ./scripts/build-riemann-client.sh || exit $?
   - ./scripts/build-systemd.sh || exit $?
@@ -129,18 +130,19 @@ script:
       fi;
       return $S;
     elif [ "$T" = "func-test" ]; then
+      make --keep-going python-checks V=1 || return $?;
+      make --keep-going func-py-checks V=1 || return $?;
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
-      if [ "$S" = "0" ]; then
-        . scripts/get-libjvm-path.sh || return $?;
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
-        make func-test V=1;
-      elif [ "$S" = "42" ]; then
+      if [ "$S" = "42" ]; then
         return $S;
-      else
+      elif [ "$S" != "0" ]; then
         make V=1;
         return $S;
       fi;
+      . scripts/get-libjvm-path.sh || return $?;
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
+      make func-test V=1 || return $?;
     elif [ "$T" = "unit-memcheck" ]; then
       make -j install || return $?;
       make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
