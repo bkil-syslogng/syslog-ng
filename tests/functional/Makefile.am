@@ -2,6 +2,7 @@ export top_srcdir
 export top_builddir
 dbd_dir = $(shell echo $(exec_prefix)/lib/dbd)
 export dbd_dir
+FUNC_SRCDIR = $(top_srcdir)/tests/functional
 
 EXTRA_DIST	+= \
 		tests/functional/runtests.sh \
@@ -21,6 +22,14 @@ EXTRA_DIST	+= \
 
 func-test:
 	@$(top_srcdir)/tests/functional/runtests.sh
+
+func-py-checks: func-py-pep8 func-py-pylint
+
+func-py-pep8:
+	pep8 --ignore=E501 $(FUNC_SRCDIR)/*.py
+
+func-py-pylint:
+	pylint -r n --rcfile=$(FUNC_SRCDIR)/pylintrc $(FUNC_SRCDIR)/*.py
 
 .PHONY: func-test
 

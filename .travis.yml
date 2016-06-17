@@ -129,6 +129,7 @@ script:
       fi;
       return $S;
     elif [ "$T" = "func-test" ]; then
+      make --keep-going func-py-checks V=1 || return $?;
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
       if [ "$S" = "42" ]; then
