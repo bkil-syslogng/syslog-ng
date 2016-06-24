@@ -34,7 +34,6 @@ syslog_prefix = "2004-09-07T10:43:21+01:00 bzorp prog[12345]:"
 syslog_new_prefix = "2004-09-07T10:43:21+01:00 bzorp prog 12345 - -"
 session_counter = 0
 need_to_flush = False
-padding = 'x' * 250
 
 
 class MessageSender(object):
@@ -49,6 +48,7 @@ class MessageSender(object):
         global syslog_prefix
         global syslog_new_prefix
 
+        padding = 'x' * 250
         need_to_flush = True
 
         print_user("generating %d messages using transport %s" % (self.repeat, str(self)))
@@ -58,9 +58,11 @@ class MessageSender(object):
 
         for counter in range(1, self.repeat):
             if self.new_protocol == 0:
-                line = '<%d>%s %s %03d/%05d %s %s' % (pri, syslog_prefix, msg, session_counter, counter, str(self), padding)
+                line = '<%d>%s %s %03d/%05d %s %s' % (
+                    pri, syslog_prefix, msg, session_counter, counter, str(self), padding)
             else:
-                line = '<%d>1 %s %s %03d/%05d %s %s' % (pri, syslog_new_prefix, msg, session_counter, counter, str(self), padding)
+                line = '<%d>1 %s %s %03d/%05d %s %s' % (
+                    pri, syslog_new_prefix, msg, session_counter, counter, str(self), padding)
 
             # add framing on tcp with new protocol
             if self.dgram == 0 and self.new_protocol == 1:
@@ -72,7 +74,9 @@ class MessageSender(object):
 
 
 class SocketSender(MessageSender):
-    def __init__(self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n', repeat=100, use_ssl=0, new_protocol=0):
+    def __init__(
+        self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n',
+            repeat=100, use_ssl=0, new_protocol=0):
         MessageSender.__init__(self, repeat, new_protocol, dgram)
         self.family = family
         self.sock_name = sock_name
@@ -97,45 +101,37 @@ class SocketSender(MessageSender):
         if not self.dgram and self.ssl:
             self.sock = socket.ssl(self.sock)
 
+    def send_data(self, data):
+        try:
+            # WTF? SSLObject only has write, whereas sockets only have send methods
+            if self.ssl:
+                self.sock.write(data)
+            else:
+                self.sock.send(data)
+            return False
+        except OSError, error:
+            if error.errno == errno.ENOBUFS:
+                print_user('got ENOBUFS, sleeping...')
+                time.sleep(0.5)
+                return True
+            else:
+                print_user("hmm... got an error to the 'send' call, maybe syslog-ng is not accepting messages?")
+                raise
+        except:
+            print_user("hmm... got an unknown error to the 'send' call, maybe syslog-ng is not accepting messages?")
+            raise
+
     def sendMessage(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
         if self.send_by_bytes:
-            for c in line:
-                try:
-                    if self.ssl:
-                        self.sock.write(c)
-                    else:
-                        self.sock.send(c)
-                except error, e:
-                    if e[0] == errno.ENOBUFS:
-                        print_user('got ENOBUFS, sleeping...')
-                        time.sleep(0.5)
-                        repeat = True
-                    else:
-                        print_user("hmm... got an error to the 'send' call, maybe syslog-ng is not accepting messages?")
-                        raise
+            for ch in line:
+                while self.send_data(ch):
+                    pass
+
         else:
-            repeat = True
-            while repeat:
-                try:
-                    repeat = False
-
-                    # WTF? SSLObject only has write, whereas sockets only have send methods
-                    if self.ssl:
-                        self.sock.write(line)
-                    else:
-                        self.sock.send(line)
-
-                    if self.dgram:
-                        time.sleep(0.01)
-                except error, e:
-                    if e[0] == errno.ENOBUFS:
-                        print_user('got ENOBUFS, sleeping...')
-                        time.sleep(0.5)
-                        repeat = True
-                    else:
-                        print_user("hmm... got an error to the 'send' call, maybe syslog-ng is not accepting messages?")
-                        raise
+            while self.send_data(line):
+                if self.dgram:
+                    time.sleep(0.01)
 
     def __str__(self):
         if self.family == socket.AF_UNIX:
@@ -153,10 +149,10 @@ class SocketSender(MessageSender):
 
 
 class FileSender(MessageSender):
-    def __init__(self, file_name, padding_=0, send_by_bytes=0, terminate_seq='\n', repeat=100):
+    def __init__(self, file_name, padding=0, send_by_bytes=0, terminate_seq='\n', repeat=100):
         MessageSender.__init__(self, repeat)
         self.file_name = file_name
-        self.padding = padding_
+        self.padding = padding
         self.send_by_bytes = send_by_bytes
         self.terminate_seq = terminate_seq
         self.fd = None
@@ -177,18 +173,13 @@ class FileSender(MessageSender):
         else:
             self.fd = open(self.file_name, "a")
 
-    def sendMessages(self, msg):
-        res = super(FileSender, self).sendMessages(msg)
-
-        return res
-
     def sendMessage(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
         if self.padding:
             line += '\0' * (self.padding - len(line))
         if self.send_by_bytes:
-            for c in line:
-                self.fd.write(c)
+            for ch in line:
+                self.fd.write(ch)
                 self.fd.flush()
         else:
             self.fd.write(line)

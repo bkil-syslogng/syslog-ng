@@ -21,11 +21,10 @@
 #############################################################################
 
 import os
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
-from control import flush_files, stop_syslogng
+from globals import port_number, has_module
+import messagegen
+import messagecheck
+import control
 
 config = """@version: 3.8
 
@@ -67,12 +66,12 @@ def test_python():
         'python1',
         'python2'
     )
-    s = SocketSender(AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(AF_INET, ('localhost', port_number), dgram=0)
 
     expected = []
     for msg in messages:
-        expected.extend(s.sendMessages(msg, pri=7))
-    stopped = stop_syslogng()
-    if not stopped or not check_file_expected('test-python', expected, settle_time=2):
+        expected.extend(sender.sendMessages(msg, pri=7))
+    stopped = control.stop_syslogng()
+    if not stopped or not messagecheck.check_file_expected('test-python', expected, settle_time=2):
         return False
     return True
