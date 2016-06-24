@@ -20,10 +20,10 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
+from globals import wildcard_file_source_supported
+import log
+import messagegen
+import messagecheck
 
 config = """@version: 3.8
 
@@ -52,18 +52,18 @@ def test_wildcard_files():
     )
 
     if not wildcard_file_source_supported:
-        print_user("Not testing a Premium version, skipping wild card source tests")
+        log.print_user("Not testing a Premium version, skipping wild card source tests")
         return True
     expected = []
 
     for ndx in range(0, len(messages)):
-        s = FileSender('wildcard/%d.log' % (ndx % 4), repeat=100)
-        expected.extend(s.sendMessages(messages[ndx]))
+        sender = messagegen.FileSender('wildcard/%d.log' % (ndx % 4), repeat=100)
+        expected.extend(sender.send_messages(messages[ndx]))
 
     # we need more time to settle, as poll based polling might need 4*3 sec
     # to read the contents for all 4 files (1 sec to discover there are
     # messages)
 
-    if not check_file_expected('test-wildcard', expected, settle_time=12):
+    if not messagecheck.check_file_expected('test-wildcard', expected, settle_time=12):
         return False
     return True

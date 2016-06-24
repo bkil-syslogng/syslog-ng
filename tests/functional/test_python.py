@@ -21,6 +21,7 @@
 #############################################################################
 
 import os
+import socket
 from globals import port_number, has_module
 import messagegen
 import messagecheck
@@ -66,11 +67,11 @@ def test_python():
         'python1',
         'python2'
     )
-    sender = messagegen.SocketSender(AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', port_number), dgram=0)
 
     expected = []
     for msg in messages:
-        expected.extend(sender.sendMessages(msg, pri=7))
+        expected.extend(sender.send_messages(msg, pri=7))
     stopped = control.stop_syslogng()
     if not stopped or not messagecheck.check_file_expected('test-python', expected, settle_time=2):
         return False

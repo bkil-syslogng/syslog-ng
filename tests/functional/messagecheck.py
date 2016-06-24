@@ -20,32 +20,34 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from control import *
-from messagegen import syslog_prefix
+import os
+import re
+from globals import logstore_store_supported
+from log import print_user
+import control
+import messagegen
 
 
 def logstore_reader(fname):
     try:
         return os.popen("../../src/logcat %s.lgs" % fname, "r")
-    except OSError, e:
-        print_user("Error opening file: %s, %s" % (fname, str(e)))
+    except OSError, err:
+        print_user("Error opening file: %s, %s" % (fname, str(err)))
 
 
 def file_reader(fname):
     try:
         return open(fname + ".log", "r")
-    except IOError, e:
-        print_user("Error opening file: %s, %s" % (fname, str(e)))
+    except IOError, err:
+        print_user("Error opening file: %s, %s" % (fname, str(err)))
 
 
 def sql_reader(name):
     (db, table) = name
     try:
         return os.popen("""echo "select * from %s order by msg;" | sqlite3 -separator " "  %s """ % (table, db), "r")
-    except OSError, e:
-        print_user("Error opening file: %s, %s" % (fname, str(e)))
+    except OSError, err:
+        print_user("Error opening db: %s %s, %s" % (db, table, str(err)))
 
 
 def check_contents(f, messages, syslog_prefix, skip_prefix):
@@ -71,33 +73,33 @@ def check_contents(f, messages, syslog_prefix, skip_prefix):
                        % (syslog_prefix, f, lineno, read_line))
             return False
         msg = read_line[skip_prefix + prefix_len:]
-        m = re.match(r"^ (\S+) (\d+)/(\d+)", msg)
+        match = re.match(r"^ (\S+) (\d+)/(\d+)", msg)
 
-        if not m:
+        if not match:
             print_user("message payload unexpected format, file=%s:%d, line=%s" % (f, lineno, read_line))
             return False
-        msg = m.group(1)
-        session = int(m.group(2))
-        id = int(m.group(3))
-        if not (msg, session) in matches:
-            if id != 1:
+        msg = match.group(1)
+        session = int(match.group(2))
+        sid = int(match.group(3))
+        if (msg, session) not in matches:
+            if sid != 1:
                 print_user("the id of the first message in a session is not 1, session=%d, "
                            "id=%d, file=%s:%d, line=%s"
-                           % (session, id, f, lineno, read_line))
+                           % (session, sid, f, lineno, read_line))
                 return False
         else:
-            if matches[(msg, session)] != id - 1:
+            if matches[(msg, session)] != sid - 1:
                 print_user("message reordering/drop detected in the same session, session=%d, "
                            "id=%d, expected_id=%d, file=%s:%d, line=%s"
-                           % (session, id, matches[(msg, session)] + 1, f, lineno, read_line))
+                           % (session, sid, matches[(msg, session)] + 1, f, lineno, read_line))
                 return False
-        matches[(msg, session)] = id
+        matches[(msg, session)] = sid
         read_line = f.readline().strip()
         lineno = lineno + 1
 
     for (msg, session, count) in messages:
 
-        if not (msg, session) in matches:
+        if (msg, session) not in matches:
             print_user("output log files lack this kind of message: %s session: %d, count: %d"
                        % (msg, session, count))
             return False
@@ -118,9 +120,9 @@ def check_reader_expected(reader, messages, settle_time, syslog_prefix, skip_pre
     return check_contents(reader, messages, syslog_prefix, skip_prefix)
 
 
-def check_file_expected(fname, messages, settle_time=1, syslog_prefix=syslog_prefix, skip_prefix=0):
+def check_file_expected(fname, messages, settle_time=1, syslog_prefix=messagegen.syslog_prefix, skip_prefix=0):
     print_user("Checking contents of output files: %s" % fname)
-    flush_files(settle_time)
+    control.flush_files(settle_time)
 
     if logstore_store_supported:
         readers = (file_reader, logstore_reader)

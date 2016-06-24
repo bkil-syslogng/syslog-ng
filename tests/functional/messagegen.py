@@ -42,7 +42,7 @@ class MessageSender(object):
         self.new_protocol = new_protocol
         self.dgram = dgram
 
-    def sendMessages(self, msg, pri=7):
+    def send_messages(self, msg, pri=7):
         global session_counter
         global need_to_flush
         global syslog_prefix
@@ -53,7 +53,7 @@ class MessageSender(object):
 
         print_user("generating %d messages using transport %s" % (self.repeat, str(self)))
 
-        self.initSender()
+        self.init_sender()
         expected = []
 
         for counter in range(1, self.repeat):
@@ -67,7 +67,7 @@ class MessageSender(object):
             # add framing on tcp with new protocol
             if self.dgram == 0 and self.new_protocol == 1:
                 line = '%d %s' % (len(line), line)
-            self.sendMessage(line)  # file or socket
+            self.send_message(line)  # file or socket
         expected.append((msg, session_counter, self.repeat))
         session_counter = session_counter + 1
         return expected
@@ -87,7 +87,7 @@ class SocketSender(MessageSender):
         self.ssl = use_ssl
         self.new_protocol = new_protocol
 
-    def initSender(self):
+    def init_sender(self):
         if self.dgram:
             self.sock = socket.socket(self.family, socket.SOCK_DGRAM)
         else:
@@ -121,7 +121,7 @@ class SocketSender(MessageSender):
             print_user("hmm... got an unknown error to the 'send' call, maybe syslog-ng is not accepting messages?")
             raise
 
-    def sendMessage(self, msg):
+    def send_message(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
         if self.send_by_bytes:
             for ch in line:
@@ -167,13 +167,13 @@ class FileSender(MessageSender):
             self.fd.flush()
             self.fd.close()
 
-    def initSender(self):
+    def init_sender(self):
         if self.is_pipe:
             self.fd = open(self.file_name, "w")
         else:
             self.fd = open(self.file_name, "a")
 
-    def sendMessage(self, msg):
+    def send_message(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
         if self.padding:
             line += '\0' * (self.padding - len(line))
