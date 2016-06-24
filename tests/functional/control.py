@@ -109,7 +109,7 @@ def flush_files(settle_time=3):
     # allow syslog-ng to settle
     time.sleep(settle_time)
 
-    # sendMessages waits between etaps, so we assume that syslog-ng has
+    # send_messages waits between etaps, so we assume that syslog-ng has
     # already received/processed everything we've sent to it. Go ahead send
     # a HUP signal.
     try:

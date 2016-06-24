@@ -21,7 +21,7 @@
 #############################################################################
 
 from socket import AF_UNIX, AF_INET
-from globals import port_number, port_number_syslog, port_number_network, ssl_port_number
+from globals import port_number, port_number_syslog, port_number_network, ssl_port_number, src_dir
 from messagegen import FileSender, SocketSender, syslog_new_prefix
 from messagecheck import check_file_expected
 
@@ -167,11 +167,11 @@ def test_input_drivers():
 
     expected = []
     for sender in senders:
-        expected.extend(sender.sendMessages(message))
+        expected.extend(sender.send_messages(message))
 
     expected_new = []
     for s_n in senders_new:
-        expected_new.extend(s_n.sendMessages(message_new))
+        expected_new.extend(s_n.send_messages(message_new))
 
     return (check_file_expected("test-input1", expected, settle_time=6) and
             check_file_expected("test-input1_new", expected_new, settle_time=6,
@@ -182,7 +182,7 @@ def test_indep():
     message = 'indep_pipes'
 
     sender = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
-    expected = sender.sendMessages(message)
+    expected = sender.send_messages(message)
     return check_file_expected("test-indep1", expected) and check_file_expected("test-indep2", expected)
 
 
@@ -200,7 +200,7 @@ def test_final():
     for ndx in range(0, len(messages)):
         if not expected[ndx]:
             expected[ndx] = []
-        expected[ndx].extend(sender.sendMessages(messages[ndx]))
+        expected[ndx].extend(sender.send_messages(messages[ndx]))
 
     for ndx in range(0, len(messages)):
         if not check_file_expected('test-final%d' % (ndx + 1,), expected[ndx]):
@@ -221,7 +221,7 @@ def test_fallback():
     for ndx in range(0, len(messages)):
         if not expected[ndx]:
             expected[ndx] = []
-        expected[ndx].extend(sender.sendMessages(messages[ndx]))
+        expected[ndx].extend(sender.send_messages(messages[ndx]))
 
     for ndx in range(0, len(messages)):
         if not check_file_expected('test-fb%d' % (ndx + 1,), expected[ndx]):
@@ -253,6 +253,6 @@ def test_catchall():
 
     expected = []
     for sender in senders:
-        expected.extend(sender.sendMessages(message))
+        expected.extend(sender.send_messages(message))
 
     return check_file_expected("test-catchall", expected)
