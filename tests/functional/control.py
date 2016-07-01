@@ -100,6 +100,7 @@ def stop_syslogng():
 
 
 def flush_files(settle_time=3):
+    # pylint: disable=global-variable-not-assigned
     global syslogng_pid
 
     if syslogng_pid == 0 or not messagegen.need_to_flush:
