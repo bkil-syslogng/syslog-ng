@@ -110,7 +110,7 @@ def main():
                 test_name = test_module.__name__ + '.' + obj
                 print_start(test_name)
 
-                if not start_syslogng(test_module.config, verbose):
+                if not start_syslogng(test_module.CONFIG, verbose):
                     sys.exit(1)
 
                 print_user("Starting test case...")
