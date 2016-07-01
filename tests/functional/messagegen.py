@@ -130,17 +130,20 @@ class SocketSender(MessageSender):
             print_user("hmm... got an unknown error to the 'send' call, maybe syslog-ng is not accepting messages?")
             raise
 
+    def send_data_wait(self, data):
+        self.send_data(data)
+        if self.dgram:
+            time.sleep(0.01)
+
     def send_message(self, msg):
         line = '%s%s' % (msg, self.terminate_seq)
         if self.send_by_bytes:
             for ch in line:
                 while self.send_data(ch):
                     pass
-
         else:
-            while self.send_data(line):
-                if self.dgram:
-                    time.sleep(0.01)
+            while self.send_data_wait(line):
+                pass
 
     def __str__(self):
         if self.family == socket.AF_UNIX:
