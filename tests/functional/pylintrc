@@ -37,38 +37,17 @@ load-plugins=
 # --disable=W"
 #disable=
 
-disable=C0111,W0613,R0903,I0011,W0142,E1101,R0921,R0922,R0801
+disable=C0111
 
 # C0111     missing-docstring       Our priority is to make the code document
 #                                   itself. Docstring is required only when
 #                                   the signature is not enough to tell
 #                                   everything important.
 #
-# W0613     unused-argument         Methods of test doubles, for example stubs,
-#                                   often return canned values, not using any
-#                                   of their arguments.
-#
-# R0903     too-few-public-methods  Node classes often have no methods at all.
-#
 # I0011     locally-disabled        Disabling a Pylint warning is always the
 #                                   result of a decision, no additional notification
 #                                   is required to tell us what we did.
-#
-# W0142     star-args               Using * or ** is not magic, rather it is a very
-#                                   useful Python feature.
-#
-# E1101     no-member               Gives false positives on numpy dynamic module
-#                                   functions.
-#
-# R0921     abstract-class-not-used Due to a pylint bug (#111138), this cannot be
-#                                   disabled inline. The warning itself is invalid,
-#                                   as the class is used by addons, which is not
-#                                   visible to pylint.
-#
-# R0922     abstract-class-little-used Probably due to a pylint bug, this cannot be
-#                                   disabled inline. The warning itself is invalid,
-#                                   as the class is used by addons, which is not
-#                                   visible to pylint.
+
 [REPORTS]
 
 # Set the output format. Available formats are text, parseable, colorized, msvs
