@@ -22,6 +22,8 @@
 
 import time
 
+# pylint: disable=superfluous-parens
+
 
 def print_user(msg):
     print '    ', time.strftime('%Y-%M-%dT%H:%m:%S'), msg

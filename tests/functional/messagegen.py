@@ -35,6 +35,8 @@ SYSLOG_NEW_PREFIX = "2004-09-07T10:43:21+01:00 bzorp prog 12345 - -"
 SESSION_COUNTER = 0
 NEED_TO_FLUSH = False
 
+# pylint: disable=global-statement
+
 
 class MessageSender(object):
     def __init__(self, repeat=100, new_protocol=0, dgram=0):
@@ -76,7 +78,7 @@ class MessageSender(object):
 class SocketSender(MessageSender):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
-        self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n',
+            self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n',
             repeat=100, use_ssl=0, new_protocol=0):
         MessageSender.__init__(self, repeat, new_protocol, dgram)
         self.family = family
