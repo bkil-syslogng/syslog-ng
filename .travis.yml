@@ -63,7 +63,7 @@ install:
   - export SLNG_CACHE="$HOME/.local";
     export SLNG="$HOME/install/syslog-ng";
     export PATH="$SLNG_CACHE"/bin:$PATH;
-    export PKG_CONFIG_PATH=$SLNG_CACHE/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
+    export PKG_CONFIG_PATH=$SLNG_CACHE/usr/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
 #  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
   - echo "max_size = 150M" > ~/.ccache/ccache.conf
   - if [ "$CC" = "clang" ]; then
