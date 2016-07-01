@@ -74,6 +74,12 @@ class MessageSender(object):
         SESSION_COUNTER = SESSION_COUNTER + 1
         return expected
 
+    def init_sender(self):
+        raise NotImplementedError
+
+    def send_message(self, line):
+        raise NotImplementedError
+
 
 class SocketSender(MessageSender):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
