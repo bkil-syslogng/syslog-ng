@@ -109,7 +109,6 @@ def test_sql():
     stopped = control.stop_syslogng()
     if not stopped:
         return False
-    time.sleep(5)
     return messagecheck.check_sql_expected(
         "%s/test-sql.db" % CURRENT_DIR,
         "logs",

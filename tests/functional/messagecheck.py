@@ -22,6 +22,8 @@
 
 import os
 import re
+import time
+
 from globals import LOGSTORE_STORE_SUPPORTED
 from log import print_user
 import control
@@ -116,7 +118,7 @@ def check_contents(f, messages, syslog_prefix, skip_prefix):
     return True
 
 
-def check_reader_expected(reader, messages, settle_time, syslog_prefix, skip_prefix):
+def check_reader_expected(reader, messages, syslog_prefix, skip_prefix):
     return check_contents(reader, messages, syslog_prefix, skip_prefix)
 
 
@@ -129,9 +131,10 @@ def check_file_expected(fname, messages, settle_time=1, syslog_prefix=messagegen
     else:
         readers = (file_reader,)
     for reader in readers:
-        return check_reader_expected(reader(fname), messages, settle_time, syslog_prefix, skip_prefix)
+        return check_reader_expected(reader(fname), messages, syslog_prefix, skip_prefix)
 
 
 def check_sql_expected(dbname, tablename, messages, settle_time=1, syslog_prefix="", skip_prefix=0):
     print_user("Checking contents of output database %s, table: %s" % (dbname, tablename))
-    return check_reader_expected(sql_reader((dbname, tablename)), messages, settle_time, syslog_prefix, skip_prefix)
+    time.sleep(settle_time)
+    return check_reader_expected(sql_reader((dbname, tablename)), messages, syslog_prefix, skip_prefix)
