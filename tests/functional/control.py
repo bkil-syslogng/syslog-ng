@@ -32,6 +32,8 @@ import messagegen
 
 SYSLOGNG_PID = 0
 
+# pylint: disable=global-statement
+
 
 def start_syslogng(conf, keep_persist=False, verbose=False):
     global SYSLOGNG_PID
