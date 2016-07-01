@@ -37,7 +37,7 @@ load-plugins=
 # --disable=W"
 #disable=
 
-disable=C0111
+disable=C0111,I0011
 
 # C0111     missing-docstring       Our priority is to make the code document
 #                                   itself. Docstring is required only when
