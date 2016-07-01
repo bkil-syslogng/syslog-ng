@@ -21,6 +21,7 @@
 #############################################################################
 
 
+# pylint: disable=no-self-use
 class DestTest(object):
 
     def init(self, options):

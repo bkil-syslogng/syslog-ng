@@ -45,8 +45,8 @@ class MessageSender(object):
     def send_messages(self, msg, pri=7):
         global session_counter
         global need_to_flush
-        global syslog_prefix
-        global syslog_new_prefix
+        global syslog_prefix  # pylint: disable=global-variable-not-assigned
+        global syslog_new_prefix  # pylint: disable=global-variable-not-assigned
 
         padding = 'x' * 250
         need_to_flush = True
@@ -74,6 +74,7 @@ class MessageSender(object):
 
 
 class SocketSender(MessageSender):
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self, family, sock_name, dgram=0, send_by_bytes=0, terminate_seq='\n',
             repeat=100, use_ssl=0, new_protocol=0):

@@ -21,7 +21,7 @@
 #############################################################################
 
 from socket import AF_UNIX, AF_INET
-from globals import port_number, port_number_syslog, port_number_network, ssl_port_number, src_dir
+from globals import port_number, port_number_syslog, port_number_network, ssl_port_number
 from messagegen import FileSender, SocketSender, syslog_new_prefix
 from messagecheck import check_file_expected
 
