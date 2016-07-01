@@ -26,7 +26,7 @@ build_riemann_client() {
     git clone https://github.com/algernon/riemann-c-client.git || exit 1
     cd riemann-c-client || exit 1
     autoreconf -i || exit 1
-    ./configure --prefix="$SLNG_CACHE" \
+    ./configure --prefix="$SLNG_CACHE/usr" \
       --disable-dependency-tracking || exit 1
     make -j install || exit 1
     cd .. || exit 1
