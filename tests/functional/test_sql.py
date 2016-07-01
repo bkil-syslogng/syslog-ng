@@ -20,11 +20,15 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
-from control import flush_files, stop_syslogng
+import re
+import os
+import sys
+import time
+from globals import current_dir, port_number, has_module
+from log import print_user
+import messagegen
+import messagecheck
+import control
 
 config = """@version: 3.8
 
@@ -94,13 +98,20 @@ def test_sql():
         'sql1',
         'sql2'
     )
-    s = SocketSender(AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(AF_INET, ('localhost', port_number), dgram=0)
 
     expected = []
     for msg in messages:
-        expected.extend(s.sendMessages(msg, pri=7))
+        expected.extend(sender.sendMessages(msg, pri=7))
     print_user("Waiting for 10 seconds until syslog-ng writes all records to the SQL table")
     time.sleep(10)
-    stopped = stop_syslogng()
+    stopped =  control.stop_syslogng()
+    if not stopped:
+        return False
     time.sleep(5)
-    return stopped and check_sql_expected("%s/test-sql.db" % current_dir, "logs", expected, settle_time=5, syslog_prefix="Sep  7 10:43:21 bzorp prog 12345")
+    return messagecheck.check_sql_expected(
+              "%s/test-sql.db" % current_dir,
+              "logs",
+              expected,
+              settle_time=5,
+              syslog_prefix="Sep  7 10:43:21 bzorp prog 12345")

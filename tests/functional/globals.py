@@ -28,14 +28,16 @@ def is_running_in_build_tree():
 
 
 def get_module_path_from_binary():
-    module_path = os.popen("%s --version | grep \"Module-Path:\" | cut -d ' ' -f 2" % get_syslog_ng_binary(), 'r').read().strip()
+    module_path = os.popen(
+        "%s --version | grep \"Module-Path:\" | cut -d ' ' -f 2"
+        % get_syslog_ng_binary(), 'r').read().strip()
     return module_path
 
 
 def format_module_path_for_intree_modules():
     module_path = ''
-    for (root, dirs, files) in os.walk(os.path.abspath(os.path.join(os.environ['top_builddir'], 'modules'))):
-        module_path += ':'.join(map(lambda x: root + '/' + x + '/.libs', dirs))
+    for (root, dirs, _) in os.walk(os.path.abspath(os.path.join(os.environ['top_builddir'], 'modules'))):
+        module_path += ':'.join([root + '/' + folder + '/.libs' for folder in dirs])
         break
     return module_path
 

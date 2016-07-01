@@ -20,10 +20,10 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
+import os
+import re
+from globals import port_number
+from log import print_user
 
 config = """@version: 3.8
 
@@ -44,7 +44,10 @@ def test_performance():
         'bzorp': 10000
     }
     print_user("Starting loggen for 10 seconds")
-    out = os.popen("../loggen/loggen -r 1000000 -Q -i -S -s 160 -I 10 127.0.0.1 %d 2>&1 |tail -n +1" % port_number, 'r').read()
+    cmd = """
+../loggen/loggen -r 1000000 -Q -i -S -s 160 -I 10 127.0.0.1 %d 2>&1 |
+tail -n +1""" % port_number
+    out = os.popen(cmd, 'r').read()
 
     print_user("performane: %s" % out)
     rate = float(re.sub('^.*rate = ([0-9.]+).*$', '\\1', out))
