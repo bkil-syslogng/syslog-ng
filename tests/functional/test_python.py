@@ -20,12 +20,12 @@
 #
 #############################################################################
 
+import os
 from globals import *
 from log import *
 from messagegen import *
 from messagecheck import *
 from control import flush_files, stop_syslogng
-import os
 
 config = """@version: 3.8
 
@@ -45,16 +45,17 @@ log { source(s_tcp); destination(d_python); };
 def get_source_dir():
     return os.path.abspath(os.path.dirname(__file__))
 
+
 def check_env():
 
     if not has_module('mod-python'):
         print 'Python module is not available, skipping Python test'
         return False
 
-    src_dir = get_source_dir()
-    print src_dir
-    if 'PYTHONPATH' not in os.environ or src_dir not in os.environ['PYTHONPATH']:
-        os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + src_dir
+    parent_dir = get_source_dir()
+    print parent_dir
+    if 'PYTHONPATH' not in os.environ or parent_dir not in os.environ['PYTHONPATH']:
+        os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + parent_dir
 
     print 'Python module found, proceeding to Python tests'
     return True

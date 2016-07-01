@@ -38,9 +38,10 @@ log { source(s_tcp); destination(d_messages); };
 
 """ % locals()
 
+
 def test_performance():
     expected_rate = {
-      'bzorp': 10000
+        'bzorp': 10000
     }
     print_user("Starting loggen for 10 seconds")
     out = os.popen("../loggen/loggen -r 1000000 -Q -i -S -s 160 -I 10 127.0.0.1 %d 2>&1 |tail -n +1" % port_number, 'r').read()
@@ -49,7 +50,7 @@ def test_performance():
     rate = float(re.sub('^.*rate = ([0-9.]+).*$', '\\1', out))
 
     hostname = os.uname()[1]
-    if expected_rate.has_key(hostname):
+    if hostname in expected_rate:
         return rate > expected_rate[hostname]
 
     # we expect to be able to process at least 1000 msgs/sec even on our venerable HP-UX

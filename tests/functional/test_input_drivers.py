@@ -79,7 +79,7 @@ destination d_final5 { file("test-final5.log"); logstore("test-final5.lgs"); };
 
 
 # test final flag + rest
-log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f_final); 
+log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f_final);
 
         filter(f_final_1_to_4);
         log { filter(f_final1); destination(d_final1); flags(final); };
@@ -94,7 +94,7 @@ log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f
 # will get here, as the filter above excludes that from the previous log
 # statement.
 
-log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl);  
+log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl);
 
         # this filter would match everything from final1 to final5, but the
         # flags(final) in the previous statement would stop the processing
@@ -132,8 +132,8 @@ log { filter(f_catchall); destination(d_catchall); flags(catch-all); };
 
 
 def test_input_drivers():
-    message = 'input_drivers';
-    message_new = 'input_drivers_new';
+    message = 'input_drivers'
+    message_new = 'input_drivers_new'
 
     senders = (
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq='\n'),
@@ -148,8 +148,8 @@ def test_input_drivers():
         SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq=''),
         SocketSender(AF_INET, ('localhost', port_number), dgram=0),
         SocketSender(AF_INET, ('localhost', port_number), dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, ssl=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, send_by_bytes=1, ssl=1),
+        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, use_ssl=1),
+        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, send_by_bytes=1, use_ssl=1),
         SocketSender(AF_INET, ('localhost', port_number_network), dgram=1, terminate_seq='\n'),
         SocketSender(AF_INET, ('localhost', port_number_network), dgram=0),
         FileSender('log-pipe'),
@@ -174,24 +174,27 @@ def test_input_drivers():
         expected_new.extend(s_n.sendMessages(message_new))
 
     return (check_file_expected("test-input1", expected, settle_time=6) and
-            check_file_expected("test-input1_new", expected_new, settle_time=6, syslog_prefix=syslog_new_prefix, skip_prefix=len('<7>1 ')))
+            check_file_expected("test-input1_new", expected_new, settle_time=6,
+                                syslog_prefix=syslog_new_prefix, skip_prefix=len('<7>1 ')))
+
 
 def test_indep():
-    message = 'indep_pipes';
+    message = 'indep_pipes'
 
     s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     expected = s.sendMessages(message)
     return check_file_expected("test-indep1", expected) and check_file_expected("test-indep2", expected)
 
+
 def test_final():
     messages = (
-      'final1',
-      'final2',
-      'final3',
-      'final4',
-      'final5'
+        'final1',
+        'final2',
+        'final3',
+        'final4',
+        'final5'
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
     s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
@@ -204,14 +207,15 @@ def test_final():
             return False
     return True
 
+
 def test_fallback():
     messages = (
-      'fallback1',
-      'fallback2',
-      'fallback3',
-      'fallback4',
+        'fallback1',
+        'fallback2',
+        'fallback3',
+        'fallback4',
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
     s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
@@ -224,9 +228,10 @@ def test_fallback():
             return False
     return True
 
+
 def test_catchall():
 
-    message = 'catchall';
+    message = 'catchall'
 
     senders = (
         SocketSender(AF_UNIX, 'log-stream-catchall', dgram=0, send_by_bytes=1),
@@ -250,5 +255,4 @@ def test_catchall():
     for s in senders:
         expected.extend(s.sendMessages(message))
 
-    return check_file_expected("test-catchall", expected);
-
+    return check_file_expected("test-catchall", expected)

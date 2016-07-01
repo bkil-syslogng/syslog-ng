@@ -72,13 +72,14 @@ log { source(s_unix);
 
 """ % locals()
 
+
 def test_facility_single():
     messages = (
-      (41, 'facility1'),
-      (1, 'facility2'),
-      (17, 'facility3'),
+        (41, 'facility1'),
+        (1, 'facility2'),
+        (17, 'facility3'),
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
     s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
@@ -91,11 +92,12 @@ def test_facility_single():
             return False
     return True
 
+
 def test_facility_multi():
     messages = (
-      (25, 'facility4'),
-      (33, 'facility4'),
-      (49, 'facility4'),
+        (25, 'facility4'),
+        (33, 'facility4'),
+        (49, 'facility4'),
     )
     expected = []
 
@@ -110,11 +112,11 @@ def test_facility_multi():
 
 def test_level_single():
     messages = (
-      (7, 'level1'),
-      (6, 'level2'),
-      (5, 'level3'),
+        (7, 'level1'),
+        (6, 'level2'),
+        (5, 'level3'),
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
     s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
@@ -127,11 +129,12 @@ def test_level_single():
             return False
     return True
 
+
 def test_level_multi():
     messages = (
-      (4, 'level4'),
-      (3, 'level4'),
-      (2, 'level4'),
+        (4, 'level4'),
+        (3, 'level4'),
+        (2, 'level4'),
     )
     expected = []
 
