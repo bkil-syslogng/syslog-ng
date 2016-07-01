@@ -20,25 +20,26 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
+from socket import AF_UNIX, AF_INET
+from globals import PORT_NUMBER, PORT_NUMBER_SYSLOG, PORT_NUMBER_NETWORK, SRC_DIR, SSL_PORT_NUMBER
+from messagegen import FileSender, SocketSender, SYSLOG_NEW_PREFIX
+from messagecheck import check_file_expected
 
-config = """@version: 3.8
+
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
 source s_int { internal(); };
 source s_unix { unix-stream("log-stream" flags(expect-hostname)); unix-dgram("log-dgram" flags(expect-hostname));  };
-source s_inet { tcp(port(%(port_number)d)); udp(port(%(port_number)d) so_rcvbuf(131072)); };
-source s_inetssl { tcp(port(%(ssl_port_number)d) tls(peer-verify(none) cert-file("%(src_dir)s/ssl.crt") key-file("%(src_dir)s/ssl.key"))); };
+source s_inet { tcp(port(%(PORT_NUMBER)d)); udp(port(%(PORT_NUMBER)d) so_rcvbuf(131072)); };
+source s_inetssl { tcp(port(%(SSL_PORT_NUMBER)d) tls(peer-verify(none) cert-file("%(SRC_DIR)s/ssl.crt") key-file("%(SRC_DIR)s/ssl.key"))); };
 source s_pipe { pipe("log-pipe" flags(expect-hostname)); pipe("log-padded-pipe" pad_size(2048) flags(expect-hostname)); };
 source s_file { file("log-file"); };
-source s_network { network(transport(udp) port(%(port_number_network)s)); network(transport(tcp) port(%(port_number_network)s)); };
+source s_network { network(transport(udp) port(%(PORT_NUMBER_NETWORK)s)); network(transport(tcp) port(%(PORT_NUMBER_NETWORK)s)); };
 source s_catchall { unix-stream("log-stream-catchall" flags(expect-hostname)); };
 
-source s_syslog { syslog(port(%(port_number_syslog)d) transport("tcp") so_rcvbuf(131072)); syslog(port(%(port_number_syslog)d) transport("udp") so_rcvbuf(131072)); };
+source s_syslog { syslog(port(%(PORT_NUMBER_SYSLOG)d) transport("tcp") so_rcvbuf(131072)); syslog(port(%(PORT_NUMBER_SYSLOG)d) transport("udp") so_rcvbuf(131072)); };
 
 # test input drivers
 filter f_input1 { message("input_drivers"); };
@@ -79,7 +80,7 @@ destination d_final5 { file("test-final5.log"); logstore("test-final5.lgs"); };
 
 
 # test final flag + rest
-log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f_final); 
+log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f_final);
 
         filter(f_final_1_to_4);
         log { filter(f_final1); destination(d_final1); flags(final); };
@@ -94,7 +95,7 @@ log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl); filter(f
 # will get here, as the filter above excludes that from the previous log
 # statement.
 
-log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl);  
+log { source(s_int); source(s_unix); source(s_inet); source(s_inetssl);
 
         # this filter would match everything from final1 to final5, but the
         # flags(final) in the previous statement would stop the processing
@@ -128,12 +129,18 @@ filter f_catchall { message("catchall"); };
 destination d_catchall { file("test-catchall.log"); logstore("test-catchall.lgs"); };
 
 log { filter(f_catchall); destination(d_catchall); flags(catch-all); };
-""" % locals()
+""" % {
+    'SRC_DIR': SRC_DIR,
+    'PORT_NUMBER': PORT_NUMBER,
+    'SSL_PORT_NUMBER': SSL_PORT_NUMBER,
+    'PORT_NUMBER_NETWORK': PORT_NUMBER_NETWORK,
+    'PORT_NUMBER_SYSLOG': PORT_NUMBER_SYSLOG
+}
 
 
 def test_input_drivers():
-    message = 'input_drivers';
-    message_new = 'input_drivers_new';
+    message = 'input_drivers'
+    message_new = 'input_drivers_new'
 
     senders = (
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq='\n'),
@@ -142,16 +149,16 @@ def test_input_drivers():
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq=''),
         SocketSender(AF_UNIX, 'log-stream', dgram=0),
         SocketSender(AF_UNIX, 'log-stream', dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq=''),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, ssl=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, send_by_bytes=1, ssl=1),
-        SocketSender(AF_INET, ('localhost', port_number_network), dgram=1, terminate_seq='\n'),
-        SocketSender(AF_INET, ('localhost', port_number_network), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0, send_by_bytes=1),
+        SocketSender(AF_INET, ('localhost', SSL_PORT_NUMBER), dgram=0, use_ssl=1),
+        SocketSender(AF_INET, ('localhost', SSL_PORT_NUMBER), dgram=0, send_by_bytes=1, use_ssl=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_NETWORK), dgram=1, terminate_seq='\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_NETWORK), dgram=0),
         FileSender('log-pipe'),
         FileSender('log-pipe', send_by_bytes=1),
         FileSender('log-padded-pipe', padding=2048),
@@ -161,72 +168,77 @@ def test_input_drivers():
     )
 
     senders_new = (
-        SocketSender(AF_INET, ('localhost', port_number_syslog), dgram=1, new_protocol=1, terminate_seq=''),
-        SocketSender(AF_INET, ('localhost', port_number_syslog), dgram=0, new_protocol=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_SYSLOG), dgram=1, new_protocol=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_SYSLOG), dgram=0, new_protocol=1, terminate_seq=''),
     )
 
     expected = []
-    for s in senders:
-        expected.extend(s.sendMessages(message))
+    for sender in senders:
+        expected.extend(sender.send_messages(message))
 
     expected_new = []
     for s_n in senders_new:
-        expected_new.extend(s_n.sendMessages(message_new))
+        expected_new.extend(s_n.send_messages(message_new))
 
     return (check_file_expected("test-input1", expected, settle_time=6) and
-            check_file_expected("test-input1_new", expected_new, settle_time=6, syslog_prefix=syslog_new_prefix, skip_prefix=len('<7>1 ')))
+            check_file_expected("test-input1_new", expected_new, settle_time=6,
+                                syslog_prefix=SYSLOG_NEW_PREFIX, skip_prefix=len('<7>1 ')))
+
 
 def test_indep():
-    message = 'indep_pipes';
+    message = 'indep_pipes'
 
-    s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
-    expected = s.sendMessages(message)
+    sender = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
+    expected = sender.send_messages(message)
     return check_file_expected("test-indep1", expected) and check_file_expected("test-indep2", expected)
+
 
 def test_final():
     messages = (
-      'final1',
-      'final2',
-      'final3',
-      'final4',
-      'final5'
+        'final1',
+        'final2',
+        'final3',
+        'final4',
+        'final5'
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
-    s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
+    sender = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
         if not expected[ndx]:
             expected[ndx] = []
-        expected[ndx].extend(s.sendMessages(messages[ndx]))
+        expected[ndx].extend(sender.send_messages(messages[ndx]))
 
     for ndx in range(0, len(messages)):
         if not check_file_expected('test-final%d' % (ndx + 1,), expected[ndx]):
             return False
     return True
 
+
 def test_fallback():
     messages = (
-      'fallback1',
-      'fallback2',
-      'fallback3',
-      'fallback4',
+        'fallback1',
+        'fallback2',
+        'fallback3',
+        'fallback4',
     )
-    expected = [None,] * len(messages)
+    expected = [None, ] * len(messages)
 
-    s = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
+    sender = SocketSender(AF_UNIX, 'log-stream', dgram=0, repeat=10)
     for ndx in range(0, len(messages)):
         if not expected[ndx]:
             expected[ndx] = []
-        expected[ndx].extend(s.sendMessages(messages[ndx]))
+        expected[ndx].extend(sender.send_messages(messages[ndx]))
 
     for ndx in range(0, len(messages)):
         if not check_file_expected('test-fb%d' % (ndx + 1,), expected[ndx]):
             return False
     return True
 
+
 def test_catchall():
 
-    message = 'catchall';
+    message = 'catchall'
 
     senders = (
         SocketSender(AF_UNIX, 'log-stream-catchall', dgram=0, send_by_bytes=1),
@@ -235,11 +247,11 @@ def test_catchall():
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq='\0\n'),
         SocketSender(AF_UNIX, 'log-stream', dgram=0),
         SocketSender(AF_UNIX, 'log-stream', dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0, send_by_bytes=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0, send_by_bytes=1),
         FileSender('log-pipe'),
         FileSender('log-pipe', send_by_bytes=1),
         FileSender('log-padded-pipe', padding=2048),
@@ -247,8 +259,7 @@ def test_catchall():
     )
 
     expected = []
-    for s in senders:
-        expected.extend(s.sendMessages(message))
+    for sender in senders:
+        expected.extend(sender.send_messages(message))
 
-    return check_file_expected("test-catchall", expected);
-
+    return check_file_expected("test-catchall", expected)

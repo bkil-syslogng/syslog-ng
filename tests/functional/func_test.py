@@ -21,15 +21,13 @@
 #
 #############################################################################
 
-import os, errno
+import os
+import errno
+import sys
 
-#internal modules
-from log import *
-from messagegen import *
-from control import *
-from globals import *
-import messagegen
-
+# internal modules
+from log import print_user, print_start, print_end
+from control import start_syslogng, stop_syslogng
 
 
 def init_env():
@@ -41,8 +39,8 @@ def init_env():
         os.mkfifo(pipe)
     try:
         os.mkdir("wildcard")
-    except OSError, e:
-        if e.errno != errno.EEXIST:
+    except OSError, error:
+        if error.errno != errno.EEXIST:
             raise
 
 
@@ -71,6 +69,7 @@ yXEg6Zq1CvuYF/E6el4h9GylxkU7wEM2Ti9QJY4n3YsHyesalERqdd9xx5t7ADRodpMpZXoZGbrS
 vccp3zMzS/aEZRuxky1/qjrAEh8OVA58e82jQqTdY8OQ/kKOu/gUgKBnHAvLkB/020p0CNbq6HjY
 l625DLckaYmOPTh0ECFKzhaPF+/LNmzD36ToOAeuNjfbUjiUVGfntr2mc4E8mUFyo+TskrkSfw==
 """)
+        # pylint: disable=protected-access
         socket._ssl.RAND_add(rnd, 1024)
         if not socket._ssl.RAND_status():
             raise "PRNG not seeded"
@@ -78,53 +77,53 @@ l625DLckaYmOPTh0ECFKzhaPF+/LNmzD36ToOAeuNjfbUjiUVGfntr2mc4E8mUFyo+TskrkSfw==
         return
 
 
-# import test modules
-import test_file_source
-import test_filters
-import test_input_drivers
-import test_performance
-import test_sql
-import test_python
+def main():
+    # import test modules
+    import test_file_source
+    import test_filters
+    import test_input_drivers
+    import test_performance
+    import test_sql
+    import test_python
 
-tests = (test_input_drivers, test_sql, test_file_source, test_filters, test_performance, test_python)
+    tests = (test_input_drivers, test_sql, test_file_source, test_filters, test_performance, test_python)
 
-init_env()
-seed_rnd()
+    init_env()
+    seed_rnd()
 
-
-verbose = False
-success = True
-rc = 0
-if len(sys.argv) > 1:
-    verbose = True
-try:
-    for test_module in tests:
-        if hasattr(test_module, "check_env") and not test_module.check_env():
-            continue
-
-
-        contents = dir(test_module)
-        contents.sort()
-        for obj in contents:
-            if obj[:5] != 'test_':
+    verbose = False
+    success = True
+    rc = 0
+    if len(sys.argv) > 1:
+        verbose = True
+    try:
+        for test_module in tests:
+            if hasattr(test_module, "check_env") and not test_module.check_env():
                 continue
-            test_case = getattr(test_module, obj)
-            test_name = test_module.__name__ + '.' + obj
-            print_start(test_name)
 
+            contents = dir(test_module)
+            contents.sort()
+            for obj in contents:
+                if obj[:5] != 'test_':
+                    continue
+                test_case = getattr(test_module, obj)
+                test_name = test_module.__name__ + '.' + obj
+                print_start(test_name)
 
-            if not start_syslogng(test_module.config, verbose):
-                sys.exit(1)
+                if not start_syslogng(test_module.CONFIG, verbose):
+                    sys.exit(1)
 
-            print_user("Starting test case...")
-            success = test_case()
-            if not stop_syslogng():
-                sys.exit(1)
-            print_end(test_name, success)
+                print_user("Starting test case...")
+                success = test_case()
+                if not stop_syslogng():
+                    sys.exit(1)
+                print_end(test_name, success)
 
-            if not success:
-                rc = 1
-finally:
-    stop_syslogng()
+                if not success:
+                    rc = 1
+    finally:
+        stop_syslogng()
 
-sys.exit(rc)
+    sys.exit(rc)
+
+main()

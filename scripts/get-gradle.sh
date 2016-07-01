@@ -1,5 +1,6 @@
+#!/bin/sh -x
 #############################################################################
-# Copyright (c) 2015 Balabit
+# Copyright (c) 2016 Balabit
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 as published
@@ -20,27 +21,16 @@
 #
 #############################################################################
 
+get_gradle() {
+  export GRADLE_HOME=$SLNG_CACHE/gradle-2.9
+  export PATH=$GRADLE_HOME/bin:$PATH
 
-# pylint: disable=no-self-use,unused-argument
-class DestTest(object):
+  if ! which gradle; then
+    wget https://downloads.gradle.org/distributions/gradle-2.9-bin.zip || exit 1
+    unzip gradle-2.9-bin.zip -d "$SLNG_CACHE" || exit 1
+    rm -v gradle-2.9-bin.zip
+  fi
+  true
+}
 
-    def init(self, options):
-        return True
-
-    def deinit(self):
-        pass
-
-    def open(self):
-        return True
-
-    def close(self):
-        pass
-
-    def is_open(self):
-        return True
-
-    def send(self, msg):
-        with open('test-python.log', 'a') as f:
-            f.write('{DATE} {HOST} {MSGHDR}{MSG}\n'.format(**msg))
-
-        return True
+get_gradle "$@"

@@ -20,21 +20,26 @@
 #
 #############################################################################
 
-from globals import *
-from log import *
-from messagegen import *
-from messagecheck import *
-from control import flush_files, stop_syslogng
+import re
+import os
+import sys
+import time
+import socket
+from globals import CURRENT_DIR, PORT_NUMBER, has_module
+from log import print_user
+import messagegen
+import messagecheck
+import control
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
 source s_int { internal(); };
-source s_tcp { tcp(port(%(port_number)d)); };
+source s_tcp { tcp(port(%(PORT_NUMBER)d)); };
 
 destination d_sql {
-    sql(type(sqlite3) database("%(current_dir)s/test-sql.db") host(dummy) port(1234) username(dummy) password(dummy)
+    sql(type(sqlite3) database("%(CURRENT_DIR)s/test-sql.db") host(dummy) port(1234) username(dummy) password(dummy)
         table("logs")
         null("@NULL@")
         columns("date datetime", "host", "program", "pid", "msg")
@@ -48,13 +53,14 @@ log { source(s_tcp); destination(d_sql); };
 
 """ % locals()
 
+
 def check_env():
 
     if not has_module('afsql'):
         print 'afsql module is not available, skipping SQL test'
         return False
-    paths=('/opt/syslog-ng/bin', '/usr/bin', '/usr/local/bin')
-    found=False
+    paths = ('/opt/syslog-ng/bin', '/usr/bin', '/usr/local/bin')
+    found = False
     for pth in paths:
         if os.path.isfile(os.path.join(pth, 'sqlite3')):
             found = True
@@ -62,13 +68,19 @@ def check_env():
         print_user("no sqlite3 tool, skipping SQL test\nSearched: %s\n" % ':'.join(paths))
         return False
 
-    soext='.so'
+    soext = '.so'
     if re.match('hp-ux', sys.platform) and not re.match('ia64', os.uname()[4]):
-        soext='.sl'
+        soext = '.sl'
 
     found = False
-    paths = (os.environ.get('dbd_dir', None), '/usr/local/lib/dbd', '/usr/lib/dbd',
-        '/usr/lib64/dbd/', '/opt/syslog-ng/lib/dbd', '/usr/lib/x86_64-linux-gnu/dbd')
+    paths = (
+        os.environ.get('dbd_dir', None),
+        '/usr/local/lib/dbd',
+        '/usr/lib/dbd',
+        '/usr/lib64/dbd/',
+        '/opt/syslog-ng/lib/dbd',
+        '/usr/lib/x86_64-linux-gnu/dbd'
+    )
     for pth in paths:
         if pth and os.path.isfile('%s/libdbdsqlite3%s' % (pth, soext)):
             found = True
@@ -87,13 +99,19 @@ def test_sql():
         'sql1',
         'sql2'
     )
-    s = SocketSender(AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', PORT_NUMBER), dgram=0)
 
     expected = []
     for msg in messages:
-        expected.extend(s.sendMessages(msg, pri=7))
+        expected.extend(sender.send_messages(msg, pri=7))
     print_user("Waiting for 10 seconds until syslog-ng writes all records to the SQL table")
     time.sleep(10)
-    stopped = stop_syslogng()
-    time.sleep(5)
-    return stopped and check_sql_expected("%s/test-sql.db" % current_dir, "logs", expected, settle_time=5, syslog_prefix="Sep  7 10:43:21 bzorp prog 12345")
+    stopped = control.stop_syslogng()
+    if not stopped:
+        return False
+    return messagecheck.check_sql_expected(
+        "%s/test-sql.db" % CURRENT_DIR,
+        "logs",
+        expected,
+        settle_time=5,
+        syslog_prefix="Sep  7 10:43:21 bzorp prog 12345")

@@ -1,5 +1,6 @@
+#!/bin/sh -x
 #############################################################################
-# Copyright (c) 2015 Balabit
+# Copyright (c) 2016 Balabit
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 as published
@@ -20,27 +21,22 @@
 #
 #############################################################################
 
+strace_func_test() {
+  printf '#!/bin/bash\n
+    '"$HOME"'/install/syslog-ng/sbin/syslog-ng "$@" &
+    PID=$!;
+    trap "kill --signal 15 $PID" 15;
+    exec strace -s 64 -o '"$PWD"'/strace.log -f -p $PID;
+    \n' > "$PWD"/x.sh &&
+  chmod +x "$PWD"/x.sh &&
+  SYSLOG_NG_BINARY="$PWD"/x.sh \
+  make func-test V=1
 
-# pylint: disable=no-self-use,unused-argument
-class DestTest(object):
+  S=$?
+  if [ $S != 0 ]; then
+    cat strace.log
+    exit $S
+  fi
+}
 
-    def init(self, options):
-        return True
-
-    def deinit(self):
-        pass
-
-    def open(self):
-        return True
-
-    def close(self):
-        pass
-
-    def is_open(self):
-        return True
-
-    def send(self, msg):
-        with open('test-python.log', 'a') as f:
-            f.write('{DATE} {HOST} {MSGHDR}{MSG}\n'.format(**msg))
-
-        return True
+strace_func_test "$@"

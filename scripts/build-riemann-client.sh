@@ -1,5 +1,6 @@
+#!/bin/sh -x
 #############################################################################
-# Copyright (c) 2015 Balabit
+# Copyright (c) 2016 Balabit
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 as published
@@ -20,27 +21,18 @@
 #
 #############################################################################
 
+build_riemann_client() {
+  if ! pkg-config --exists "riemann-client >= 1.6.0"; then
+    git clone https://github.com/algernon/riemann-c-client.git || exit 1
+    cd riemann-c-client || exit 1
+    autoreconf -i || exit 1
+    ./configure --prefix="$SLNG_CACHE/usr" \
+      --disable-dependency-tracking || exit 1
+    make -j install || exit 1
+    cd .. || exit 1
+    rm -Rf riemann-c-client
+  fi
+  true
+}
 
-# pylint: disable=no-self-use,unused-argument
-class DestTest(object):
-
-    def init(self, options):
-        return True
-
-    def deinit(self):
-        pass
-
-    def open(self):
-        return True
-
-    def close(self):
-        pass
-
-    def is_open(self):
-        return True
-
-    def send(self, msg):
-        with open('test-python.log', 'a') as f:
-            f.write('{DATE} {HOST} {MSGHDR}{MSG}\n'.format(**msg))
-
-        return True
+build_riemann_client "$@"

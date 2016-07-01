@@ -22,19 +22,25 @@
 
 import os
 
+
 def is_running_in_build_tree():
     return 'SYSLOG_NG_BINARY' not in os.environ
 
+
 def get_module_path_from_binary():
-    module_path = os.popen("%s --version | grep \"Module-Path:\" | cut -d ' ' -f 2" % get_syslog_ng_binary(), 'r').read().strip()
+    module_path = os.popen(
+        "%s --version | grep \"Module-Path:\" | cut -d ' ' -f 2"
+        % get_syslog_ng_binary(), 'r').read().strip()
     return module_path
+
 
 def format_module_path_for_intree_modules():
     module_path = ''
-    for (root, dirs, files) in os.walk(os.path.abspath(os.path.join(os.environ['top_builddir'], 'modules'))):
-        module_path += ':'.join(map(lambda x: root + '/' + x + '/.libs', dirs))
+    for (root, dirs, _) in os.walk(os.path.abspath(os.path.join(os.environ['top_builddir'], 'modules'))):
+        module_path += ':'.join([root + '/' + folder + '/.libs' for folder in dirs])
         break
     return module_path
+
 
 def get_module_path():
     if is_running_in_build_tree():
@@ -43,14 +49,17 @@ def get_module_path():
         module_path = get_module_path_from_binary()
     return module_path
 
+
 def get_syslog_ng_binary():
     return os.getenv('SYSLOG_NG_BINARY', '../../syslog-ng/syslog-ng')
+
 
 def is_premium():
     version = os.popen('%s -V' % get_syslog_ng_binary(), 'r').read()
     if version.find('premium-edition') != -1:
         return True
     return False
+
 
 def has_module(module):
     avail_mods = os.popen('%s -V | grep ^Available-Modules: ' % get_syslog_ng_binary(), 'r').read()
@@ -59,22 +68,20 @@ def has_module(module):
     return False
 
 
-is_premium_edition = is_premium()
-if is_premium_edition:
-    logstore_store_supported = True
-    wildcard_file_source_supported = True
+if is_premium():
+    LOGSTORE_STORE_SUPPORTED = True
+    WILDCARD_FILE_SOURCE_SUPPORTED = True
 else:
-    logstore_store_supported = False
-    wildcard_file_source_supported = False
+    LOGSTORE_STORE_SUPPORTED = False
+    WILDCARD_FILE_SOURCE_SUPPORTED = False
 
-port_number = os.getpid() % 30000 + 33000
-ssl_port_number = port_number + 1
-port_number_syslog = port_number + 2
-port_number_network = port_number + 3
+PORT_NUMBER = os.getpid() % 30000 + 33000
+SSL_PORT_NUMBER = PORT_NUMBER + 1
+PORT_NUMBER_SYSLOG = PORT_NUMBER + 2
+PORT_NUMBER_NETWORK = PORT_NUMBER + 3
 
-current_dir = os.getcwd()
+CURRENT_DIR = os.getcwd()
 try:
-    src_dir = os.environ["srcdir"]
+    SRC_DIR = os.environ["srcdir"]
 except KeyError:
-    src_dir = current_dir
-
+    SRC_DIR = CURRENT_DIR

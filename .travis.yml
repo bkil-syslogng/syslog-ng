@@ -1,47 +1,109 @@
 language: c
+
 git:
   submodules: false
 
-env: B=autotools
+env:
+  - E=precise T=distcheck
+  - E=precise T=func-test
+
+sudo: false
+
+compiler:
+  - gcc
+  - clang
+
+cache:
+        directories:
+          - $HOME/.local/bin
+          - $HOME/.local/deps
+          - $HOME/.local/gradle-2.9
+          - $HOME/.local/include
+          - $HOME/.local/lib
+          - $HOME/.local/man
+          - $HOME/.cache/pip
+          - $HOME/.ccache
+          - $HOME/.gradle/caches
+          - .autoconf
+          - autom4te.cache
+
+before_cache:
+        - rm -f $HOME/.cache/pip/log/debug.log
+        - ccache -s
+        - echo "du -s $HOME/.cache/* $HOME/.ccache/* .autoconf autom4te.cache
+          ls -la $HOME $HOME/.[^.]* $HOME/..?*
+          find $HOME/.local
+          find $HOME/install"
+addons:
+        apt:
+          packages:
+            - autoconf-archive
+            - docbook-xsl
+      #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
+            - geoip-database
+            - gperf
+            - intltool
+            - libcap-dev
+            - libesmtp-dev
+            - libevtlog-dev
+            - libgeoip-dev
+            - libhiredis-dev
+            - libjson0-dev
+            - libnet1-dev
+            - libprotobuf-c0-dev
+#            - libsystemd-journal-dev # TODO: compile
+#            - libsystemd-daemon-dev # TODO: compile
+            - libwrap0-dev
+            - protobuf-c-compiler
+            - strace
+            - valgrind
+            - xsltproc
 
 install:
   - export SLNG_CACHE="$HOME/.local";
     export SLNG="$HOME/install/syslog-ng";
     export PATH="$SLNG_CACHE"/bin:$PATH;
-    export PKG_CONFIG_PATH=$SLNG_CACHE/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
-  - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
-  - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq
-      autoconf-archive
-      bison
-      docbook-xsl
-      flex
-      gradle-2.2.1
-      libcap-dev
-      libdbd-sqlite3
-      libdbi0-dev
-      libesmtp-dev
-      libevtlog-dev
-      libgeoip-dev
-      libglib2.0-dev
-      libhiredis-dev
-      libivykis-dev
-      libjson0-dev
-      libnet1-dev
-      libriemann-client-dev
-      libwrap0-dev
-      pkg-config
-      sqlite3
-      xsltproc
-  - sudo pip install -r requirements.txt
+    export PKG_CONFIG_PATH=$SLNG_CACHE/usr/lib/pkgconfig:$SLNG/lib/pkgconfig:$PKG_CONFIG_PATH;
+#  - if [ "$CC" = "clang" ]; then export CCACHE_CPP2=yes; fi
+  - echo "max_size = 150M" > ~/.ccache/ccache.conf
+  - if [ "$CC" = "clang" ]; then
+            printf "run_second_cpp = true\nprefix_command = -Qunused-arguments\n" >>
+              ~/.ccache/ccache.conf;
+          fi
+  # if ! [ -f $HOME/.local/bin/clang ]; then ln -s `which ccache` $HOME/.local/bin/clang; fi
+  #  - printf '#!/bin/sh\nCCACHE_CPP2=yes exec ccache clang "$@"\n' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+  #  - echo 'CCACHE_CPP2=yes exec ccache clang -Qunused-arguments `test -t 2 && echo -fcolor-diagnostics` "$@"' > $HOME/.local/bin/clang; chmod +x $HOME/.local/bin/clang
+  - pip install --user -r requirements.txt
+  - pip install --user pyflakes
   - ./scripts/build-dbi.sh || exit $?
+  - ./scripts/build-riemann-client.sh || exit $?
+  - ./scripts/build-systemd.sh || exit $?
+  - . scripts/get-gradle.sh || exit $?
+  - export GRADLE_OPTS="-Dorg.gradle.daemon=true" # -Dorg.gradle.parallel=true
+  - export GRADLE_CMDLINE="--no-color --stacktrace --quiet"
+  - find $HOME/.local
+
 before_script:
+  - export PATH=/usr/lib/ccache:$PATH
+  - ccache -z
   - ./autogen.sh
+  - env
   - unset PYTHON_CFLAGS # HACK
+  - if [ "$E" != "trusty" ]; then
+      CONFIGURE_OPTS="
+        --with-libhiredis=/usr";
+    fi;
+  - if [
+         "$T" = "unit-memcheck" -o
+         "$T" = "unit-sgcheck" -o
+         "$T" = "unit-helgrind"
+       ]; then
+      CONFIGURE_OPTS="$CONFIGURE_OPTS --enable-valgrind";
+    fi
   - ./configure
+      $CONFIGURE_OPTS
       CFLAGS=-Werror
-      --prefix=$HOME/install/syslog-ng
+      --prefix="$SLNG"
       --with-ivykis=internal
       --with-mongoc=internal
       --with-librabbitmq=internal
@@ -52,47 +114,136 @@ before_script:
       --enable-linux-caps
       --disable-sun-streams
       --enable-all-modules
+      --with-systemd-journal=system
       --enable-pacct
       --enable-manpages
       --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       --enable-extra-warnings
+
 script:
   - . tests/build-log-cflags-propagation.sh;
-    if [ "$CC" = "gcc" ]; then
-      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings";
+    if [ "$T" = "distcheck" ]; then
+      MODULES="--enable-pacct";
+      if [ "$E" != "trusty" ]; then
+        MODULES="$MODULES --with-libhiredis=/usr";
+      fi;
+      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings $MODULES";
       exec_prop_check "make distcheck V=1 --keep-going";
-    else
+      S=$?;
+      if [ $S -ne 0 ]; then
+        find . -iname test-suite.log -exec cat {} +;
+      fi;
+      return $S;
+    elif [ "$T" = "func-test" ]; then
+      make --keep-going python-checks V=1 || return $?;
+      make --keep-going func-py-checks V=1 || return $?;
       exec_prop_check "make -j V=1 --keep-going install";
       S=$?;
-      if [ "$S" = "0" ]; then
-        . scripts/get-libjvm-path.sh || return $?;
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
-        make func-test V=1;
-      elif [ "$S" = "42" ]; then
+      if [ "$S" = "42" ]; then
         return $S;
-      else
+      elif [ "$S" != "0" ]; then
         make V=1;
         return $S;
       fi;
+      . scripts/get-libjvm-path.sh || return $?;
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
+      make func-test V=1 || return $?;
+    elif [ "$T" = "unit-memcheck" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=memcheck;
+      S=$?;
+      cat test-suite-memcheck.log;
+      return $S;
+    elif [ "$T" = "unit-sgcheck" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=sgcheck;
+      S=$?;
+      cat test-suite-sgcheck.log;
+      return $S;
+    elif [ "$T" = "unit-helgrind" ]; then
+      make -j install || return $?;
+      make --keep-going check-valgrind-tool VALGRIND_TOOL=helgrind;
+      S=$?;
+      cat test-suite-helgrind.log;
+      return $S;
+    else
+      true;
     fi
-compiler:
-  - gcc
-  - clang
+#      ./scripts/strace-func-test.sh || exit $?
+
+after_script:
+        - ccache -s
 
 matrix:
+  fast_finish: true
+  allow_failures:
+    - env: E=precise T=unit-memcheck
+      compiler: gcc
+    - env: E=precise T=unit-sgcheck
+      compiler: gcc
+    - env: E=precise T=unit-helgrind
+      compiler: gcc
+  exclude:
+    - env: E=precise T=distcheck
+      compiler: clang
+    - env: E=precise T=func-test
+      compiler: gcc
   include:
-    - env: B=copyright-check
+    - env: E=copyright_check
       sudo: false
       compiler: gcc
+      cache:
+      before_cache:
+      addons:
       install:
       before_script:
       script:
         - export COPYRIGHTVERBOSITY=2
         - tests/copyright/check.sh . .
-    - env: B=trusty-cmake
-      compiler: clang
+      after_script:
+    - env: E=precise T=unit-memcheck
+      compiler: gcc
+    - env: E=precise T=unit-sgcheck
+      compiler: gcc
+    - env: E=precise T=unit-helgrind
+      compiler: gcc
+    - env: E=trusty T=cmake
       dist: trusty
       sudo: required
+      cache:
+      before_cache:
+      compiler: clang
+      addons:
+        apt:
+          packages:
+            - autoconf-archive
+            - docbook-xsl
+            - gradle
+            - libcap-dev
+            - libdbd-sqlite3
+            - libdbi-dev
+            - libesmtp-dev
+            - libevtlog-dev
+            - libgeoip-dev
+            - libhiredis-dev
+            - libivykis-dev
+            - libjson0-dev
+            - libnet1-dev
+            - libprotobuf-c0-dev
+            - libwrap0-dev
+            - libxml2-utils
+            - xsltproc
+
+      install:
+        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        - sudo apt-get update -qq
+        - sudo apt-get install --force-yes -qq
+           libsystemd-journal-dev
+           libsystemd-daemon-dev
+           libriemann-client-dev
+        - sudo pip install -r requirements.txt
       before_script:
       script:
         - mkdir build
@@ -102,6 +253,54 @@ matrix:
             -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
             ..
         - make -j install
+      after_script:
+
+    - env: E=trusty T=distcheck
+      dist: trusty
+      sudo: required
+      cache:
+      before_cache:
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - autoconf-archive
+            - docbook-xsl
+            - gradle
+            - libcap-dev
+            - libdbd-sqlite3
+            - libdbi-dev
+            - libesmtp-dev
+            - libevtlog-dev
+            - libgeoip-dev
+            - libhiredis-dev
+            - libjson0-dev
+            - libnet1-dev
+            - libprotobuf-c0-dev
+            - libwrap0-dev
+            - libxml2-utils
+            - xsltproc
+#            - libriemann-client-dev # TODO: compile
+#            - libsystemd-daemon-dev # TODO: waiting for whitelisting
+#            - libsystemd-journal-dev # TODO: waiting for whitelisting
+      install:
+        - export SLNG="$HOME/install/syslog-ng"
+#        - sudo sed -ri "s~^(deb(-src)?) http://us\.archive\.ubuntu\.com/ubuntu/( .*)$~\1 mirror://mirrors.ubuntu.com/mirrors.txt\3~" /etc/apt/sources.list
+        - cat /etc/apt/sources.list
+        - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
+        - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" |
+          sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
+        - sudo apt-get update -qq
+        - sudo apt-get install --force-yes -qq
+           libriemann-client-dev
+           libsystemd-daemon-dev
+           libsystemd-journal-dev
+           # gradle-2.2.1
+        - sudo pip install -r requirements.txt
+    # HACK
+    # --keep-going
+        # to make error messages more readable on error
+      after_script:
 
 branches:
   except:
