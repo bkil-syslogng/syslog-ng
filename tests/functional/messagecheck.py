@@ -22,7 +22,7 @@
 
 import os
 import re
-from globals import logstore_store_supported
+from globals import LOGSTORE_STORE_SUPPORTED
 from log import print_user
 import control
 import messagegen
@@ -120,11 +120,11 @@ def check_reader_expected(reader, messages, settle_time, syslog_prefix, skip_pre
     return check_contents(reader, messages, syslog_prefix, skip_prefix)
 
 
-def check_file_expected(fname, messages, settle_time=1, syslog_prefix=messagegen.syslog_prefix, skip_prefix=0):
+def check_file_expected(fname, messages, settle_time=1, syslog_prefix=messagegen.SYSLOG_PREFIX, skip_prefix=0):
     print_user("Checking contents of output files: %s" % fname)
     control.flush_files(settle_time)
 
-    if logstore_store_supported:
+    if LOGSTORE_STORE_SUPPORTED:
         readers = (file_reader, logstore_reader)
     else:
         readers = (file_reader,)

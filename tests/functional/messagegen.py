@@ -30,10 +30,10 @@ import time
 
 from log import print_user
 
-syslog_prefix = "2004-09-07T10:43:21+01:00 bzorp prog[12345]:"
-syslog_new_prefix = "2004-09-07T10:43:21+01:00 bzorp prog 12345 - -"
-session_counter = 0
-need_to_flush = False
+SYSLOG_PREFIX = "2004-09-07T10:43:21+01:00 bzorp prog[12345]:"
+SYSLOG_NEW_PREFIX = "2004-09-07T10:43:21+01:00 bzorp prog 12345 - -"
+SESSION_COUNTER = 0
+NEED_TO_FLUSH = False
 
 
 class MessageSender(object):
@@ -43,13 +43,13 @@ class MessageSender(object):
         self.dgram = dgram
 
     def send_messages(self, msg, pri=7):
-        global session_counter
-        global need_to_flush
-        global syslog_prefix  # pylint: disable=global-variable-not-assigned
-        global syslog_new_prefix  # pylint: disable=global-variable-not-assigned
+        global SESSION_COUNTER
+        global NEED_TO_FLUSH
+        global SYSLOG_PREFIX  # pylint: disable=global-variable-not-assigned
+        global SYSLOG_NEW_PREFIX  # pylint: disable=global-variable-not-assigned
 
         padding = 'x' * 250
-        need_to_flush = True
+        NEED_TO_FLUSH = True
 
         print_user("generating %d messages using transport %s" % (self.repeat, str(self)))
 
@@ -59,17 +59,17 @@ class MessageSender(object):
         for counter in range(1, self.repeat):
             if self.new_protocol == 0:
                 line = '<%d>%s %s %03d/%05d %s %s' % (
-                    pri, syslog_prefix, msg, session_counter, counter, str(self), padding)
+                    pri, SYSLOG_PREFIX, msg, SESSION_COUNTER, counter, str(self), padding)
             else:
                 line = '<%d>1 %s %s %03d/%05d %s %s' % (
-                    pri, syslog_new_prefix, msg, session_counter, counter, str(self), padding)
+                    pri, SYSLOG_NEW_PREFIX, msg, SESSION_COUNTER, counter, str(self), padding)
 
             # add framing on tcp with new protocol
             if self.dgram == 0 and self.new_protocol == 1:
                 line = '%d %s' % (len(line), line)
             self.send_message(line)  # file or socket
-        expected.append((msg, session_counter, self.repeat))
-        session_counter = session_counter + 1
+        expected.append((msg, SESSION_COUNTER, self.repeat))
+        SESSION_COUNTER = SESSION_COUNTER + 1
         return expected
 
 

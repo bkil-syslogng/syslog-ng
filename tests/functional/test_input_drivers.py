@@ -21,24 +21,24 @@
 #############################################################################
 
 from socket import AF_UNIX, AF_INET
-from globals import port_number, port_number_syslog, port_number_network, ssl_port_number
-from messagegen import FileSender, SocketSender, syslog_new_prefix
+from globals import PORT_NUMBER, PORT_NUMBER_SYSLOG, PORT_NUMBER_NETWORK, SSL_PORT_NUMBER
+from messagegen import FileSender, SocketSender, SYSLOG_NEW_PREFIX
 from messagecheck import check_file_expected
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
 source s_int { internal(); };
 source s_unix { unix-stream("log-stream" flags(expect-hostname)); unix-dgram("log-dgram" flags(expect-hostname));  };
-source s_inet { tcp(port(%(port_number)d)); udp(port(%(port_number)d) so_rcvbuf(131072)); };
-source s_inetssl { tcp(port(%(ssl_port_number)d) tls(peer-verify(none) cert-file("%(src_dir)s/ssl.crt") key-file("%(src_dir)s/ssl.key"))); };
+source s_inet { tcp(port(%(PORT_NUMBER)d)); udp(port(%(PORT_NUMBER)d) so_rcvbuf(131072)); };
+source s_inetssl { tcp(port(%(SSL_PORT_NUMBER)d) tls(peer-verify(none) cert-file("%(SRC_DIR)s/ssl.crt") key-file("%(SRC_DIR)s/ssl.key"))); };
 source s_pipe { pipe("log-pipe" flags(expect-hostname)); pipe("log-padded-pipe" pad_size(2048) flags(expect-hostname)); };
 source s_file { file("log-file"); };
-source s_network { network(transport(udp) port(%(port_number_network)s)); network(transport(tcp) port(%(port_number_network)s)); };
+source s_network { network(transport(udp) port(%(PORT_NUMBER_NETWORK)s)); network(transport(tcp) port(%(PORT_NUMBER_NETWORK)s)); };
 source s_catchall { unix-stream("log-stream-catchall" flags(expect-hostname)); };
 
-source s_syslog { syslog(port(%(port_number_syslog)d) transport("tcp") so_rcvbuf(131072)); syslog(port(%(port_number_syslog)d) transport("udp") so_rcvbuf(131072)); };
+source s_syslog { syslog(port(%(PORT_NUMBER_SYSLOG)d) transport("tcp") so_rcvbuf(131072)); syslog(port(%(PORT_NUMBER_SYSLOG)d) transport("udp") so_rcvbuf(131072)); };
 
 # test input drivers
 filter f_input1 { message("input_drivers"); };
@@ -142,16 +142,16 @@ def test_input_drivers():
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq=''),
         SocketSender(AF_UNIX, 'log-stream', dgram=0),
         SocketSender(AF_UNIX, 'log-stream', dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq=''),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, use_ssl=1),
-        SocketSender(AF_INET, ('localhost', ssl_port_number), dgram=0, send_by_bytes=1, use_ssl=1),
-        SocketSender(AF_INET, ('localhost', port_number_network), dgram=1, terminate_seq='\n'),
-        SocketSender(AF_INET, ('localhost', port_number_network), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0, send_by_bytes=1),
+        SocketSender(AF_INET, ('localhost', SSL_PORT_NUMBER), dgram=0, use_ssl=1),
+        SocketSender(AF_INET, ('localhost', SSL_PORT_NUMBER), dgram=0, send_by_bytes=1, use_ssl=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_NETWORK), dgram=1, terminate_seq='\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_NETWORK), dgram=0),
         FileSender('log-pipe'),
         FileSender('log-pipe', send_by_bytes=1),
         FileSender('log-padded-pipe', padding=2048),
@@ -161,8 +161,8 @@ def test_input_drivers():
     )
 
     senders_new = (
-        SocketSender(AF_INET, ('localhost', port_number_syslog), dgram=1, new_protocol=1, terminate_seq=''),
-        SocketSender(AF_INET, ('localhost', port_number_syslog), dgram=0, new_protocol=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_SYSLOG), dgram=1, new_protocol=1, terminate_seq=''),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER_SYSLOG), dgram=0, new_protocol=1, terminate_seq=''),
     )
 
     expected = []
@@ -175,7 +175,7 @@ def test_input_drivers():
 
     return (check_file_expected("test-input1", expected, settle_time=6) and
             check_file_expected("test-input1_new", expected_new, settle_time=6,
-                                syslog_prefix=syslog_new_prefix, skip_prefix=len('<7>1 ')))
+                                syslog_prefix=SYSLOG_NEW_PREFIX, skip_prefix=len('<7>1 ')))
 
 
 def test_indep():
@@ -240,11 +240,11 @@ def test_catchall():
         SocketSender(AF_UNIX, 'log-dgram', dgram=1, terminate_seq='\0\n'),
         SocketSender(AF_UNIX, 'log-stream', dgram=0),
         SocketSender(AF_UNIX, 'log-stream', dgram=0, send_by_bytes=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=1, terminate_seq='\0\n'),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0),
-        SocketSender(AF_INET, ('localhost', port_number), dgram=0, send_by_bytes=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=1, terminate_seq='\0\n'),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0),
+        SocketSender(AF_INET, ('localhost', PORT_NUMBER), dgram=0, send_by_bytes=1),
         FileSender('log-pipe'),
         FileSender('log-pipe', send_by_bytes=1),
         FileSender('log-padded-pipe', padding=2048),

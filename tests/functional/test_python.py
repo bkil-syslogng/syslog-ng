@@ -22,15 +22,15 @@
 
 import os
 import socket
-from globals import port_number, has_module
+from globals import PORT_NUMBER, has_module
 import messagegen
 import messagecheck
 import control
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 source s_int { internal(); };
-source s_tcp { tcp(port(%(port_number)d)); };
+source s_tcp { tcp(port(%(PORT_NUMBER)d)); };
 
 destination d_python {
     python(class(sngtestmod.DestTest)
@@ -67,7 +67,7 @@ def test_python():
         'python1',
         'python2'
     )
-    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', PORT_NUMBER), dgram=0)
 
     expected = []
     for msg in messages:

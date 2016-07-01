@@ -22,15 +22,15 @@
 
 import os
 import re
-from globals import port_number
+from globals import PORT_NUMBER
 from log import print_user
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
 source s_int { internal(); };
-source s_tcp { tcp(port(%(port_number)d)); };
+source s_tcp { tcp(port(%(PORT_NUMBER)d)); };
 
 destination d_messages { file("test-performance.log"); };
 
@@ -46,7 +46,7 @@ def test_performance():
     print_user("Starting loggen for 10 seconds")
     cmd = """
 ../loggen/loggen -r 1000000 -Q -i -S -s 160 -I 10 127.0.0.1 %d 2>&1 |
-tail -n +1""" % port_number
+tail -n +1""" % PORT_NUMBER
     out = os.popen(cmd, 'r').read()
 
     print_user("performane: %s" % out)

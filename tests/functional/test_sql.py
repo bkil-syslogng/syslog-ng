@@ -25,21 +25,21 @@ import os
 import sys
 import time
 import socket
-from globals import current_dir, port_number, has_module
+from globals import CURRENT_DIR, PORT_NUMBER, has_module
 from log import print_user
 import messagegen
 import messagecheck
 import control
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
 source s_int { internal(); };
-source s_tcp { tcp(port(%(port_number)d)); };
+source s_tcp { tcp(port(%(PORT_NUMBER)d)); };
 
 destination d_sql {
-    sql(type(sqlite3) database("%(current_dir)s/test-sql.db") host(dummy) port(1234) username(dummy) password(dummy)
+    sql(type(sqlite3) database("%(CURRENT_DIR)s/test-sql.db") host(dummy) port(1234) username(dummy) password(dummy)
         table("logs")
         null("@NULL@")
         columns("date datetime", "host", "program", "pid", "msg")
@@ -99,7 +99,7 @@ def test_sql():
         'sql1',
         'sql2'
     )
-    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', port_number), dgram=0)
+    sender = messagegen.SocketSender(socket.AF_INET, ('localhost', PORT_NUMBER), dgram=0)
 
     expected = []
     for msg in messages:
@@ -111,7 +111,7 @@ def test_sql():
         return False
     time.sleep(5)
     return messagecheck.check_sql_expected(
-        "%s/test-sql.db" % current_dir,
+        "%s/test-sql.db" % CURRENT_DIR,
         "logs",
         expected,
         settle_time=5,

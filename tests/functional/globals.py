@@ -69,19 +69,19 @@ def has_module(module):
 
 
 if is_premium():
-    logstore_store_supported = True
-    wildcard_file_source_supported = True
+    LOGSTORE_STORE_SUPPORTED = True
+    WILDCARD_FILE_SOURCE_SUPPORTED = True
 else:
-    logstore_store_supported = False
-    wildcard_file_source_supported = False
+    LOGSTORE_STORE_SUPPORTED = False
+    WILDCARD_FILE_SOURCE_SUPPORTED = False
 
-port_number = os.getpid() % 30000 + 33000
-ssl_port_number = port_number + 1
-port_number_syslog = port_number + 2
-port_number_network = port_number + 3
+PORT_NUMBER = os.getpid() % 30000 + 33000
+SSL_PORT_NUMBER = PORT_NUMBER + 1
+PORT_NUMBER_SYSLOG = PORT_NUMBER + 2
+PORT_NUMBER_NETWORK = PORT_NUMBER + 3
 
-current_dir = os.getcwd()
+CURRENT_DIR = os.getcwd()
 try:
-    src_dir = os.environ["srcdir"]
+    SRC_DIR = os.environ["srcdir"]
 except KeyError:
-    src_dir = current_dir
+    SRC_DIR = CURRENT_DIR
