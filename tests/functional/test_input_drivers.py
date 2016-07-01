@@ -21,9 +21,10 @@
 #############################################################################
 
 from socket import AF_UNIX, AF_INET
-from globals import PORT_NUMBER, PORT_NUMBER_SYSLOG, PORT_NUMBER_NETWORK, SSL_PORT_NUMBER
+from globals import PORT_NUMBER, PORT_NUMBER_SYSLOG, PORT_NUMBER_NETWORK, SRC_DIR, SSL_PORT_NUMBER
 from messagegen import FileSender, SocketSender, SYSLOG_NEW_PREFIX
 from messagecheck import check_file_expected
+
 
 CONFIG = """@version: 3.8
 
@@ -128,7 +129,13 @@ filter f_catchall { message("catchall"); };
 destination d_catchall { file("test-catchall.log"); logstore("test-catchall.lgs"); };
 
 log { filter(f_catchall); destination(d_catchall); flags(catch-all); };
-""" % locals()
+""" % {
+    'SRC_DIR': SRC_DIR,
+    'PORT_NUMBER': PORT_NUMBER,
+    'SSL_PORT_NUMBER': SSL_PORT_NUMBER,
+    'PORT_NUMBER_NETWORK': PORT_NUMBER_NETWORK,
+    'PORT_NUMBER_SYSLOG': PORT_NUMBER_SYSLOG
+}
 
 
 def test_input_drivers():
