@@ -20,12 +20,12 @@
 #
 #############################################################################
 
-from globals import wildcard_file_source_supported
+from globals import WILDCARD_FILE_SOURCE_SUPPORTED
 import log
 import messagegen
 import messagecheck
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
@@ -51,7 +51,7 @@ def test_wildcard_files():
         'wildcard7',
     )
 
-    if not wildcard_file_source_supported:
+    if not WILDCARD_FILE_SOURCE_SUPPORTED:
         log.print_user("Not testing a Premium version, skipping wild card source tests")
         return True
     expected = []

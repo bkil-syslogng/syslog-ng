@@ -24,7 +24,7 @@ import socket
 import messagegen
 import messagecheck
 
-config = """@version: 3.8
+CONFIG = """@version: 3.8
 
 options { ts_format(iso); chain_hostnames(no); keep_hostname(yes); threaded(yes); };
 
