@@ -40,6 +40,7 @@ addons:
             - autoconf-archive
             - docbook-xsl
       #      - gradle # the one in 12.04 is buggy, one in 14.04 seems fine
+            - geoip-database
             - gperf
             - intltool
             - libcap-dev
