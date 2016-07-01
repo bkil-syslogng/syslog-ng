@@ -123,7 +123,11 @@ before_script:
 script:
   - . tests/build-log-cflags-propagation.sh;
     if [ "$T" = "distcheck" ]; then
-      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings";
+      MODULES="--enable-pacct";
+      if [ "$E" != "trusty" ]; then
+        MODULES="$MODULES --with-libhiredis=/usr";
+      fi;
+      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings $MODULES";
       exec_prop_check "make distcheck V=1 --keep-going";
       S=$?;
       if [ $S -ne 0 ]; then
