@@ -78,39 +78,48 @@ va_get(VAIterator *args)
 typedef gboolean (*ScanTestFn)(KVScanner *scanner, VAIterator *args, gboolean *expect_more);
 
 static gboolean
-_compare_key_value(KVScanner *scanner, VAIterator *args, gboolean *expect_more)
+_compare_key_value2(KVScanner *scanner, const gchar *key, const gchar *value, gboolean *expect_more)
 {
-  const gchar *kv = va_get(args);
-  if (!kv)
-    return FALSE;
-
   gboolean ok = kv_scanner_scan_next(scanner);
   if (!ok)
     {
       *expect_more = FALSE;
       expect_true(ok, "kv_scanner is expected to return TRUE for scan_next(), "
                   "first unconsumed key: [%s]",
-                  kv);
+                  key);
       return FALSE;
     }
 
-  _assert_current_key_is(scanner, kv);
+  _assert_current_key_is(scanner, key);
 
-  kv = va_get(args);
-  g_assert(kv);
-  _assert_current_value_is(scanner, kv);
-
+  g_assert(value);
+  _assert_current_value_is(scanner, value);
   return TRUE;
+}
+
+static gboolean
+_compare_key_value(KVScanner *scanner, VAIterator *args, gboolean *expect_more)
+{
+  const gchar *key = va_get(args);
+  if (!key)
+    return FALSE;
+  const gchar *value = va_get(args);
+
+  return _compare_key_value2(scanner, key, value, expect_more);
 }
 
 static gboolean
 _value_was_quoted(KVScanner *scanner, VAIterator *args, gboolean *expect_more)
 {
-  if (!_compare_key_value(scanner, args, expect_more))
+  const gchar *key = va_get(args);
+  if (!key)
     return FALSE;
-
+  const gchar *value = va_get(args);
   gboolean was_quoted = GPOINTER_TO_SIZE(va_get(args));
   g_assert((was_quoted == FALSE) || (was_quoted == TRUE));
+
+  if (!_compare_key_value2(scanner, key, value, expect_more))
+    return FALSE;
 
   expect_gboolean(scanner->value_was_quoted, was_quoted, "mismatch in value_was_quoted");
   return TRUE;
