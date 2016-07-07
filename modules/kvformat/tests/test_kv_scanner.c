@@ -60,24 +60,11 @@ _assert_current_value_is(KVScanner *scanner, const gchar *expected_value)
   return expect_nstring(value, -1, expected_value, -1, "current value mismatch");
 }
 
-typedef const gchar *const VAElement;
-
-typedef struct _VAIterator
-{
-  const VAElement *arg;
-} VAIterator;
-
-static VAElement
-va_get(VAIterator *args)
-{
-  VAElement next = *args->arg;
-  args->arg++;
-  return next;
-}
-
 static gboolean
 _compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value, gboolean *expect_more)
 {
+  g_assert(value);
+
   gboolean ok = kv_scanner_scan_next(scanner);
   if (!ok)
     {
@@ -89,33 +76,25 @@ _compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value, gbo
     }
 
   _assert_current_key_is(scanner, key);
-
-  g_assert(value);
   _assert_current_value_is(scanner, value);
   return TRUE;
 }
 
-static gboolean
-_get_compare_key_value(KVScanner *scanner, VAIterator *args, gboolean *expect_more)
-{
-  const gchar *key = va_get(args);
-  if (!key)
-    return FALSE;
-  const gchar *value = va_get(args);
-
-  return _compare_key_value(scanner, key, value, expect_more);
-}
+typedef const gchar *const VAElement;
 
 static void
-_scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, VAElement args0[])
+_scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, VAElement args[])
 {
   g_assert(input);
-  VAIterator args = { args0 };
-
   kv_scanner_input(scanner, input);
   gboolean expect_more = TRUE;
-  while (_get_compare_key_value(scanner, &args, &expect_more))
+  const gchar *key = *(args++);
+  while (key)
     {
+      const gchar *value = *(args++);
+      if (!value || !_compare_key_value(scanner, key, value, &expect_more))
+        break;
+      key = *(args++);
     }
   if (expect_more)
     _assert_no_more_tokens(scanner);
@@ -129,18 +108,18 @@ _scan_kv_pairs_implicit(const gchar *input, VAElement args[])
   kv_scanner_free(scanner);
 }
 
-typedef struct _VAQElement
+typedef struct _KVQElement
 {
   const gchar *const key;
   const gchar *const value;
   gboolean quoted;
-} VAQElement;
+} KVQElement;
 
-typedef struct _VAQContainer
+typedef struct _KVQContainer
 {
   const gsize n;
-  const VAQElement *const arg;
-} VAQContainer;
+  const KVQElement *const arg;
+} KVQContainer;
 
 #define VARARG_STRUCT(VARARG_STRUCT_cont, VARARG_STRUCT_elem, ...) \
   (const VARARG_STRUCT_cont) { \
@@ -149,11 +128,11 @@ typedef struct _VAQContainer
   }
 
 static void
-_scan_kv_pairs_quoted(const gchar *input, VAQContainer args)
+_scan_kv_pairs_quoted(const gchar *input, KVQContainer args)
 {
   KVScanner *scanner = kv_scanner_new();
-  g_assert(input);
 
+  g_assert(input);
   kv_scanner_input(scanner, input);
   gboolean expect_more = TRUE;
   for (gsize i = 0; i < args.n; i++)
@@ -172,7 +151,7 @@ _scan_kv_pairs_quoted(const gchar *input, VAQContainer args)
 #define TEST_KV_SCAN_Q(TEST_KV_SCAN_input, ...) \
   do { \
     testcase_begin("TEST_KV_SCAN_Q(%s, %s)", #TEST_KV_SCAN_input, #__VA_ARGS__); \
-    _scan_kv_pairs_quoted(TEST_KV_SCAN_input, VARARG_STRUCT(VAQContainer, VAQElement, __VA_ARGS__)); \
+    _scan_kv_pairs_quoted(TEST_KV_SCAN_input, VARARG_STRUCT(KVQContainer, KVQElement, __VA_ARGS__)); \
     testcase_end(); \
   } while (0)
 
