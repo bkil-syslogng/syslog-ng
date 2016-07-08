@@ -4,6 +4,8 @@ git:
 
 env: B=autotools
 
+os: linux
+
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
   - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
@@ -34,7 +36,7 @@ install:
 before_script:
   - ./autogen.sh
   - unset PYTHON_CFLAGS # HACK
-  - ./configure
+  - CONFIGURE_FLAGS="
       CFLAGS=-Werror
       --prefix=$HOME/install/syslog-ng
       --with-ivykis=internal
@@ -52,10 +54,12 @@ before_script:
       --enable-manpages
       --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
       --enable-extra-warnings
+      "
+  - ./configure $CONFIGURE_FLAGS
 script:
   - . tests/build-log-cflags-propagation.sh;
     if [ "$CC" = "gcc" ]; then
-      export DISTCHECK_CONFIGURE_FLAGS="CFLAGS=-Werror --enable-extra-warnings";
+      export DISTCHECK_CONFIGURE_FLAGS="$CONFIGURE_FLAGS";
       exec_prop_check "make distcheck V=1 --keep-going";
     else
       exec_prop_check "make -j V=1 --keep-going install";
@@ -98,6 +102,41 @@ matrix:
             -DCMAKE_INSTALL_PREFIX=$HOME/install/syslog-ng
             ..
         - make -j install
+    - env: B=check
+      os: osx
+      osx_image: xcode8
+      compiler: clang
+      install:
+        - brew update
+        - brew install
+          autoconf-archive
+          binutils
+          bison
+          eventlog
+          geoip
+          geoipupdate
+          glib
+          gradle
+          hiredis
+          libdbi
+          libnet
+          python
+          riemann-client
+        - geoipupdate
+        - pip install -r requirements.txt
+        - export PATH=/usr/local/opt/bison/bin:/usr/local/opt/libnet/bin:$PATH
+        - export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH
+      before_script:
+        - ./autogen.sh
+        - ./configure
+          --disable-sun-streams
+          --disable-systemd
+          --disable-pacct
+          --enable-all-modules
+          --disable-smtp
+        - make -j 3
+      script:
+        - make check
 
 branches:
   except:
