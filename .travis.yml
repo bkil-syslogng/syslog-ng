@@ -4,6 +4,8 @@ git:
 
 env: B=autotools
 
+os: linux
+
 install:
   - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key | sudo apt-key add -
   - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
@@ -110,6 +112,53 @@ matrix:
           {
             S=$?;
             make V=1 install;
+            return $S;
+          }
+    - env: B=check
+      os: osx
+      osx_image: xcode8
+      compiler: clang
+      install:
+        - brew update
+        - brew install
+            autoconf-archive
+            binutils
+            bison
+            eventlog
+            geoip
+            geoipupdate
+            glib
+            gradle
+            hiredis
+            libdbi
+            libnet
+            python
+            riemann-client
+        - geoipupdate
+        - pip install -r requirements.txt
+        - export PATH=/usr/local/opt/bison/bin:/usr/local/opt/libnet/bin:$PATH
+        - export PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH
+      before_script:
+        - ./autogen.sh
+        - ./configure
+            --disable-sun-streams
+            --disable-systemd
+            --disable-pacct
+            --enable-all-modules
+            --disable-smtp
+        - make --keep-going -j 3 ||
+          {
+            S=$?;
+            make V=1;
+            return $S;
+          }
+      script:
+        - make --keep-going check ||
+          {
+            S=$?;
+            make V=1 check;
+            find . -name test-suite.log |
+            xargs cat;
             return $S;
           }
 
