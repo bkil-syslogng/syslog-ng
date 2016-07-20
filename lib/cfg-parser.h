@@ -108,6 +108,8 @@ extern CfgParser main_parser;
 
 #define CFG_PARSER_IMPLEMENT_LEXER_BINDING(parser_prefix, root_type)          \
     int                                                                       \
+    parser_prefix ## lex(YYSTYPE *yylval, YYLTYPE *yylloc, CfgLexer *lexer); \
+    int                                                                       \
     parser_prefix ## lex(YYSTYPE *yylval, YYLTYPE *yylloc, CfgLexer *lexer)   \
     {                                                                         \
       int token;                                                              \
@@ -117,7 +119,9 @@ extern CfgParser main_parser;
     }                                                                         \
                                                                               \
     void                                                                      \
-    parser_prefix ## error(YYLTYPE *yylloc, CfgLexer *lexer, root_type instance, gpointer arg, const char *msg) \
+    parser_prefix ## error(YYLTYPE *yylloc, CfgLexer *lexer, root_type instance, gpointer arg, const char *msg); \
+    void                                                                      \
+    parser_prefix ## error(YYLTYPE *yylloc, CfgLexer *lexer, root_type instance G_GNUC_UNUSED, gpointer arg, const char *msg) \
     {                                                                                             \
       report_syntax_error(lexer, yylloc, cfg_lexer_get_context_description(lexer), msg);          \
     }

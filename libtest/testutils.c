@@ -36,7 +36,7 @@ static gboolean testutils_global_success = TRUE;
 struct timeval start_time_val;
 
 GString *current_testcase_description = NULL;
-gchar *current_testcase_function = NULL;
+const gchar *current_testcase_function = NULL;
 gchar *current_testcase_file = NULL;
 GList *internal_messages = NULL;
 
@@ -543,4 +543,13 @@ gboolean
 testutils_deinit(void)
 {
   return testutils_global_success;
+}
+
+gchar *
+basename_const(const gchar *file)
+{
+  gchar *dup_file = g_strdup(file);
+  gchar *base = g_strdup(basename(dup_file));
+  g_free(dup_file);
+  return base;
 }
