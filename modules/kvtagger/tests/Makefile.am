@@ -5,7 +5,8 @@ check_PROGRAMS                                  +=      \
         ${modules_kvtagger_tests_TESTS}
 
 modules_kvtagger_tests_test_kvtagdb_CFLAGS   =       \
-        $(TEST_CFLAGS) -I$(top_srcdir)/modules/kvtagger
+        $(TEST_CFLAGS) -I$(top_srcdir)/modules/kvtagger \
+        $(EXTRA_WARNINGS)
 modules_kvtagger_tests_test_kvtagdb_LDADD    =       \
         $(TEST_LDADD)
 modules_kvtagger_tests_test_kvtagdb_LDFLAGS  =       \
