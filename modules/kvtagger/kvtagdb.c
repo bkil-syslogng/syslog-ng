@@ -42,8 +42,8 @@ typedef struct _element_range
 static gint
 _tagrecord_cmp(gconstpointer k1, gconstpointer k2)
 {
-  TagRecord *r1 = (TagRecord *)k1;
-  TagRecord *r2 = (TagRecord *)k2;
+  const TagRecord *r1 = (const TagRecord *)k1;
+  const TagRecord *r2 = (const TagRecord *)k2;
 
   return strcmp(r1->selector, r2->selector);
 }
@@ -118,7 +118,7 @@ _free(KVTagDB *self)
 }
 
 KVTagDB*
-kvtagdb_new()
+kvtagdb_new(void)
 {
   KVTagDB *self = g_new0(KVTagDB, 1);
     

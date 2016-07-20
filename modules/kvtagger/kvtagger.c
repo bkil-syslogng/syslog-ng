@@ -81,13 +81,13 @@ kvtagger_set_database_default_selector(LogParser *p, const gchar *default_select
   self->default_selector = g_strdup(default_selector);
 }
 
-gboolean
+static gboolean
 _is_default_selector_set(KVTagger *self)
 {
   return (self->default_selector != NULL);
 }
 
-void
+static void
 _tag_message(gpointer pmsg, const TagRecord *tag)
 {
   LogMessage *msg = (LogMessage *) pmsg;
@@ -96,7 +96,7 @@ _tag_message(gpointer pmsg, const TagRecord *tag)
 
 static gboolean
 kvtagger_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptions *path_options,
-                        const gchar *input, gsize input_len)
+                        const gchar *input G_GNUC_UNUSED, gsize input_len G_GNUC_UNUSED)
 {
   KVTagger *self = (KVTagger *)s;
   LogMessage *msg = log_msg_make_writable(pmsg, path_options);
@@ -192,7 +192,7 @@ _open_data_file(const gchar *filename)
   return f;
 }
 
-const gchar*
+static const gchar*
 _get_filename_extension(const gchar *filename)
 {
    gsize filename_len = strlen(filename);
@@ -257,7 +257,7 @@ _is_initialized(KVTagger *self)
   return kvtagdb_is_loaded(self->tagdb);
 }
 
-gboolean
+static gboolean
 _compile_selector_template(KVTagger *self)
 {
   GError *error = NULL;

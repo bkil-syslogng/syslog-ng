@@ -74,7 +74,7 @@ _get_next_record(TagRecordScanner *s, const gchar *input, TagRecord *next_record
   return TRUE;
 }
 
-const TagRecord*
+static const TagRecord*
 get_next_record(TagRecordScanner *self, const gchar *input)
 {
   if (!_get_next_record(self, input, &self->last_record))
@@ -93,7 +93,7 @@ csv_tag_record_scanner_free(TagRecordScanner *s)
 }
 
 TagRecordScanner*
-csv_tag_record_scanner_new()
+csv_tag_record_scanner_new(void)
 {
   CSVTagRecordScanner *self = g_new0(CSVTagRecordScanner, 1);
   csv_scanner_options_set_delimiters(&self->options, ",");

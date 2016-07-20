@@ -28,7 +28,7 @@
 #define KVTAGDB_TESTCASE(testfunc, ...) {testcase_begin("%s(%s)", #testfunc, #__VA_ARGS__); testfunc(__VA_ARGS__); testcase_end();}
 
 static void
-_foreach_ctr(gpointer arg, const TagRecord *record)
+_foreach_ctr(gpointer arg, const TagRecord *record G_GNUC_UNUSED)
 {
   int *ctr = (int *)arg;
   ++(*ctr);
@@ -47,7 +47,7 @@ _test_empty_db(KVTagDB *tagdb)
 }
 
 static void
-test_empty_db()
+test_empty_db(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
 
@@ -57,7 +57,7 @@ test_empty_db()
 }
 
 static void
-test_purge_empty_db()
+test_purge_empty_db(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
 
@@ -68,7 +68,7 @@ test_purge_empty_db()
 }
 
 static void
-test_index_empty_db()
+test_index_empty_db(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
 
@@ -105,7 +105,7 @@ _g_strcmp(const gconstpointer a, gconstpointer b)
 }
 
 static void
-test_insert()
+test_insert(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
 
@@ -119,7 +119,7 @@ test_insert()
 }
 
 static void
-test_get_selectors()
+test_get_selectors(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
 
@@ -146,7 +146,7 @@ typedef struct _TestNVPair
 typedef struct _TestNVPairStore
 {
   TestNVPair *pairs;
-  int ctr;
+  guint ctr;
 } TestNVPairStore;
 
 static void
@@ -160,7 +160,7 @@ _foreach_get_nvpairs(gpointer arg, const TagRecord *record)
 static void
 _assert_kvtag_db_contains_name_value_pairs_by_selector(KVTagDB *tagdb, 
                                                        const gchar *selector,
-                                                       TestNVPair *expected_nvpairs,
+                                                       const TestNVPair *expected_nvpairs,
                                                        guint number_of_expected_nvpairs)
 {
   TestNVPair result[number_of_expected_nvpairs];
@@ -177,12 +177,12 @@ _assert_kvtag_db_contains_name_value_pairs_by_selector(KVTagDB *tagdb,
 }
 
 static void
-test_inserted_nv_pairs()
+test_inserted_nv_pairs(void)
 {
   KVTagDB *tagdb = kvtagdb_new();
   _fill_tagdb(tagdb, "selector", "name", "value", 1, 3);
 
- TestNVPair expected_nvpairs[3] = {
+ const TestNVPair expected_nvpairs[3] = {
     {.name="name-0.0", .value="value-0.0"},
     {.name="name-0.1", .value="value-0.1"},
     {.name="name-0.2", .value="value-0.2"}
@@ -193,30 +193,33 @@ test_inserted_nv_pairs()
 }
 
 static void
-test_import_with_valid_csv()
+test_import_with_valid_csv(void)
 {
-  gchar csv_content[] = "selector1,name1,value1\n"\
+  const gchar csv_content_[] = "selector1,name1,value1\n"\
                         "selector1,name1.1,value1.1\n"\
                         "selector2,name2,value2\n"\
                         "selector3,name3,value3";
+  gchar *csv_content = g_strdup(csv_content_);
   FILE *fp = fmemopen(csv_content, strlen(csv_content) + 1, "r");
   KVTagDB *db = kvtagdb_new();
   TagRecordScanner *scanner = create_tag_record_scanner_by_type("csv");
 
   assert_true(kvtagdb_import(db, fp, scanner), "Failed to import valid CSV file.");
+  fclose(fp);
+  g_free(csv_content);
   assert_true(kvtagdb_is_loaded(db), "The kvtag_db_is_loaded reports False after a successful import operation. ");
   assert_true(kvtagdb_is_indexed(db), "The kvtag_db_is_indexed reports False after successful import&load operations.");
 
-  TestNVPair expected_nvpairs_selector1[2] = {
+  const TestNVPair expected_nvpairs_selector1[2] = {
     {.name="name1", .value="value1"},
     {.name="name1.1", .value="value1.1"},
   };
 
-  TestNVPair expected_nvpairs_selector2[1] = {
+  const TestNVPair expected_nvpairs_selector2[1] = {
     {.name="name2", .value="value2"},
   };
 
-  TestNVPair expected_nvpairs_selector3[1] = {
+  const TestNVPair expected_nvpairs_selector3[1] = {
     {.name="name3", .value="value3"},
   };
 
@@ -229,9 +232,10 @@ test_import_with_valid_csv()
 }
 
 static void
-test_import_with_invalid_csv_content()
+test_import_with_invalid_csv_content(void)
 {
-  gchar csv_content[] = "xxx";
+  const gchar csv_content_[] = "xxx";
+  gchar *csv_content = g_strdup(csv_content_);
   FILE *fp = fmemopen(csv_content, strlen(csv_content) + 1, "r");
   KVTagDB *db = kvtagdb_new();
   TagRecordScanner *scanner = create_tag_record_scanner_by_type("csv");
@@ -240,11 +244,14 @@ test_import_with_invalid_csv_content()
   assert_false(kvtagdb_is_loaded(db), "The kvtag_db_is_loaded reports True after a failing import operation. ");
   assert_false(kvtagdb_is_indexed(db), "The kvtag_db_is_indexed reports True after failing import&load operations.");
 
+  fclose(fp);
+  g_free(csv_content);
   kvtagdb_free(db);
   tag_record_scanner_free(scanner);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED)
 {
   KVTAGDB_TESTCASE(test_empty_db);
   KVTAGDB_TESTCASE(test_purge_empty_db);

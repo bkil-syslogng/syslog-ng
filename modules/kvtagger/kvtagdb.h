@@ -31,7 +31,7 @@ typedef struct _KVTagDB KVTagDB;
 
 typedef void(*KVTAGDB_TAG_CB)(gpointer arg, const TagRecord *record);
 
-KVTagDB* kvtagdb_new();
+KVTagDB* kvtagdb_new(void);
 void kvtagdb_free(KVTagDB *self);
 
 KVTagDB* kvtagdb_ref(KVTagDB *self);

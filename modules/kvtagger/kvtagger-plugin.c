@@ -37,6 +37,8 @@ static Plugin kvtagger_plugins[] =
 };
 
 gboolean
+kvtagger_module_init(GlobalConfig *cfg, CfgArgs *args);
+gboolean
 kvtagger_module_init(GlobalConfig *cfg, CfgArgs *args)
 {
   plugin_register(cfg, kvtagger_plugins, G_N_ELEMENTS(kvtagger_plugins));
