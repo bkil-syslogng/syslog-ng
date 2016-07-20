@@ -46,7 +46,7 @@
 #define ASSERTION_ERROR(message) "%s:%d/%s\n  #       %s", \
                                  basename(__FILE__), __LINE__, __FUNCTION__, ((message) ? (message) : "")
 
-void start_stopwatch();
+void start_stopwatch(void);
 void stop_stopwatch_and_display_result(gchar *message_template, ...);
 
 void reset_grabbed_messages(void);
@@ -121,10 +121,12 @@ gboolean assert_msg_field_equals_non_fatal(LogMessage *msg, gchar *field_name, g
 #define assert_msg_field_equals(msg, field_name, expected_value, expected_value_len, error_message, ...) (assert_msg_field_equals_non_fatal(msg, field_name, expected_value, expected_value_len, error_message, ##__VA_ARGS__) ? 1 : (exit(1),0))
 
 extern GString *current_testcase_description;
-extern gchar *current_testcase_function;
+extern const gchar *current_testcase_function;
 extern gchar *current_testcase_file;
 
 gboolean testutils_deinit(void);
+
+gchar *basename_const(const gchar *file);
 
 #define testcase_begin(description_template, ...) \
     do { \
@@ -136,8 +138,8 @@ gboolean testutils_deinit(void);
         } \
       current_testcase_description = g_string_sized_new(0); \
       g_string_printf(current_testcase_description, description_template, ##__VA_ARGS__); \
-      current_testcase_function = (gchar *)(__FUNCTION__); \
-      current_testcase_file = basename(__FILE__); \
+      current_testcase_function = __FUNCTION__; \
+      current_testcase_file = basename_const(__FILE__); \
     } while (0)
 
 #define testcase_end() \
@@ -145,6 +147,7 @@ gboolean testutils_deinit(void);
       g_string_free(current_testcase_description, TRUE); \
       current_testcase_description = NULL; \
       current_testcase_function = NULL; \
+      g_free(current_testcase_file); \
       current_testcase_file = NULL; \
     } while (0)
 
