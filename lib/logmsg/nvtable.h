@@ -294,7 +294,7 @@ nv_table_is_value_set(NVTable *self, NVHandle handle)
 }
 
 static inline const gchar *
-__nv_table_get_value(NVTable *self, NVHandle handle, guint16 num_static_entries, gssize *length)
+__nv_table_get_value(NVTable *self, NVHandle handle, guint16 num_static_entries G_GNUC_UNUSED, gssize *length)
 {
   NVEntry *entry;
   NVDynValue *dyn_slot;
