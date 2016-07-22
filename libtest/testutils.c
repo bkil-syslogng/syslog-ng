@@ -41,7 +41,7 @@ gchar *current_testcase_file = NULL;
 GList *internal_messages = NULL;
 
 static void
-print_failure(const gchar *custom_template, va_list custom_args, gchar *assertion_failure_template, ...)
+print_failure(const gchar *custom_template, va_list custom_args, const gchar *assertion_failure_template, ...)
 {
   testutils_global_success = FALSE;
   va_list assertion_failure_args;
@@ -501,7 +501,7 @@ assert_gpointer_non_fatal(gpointer actual, gpointer expected, const gchar *error
 }
 
 gboolean
-assert_msg_field_equals_non_fatal(LogMessage *msg, gchar *field_name, gchar *expected_value, gssize expected_value_len, const gchar *error_message, ...)
+assert_msg_field_equals_non_fatal(LogMessage *msg, const gchar *field_name, const gchar *expected_value, gssize expected_value_len, const gchar *error_message, ...)
 {
   gssize actual_value_len;
   const gchar* actual_value;
@@ -522,7 +522,7 @@ assert_msg_field_equals_non_fatal(LogMessage *msg, gchar *field_name, gchar *exp
 }
 
 gboolean
-assert_msg_field_unset_non_fatal(LogMessage *msg, gchar *field_name, const gchar *error_message, ...)
+assert_msg_field_unset_non_fatal(LogMessage *msg, const gchar *field_name, const gchar *error_message, ...)
 {
   gssize actual_value_len;
   const gchar *actual_value;

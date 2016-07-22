@@ -41,9 +41,61 @@ AM_CPPFLAGS		= -I$(top_srcdir)/lib -I$(top_srcdir)/modules -I$(top_builddir)/lib
 
 AM_CFLAGS =
 if ENABLE_EXTRA_WARNINGS
-AM_CFLAGS += \
-	-Wshadow
+IGNORE =
+	-Wcast-align \
+	-Wwrite-strings \
+	-Wabi \
+	-Wno-stack-protector \
+	-Winvalid-pch \
+	-Wmissing-format-attribute \
+	-Wdeprecated \
+	-Wdeprecated-declarations \
+	-Woverflow \
+	-Wunused-parameter \
+	-Wvariadic-macros \
+	-Wimplicit-function-declaration \
+-X
 
+AM_CFLAGS += \
+	-fno-common \
+\
+	-Wextra \
+	-Wshadow \
+	-std=gnu99 \
+	-W \
+	-Wall \
+	-Wstrict-overflow=2 \
+	\
+	-Wno-error=pointer-arith \
+	-Wno-error=float-equal \
+	-Wno-error=missing-prototypes \
+	-Wno-error=missing-declarations \
+	-Wno-error=cast-qual \
+	-Wno-error=sign-conversion \
+	-Wno-error=conversion \
+	-Wno-error=undef \
+	-Wno-error=unused-parameter \
+	-Wno-error=switch-default \
+	-Wno-error=missing-field-initializers \
+	-Wno-error=redundant-decls \
+	-Wno-error=strict-prototypes \
+	-Wno-error=strict-overflow \
+	-Wno-error=suggest-attribute=pure \
+	-Wno-error=suggest-attribute=const \
+	-Wno-error=suggest-attribute=noreturn \
+	@CFLAGS_NOWARN_SUGGEST_FORMAT@ \
+	-Wno-error=inline \
+	-Wno-error=sign-compare \
+	-Wno-error=type-limits \
+	-Wno-error=bad-function-cast \
+	-Wno-error=nested-externs \
+	-Wno-error=format=2 \
+	-Wno-error=aggregate-return \
+	-Wno-error=double-promotion \
+	-Wno-error=pointer-sign \
+	-Wshadow
+# -Wno-error=pedantic
+# -Wlong-long
 endif
 
 TEST_CFLAGS		= -I$(top_srcdir)/libtest $(AM_CFLAGS)
