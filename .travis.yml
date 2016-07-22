@@ -34,6 +34,9 @@ install:
 before_script:
   - ./autogen.sh
   - unset PYTHON_CFLAGS # HACK
+  - if [ "$CC" = "gcc" ]; then
+      EXTRA_WARN="--enable-extra-warnings";
+    fi
   - CONFIGURE_FLAGS="
       CFLAGS=-Werror
       --prefix=$HOME/install/syslog-ng
@@ -51,7 +54,7 @@ before_script:
       --enable-pacct
       --enable-manpages
       --with-docbook=/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl
-      --enable-extra-warnings
+      $EXTRA_WARN
       "
   - ./configure $CONFIGURE_FLAGS
 script:
