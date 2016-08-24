@@ -25,6 +25,15 @@
 
 #include <string.h>
 
+typedef struct _KVValueEndScanner KVValueEndScanner;
+struct _KVValueEndScanner
+{
+  gint state;
+  gchar *cur;
+  gchar *value_end;
+  gchar value_separator;
+};
+
 enum
 {
   KV_QUOTE_INITIAL = 0,
@@ -32,6 +41,18 @@ enum
   KV_QUOTE_BACKSLASH,
   KV_QUOTE_FINISH
 };
+
+enum {
+  KV_VALUE = 0,
+  KV_KEY_OR_VALUE,
+  KV_FINISH
+};
+
+void
+kv_scanner_set_allow_pair_separator_in_values(KVScanner *self, gboolean allowed)
+{
+  self->allow_pair_separator_in_values = allowed;
+}
 
 void
 kv_scanner_set_value_separator(KVScanner *self, gchar value_separator)
@@ -45,6 +66,12 @@ kv_scanner_input(KVScanner *self, const gchar *input)
   self->input = input;
   self->input_len = strlen(input);
   self->input_pos = 0;
+}
+
+static void
+_kv_scanner_reset_value(KVScanner *self)
+{
+  return g_string_truncate(self->value, 0);
 }
 
 static gboolean
@@ -136,7 +163,7 @@ _kv_scanner_extract_value(KVScanner *self)
 {
   const gchar *cur;
 
-  g_string_truncate(self->value, 0);
+  _kv_scanner_reset_value(self);
   self->value_was_quoted = FALSE;
   cur = &self->input[self->input_pos];
 
@@ -193,15 +220,97 @@ _kv_scanner_decode_value(KVScanner *self)
   return TRUE;
 }
 
+static void
+_kv_end_scanner_handle_kv_value_state(KVValueEndScanner* end_scanner)
+{
+  switch (*end_scanner->cur) {
+    case ' ':
+      end_scanner->state = KV_KEY_OR_VALUE;
+      end_scanner->value_end = end_scanner->cur;
+      break;
+    case '\0':
+      end_scanner->state = KV_FINISH;
+      end_scanner->value_end = end_scanner->cur;
+      break;
+    default:
+      break;
+  }
+}
+
+static void
+_kv_end_scanner_handle_kv_key_or_value_state(KVValueEndScanner* end_scanner)
+{
+  if (*end_scanner->cur == end_scanner->value_separator) {
+    end_scanner->state = KV_FINISH;
+  } else if (!_is_valid_key_character(*end_scanner->cur)) {
+    end_scanner->state = KV_VALUE;
+    end_scanner->value_end = end_scanner->cur;
+  } else if (*end_scanner->cur == ' ') {
+    end_scanner->state = KV_KEY_OR_VALUE;
+    end_scanner->value_end = end_scanner->cur;
+  } else if (*end_scanner->cur == 0) {
+    end_scanner->state = KV_FINISH;
+    end_scanner->value_end = end_scanner->cur;
+  }
+}
+
+static gchar*
+_kv_scanner_get_values_end(KVScanner *self)
+{
+  KVValueEndScanner end_scanner;
+
+  end_scanner.state = KV_VALUE;
+  end_scanner.cur = &self->input[self->input_pos];
+  end_scanner.value_separator = self->value_separator;
+
+  while(end_scanner.state != KV_FINISH) {
+    switch(end_scanner.state) {
+      case KV_VALUE:
+        _kv_end_scanner_handle_kv_value_state(&end_scanner);
+        break;
+
+      case KV_KEY_OR_VALUE:
+        _kv_end_scanner_handle_kv_key_or_value_state(&end_scanner);
+        break;
+    }
+    end_scanner.cur++;
+  }
+  return end_scanner.value_end;
+}
+
+static gboolean
+_kv_scanner_extract_value_with_spaces(KVScanner *self)
+{
+  gchar *cur, *end;
+
+  _kv_scanner_reset_value(self);
+  cur = &self->input[self->input_pos];
+  end = _kv_scanner_get_values_end(self);
+
+  for (; cur < end; cur++) {
+    if ( *cur != "\'" || *cur != "\"")
+      g_string_append_c(self->value, *cur);
+  }
+
+  self->input_pos = end - self->input;
+  return TRUE;
+}
+
 gboolean
 kv_scanner_scan_next(KVScanner *self)
 {
   _kv_scanner_skip_space(self);
+
+  if (self->allow_pair_separator_in_values) {
+    if (!_kv_scanner_extract_key(self) ||
+        !_kv_scanner_extract_value_with_spaces(self))
+      return FALSE;
+  } else {
   if (!_kv_scanner_extract_key(self) ||
       !_kv_scanner_extract_value(self) ||
       !_kv_scanner_decode_value(self))
     return FALSE;
-
+  }
   return TRUE;
 }
 
@@ -233,6 +342,7 @@ kv_scanner_clone(KVScanner *self)
   KVScanner *cloned = kv_scanner_new();
   cloned->parse_value = self->parse_value;
   cloned->value_separator = self->value_separator;
+  cloned->allow_pair_separator_in_values = self->allow_pair_separator_in_values;
   return cloned;
 }
 
@@ -245,6 +355,7 @@ kv_scanner_init(KVScanner *self)
   self->decoded_value = g_string_sized_new(64);
   self->free_fn = kv_scanner_free_method;
   self->value_separator = '=';
+  self->allow_pair_separator_in_values = FALSE;
 }
 
 KVScanner *
