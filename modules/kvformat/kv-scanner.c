@@ -45,6 +45,7 @@ enum
 enum {
   KV_VALUE = 0,
   KV_KEY_OR_VALUE,
+  KV_IN_SEPARATOR,
   KV_FINISH
 };
 
@@ -225,7 +226,7 @@ _kv_end_scanner_handle_kv_value_state(KVValueEndScanner* end_scanner)
 {
   switch (*end_scanner->cur) {
     case ' ':
-      end_scanner->state = KV_KEY_OR_VALUE;
+      end_scanner->state = KV_IN_SEPARATOR;
       end_scanner->value_end = end_scanner->cur;
       break;
     case '\0':
@@ -246,11 +247,25 @@ _kv_end_scanner_handle_kv_key_or_value_state(KVValueEndScanner* end_scanner)
     end_scanner->state = KV_VALUE;
     end_scanner->value_end = end_scanner->cur;
   } else if (*end_scanner->cur == ' ') {
-    end_scanner->state = KV_KEY_OR_VALUE;
+    end_scanner->state = KV_IN_SEPARATOR;
     end_scanner->value_end = end_scanner->cur;
   } else if (*end_scanner->cur == 0) {
     end_scanner->state = KV_FINISH;
     end_scanner->value_end = end_scanner->cur;
+  }
+}
+
+static void
+_kv_end_scanner_handle_kv_in_separator_state(KVValueEndScanner* end_scanner)
+{
+  if (*end_scanner->cur == ' ') {
+    end_scanner->state = KV_IN_SEPARATOR;
+  } else if (*end_scanner->cur == 0) {
+    end_scanner->state = KV_FINISH;
+  } else if (!_is_valid_key_character(*end_scanner->cur)) {
+    end_scanner->state = KV_VALUE;
+  } else {
+    end_scanner->state = KV_KEY_OR_VALUE;
   }
 }
 
@@ -272,6 +287,9 @@ _kv_scanner_get_values_end(KVScanner *self)
       case KV_KEY_OR_VALUE:
         _kv_end_scanner_handle_kv_key_or_value_state(&end_scanner);
         break;
+
+      case KV_IN_SEPARATOR:
+        _kv_end_scanner_handle_kv_in_separator_state(&end_scanner);
     }
     end_scanner.cur++;
   }
@@ -288,7 +306,7 @@ _kv_scanner_extract_value_with_spaces(KVScanner *self)
   end = _kv_scanner_get_values_end(self);
 
   for (; cur < end; cur++) {
-    if ( *cur != "\'" || *cur != "\"")
+    if ( *cur != '\'' && *cur != '\"')
       g_string_append_c(self->value, *cur);
   }
 
