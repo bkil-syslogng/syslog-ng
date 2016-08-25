@@ -25,13 +25,16 @@
 
 #include <string.h>
 
-typedef struct _KVValueEndScanner KVValueEndScanner;
-struct _KVValueEndScanner
+typedef struct _KVValueDetails KVValueDetails;
+struct _KVValueDetails
 {
   gint state;
+  gchar *begin;
   gchar *cur;
   gchar *value_end;
   gchar value_separator;
+  gchar quote;
+  gint  quotes_state;
 };
 
 enum
@@ -46,7 +49,14 @@ enum {
   KV_VALUE = 0,
   KV_KEY_OR_VALUE,
   KV_IN_SEPARATOR,
+  KV_IN_QUOTE,
   KV_FINISH
+};
+
+enum {
+  KV_QUOTE_NONE = 0,
+  KV_QUOTE_OPEN,
+  KV_QOUTE_CLOSED
 };
 
 void
@@ -72,7 +82,7 @@ kv_scanner_input(KVScanner *self, const gchar *input)
 static void
 _kv_scanner_reset_value(KVScanner *self)
 {
-  return g_string_truncate(self->value, 0);
+  g_string_truncate(self->value, 0);
 }
 
 static gboolean
@@ -126,29 +136,29 @@ _decode_backslash_escape(KVScanner *self, gchar ch)
   gchar control;
   switch (ch)
     {
-    case 'b':
-      control = '\b';
-      break;
-    case 'f':
-      control = '\f';
-      break;
-    case 'n':
-      control = '\n';
-      break;
-    case 'r':
-      control = '\r';
-      break;
-    case 't':
-      control = '\t';
-      break;
-    case '\\':
-      control = '\\';
-      break;
-    default:
-      if (self->quote_char != ch)
-        g_string_append_c(self->value, '\\');
-      control = ch;
-      break;
+      case 'b':
+        control = '\b';
+        break;
+      case 'f':
+        control = '\f';
+        break;
+      case 'n':
+        control = '\n';
+        break;
+      case 'r':
+        control = '\r';
+        break;
+      case 't':
+        control = '\t';
+        break;
+      case '\\':
+        control = '\\';
+        break;
+      default:
+        if (self->quote_char != ch)
+          g_string_append_c(self->value, '\\');
+          control = ch;
+        break;
     }
   g_string_append_c(self->value, control);
 }
@@ -222,16 +232,22 @@ _kv_scanner_decode_value(KVScanner *self)
 }
 
 static void
-_kv_end_scanner_handle_kv_value_state(KVValueEndScanner* end_scanner)
+_kv_detail_scanner_handle_kv_value_state(KVValueDetails* detail_scanner)
 {
-  switch (*end_scanner->cur) {
+  switch (*detail_scanner->cur) {
     case ' ':
-      end_scanner->state = KV_IN_SEPARATOR;
-      end_scanner->value_end = end_scanner->cur;
+      detail_scanner->state = KV_IN_SEPARATOR;
+      detail_scanner->value_end = detail_scanner->cur;
       break;
     case '\0':
-      end_scanner->state = KV_FINISH;
-      end_scanner->value_end = end_scanner->cur;
+      detail_scanner->state = KV_FINISH;
+      detail_scanner->value_end = detail_scanner->cur;
+      break;
+    case '\'':
+    case '\"':
+      detail_scanner->quote = *detail_scanner->cur;
+      detail_scanner->quotes_state = KV_QUOTE_OPEN;
+      detail_scanner->state = KV_IN_QUOTE;
       break;
     default:
       break;
@@ -239,78 +255,129 @@ _kv_end_scanner_handle_kv_value_state(KVValueEndScanner* end_scanner)
 }
 
 static void
-_kv_end_scanner_handle_kv_key_or_value_state(KVValueEndScanner* end_scanner)
+_kv_detail_scanner_handle_kv_key_or_value_state(KVValueDetails* detail_scanner)
 {
-  if (*end_scanner->cur == end_scanner->value_separator) {
-    end_scanner->state = KV_FINISH;
-  } else if (!_is_valid_key_character(*end_scanner->cur)) {
-    end_scanner->state = KV_VALUE;
-    end_scanner->value_end = end_scanner->cur;
-  } else if (*end_scanner->cur == ' ') {
-    end_scanner->state = KV_IN_SEPARATOR;
-    end_scanner->value_end = end_scanner->cur;
-  } else if (*end_scanner->cur == 0) {
-    end_scanner->state = KV_FINISH;
-    end_scanner->value_end = end_scanner->cur;
+  if (*detail_scanner->cur == detail_scanner->value_separator) {
+    detail_scanner->state = KV_FINISH;
+  } else if (*detail_scanner->cur == ' ') {
+    detail_scanner->state = KV_IN_SEPARATOR;
+    detail_scanner->value_end = detail_scanner->cur;
+  } else if (*detail_scanner->cur == 0) {
+    detail_scanner->state = KV_FINISH;
+    detail_scanner->value_end = detail_scanner->cur;
+  } else if (*detail_scanner->cur == '\'' || *detail_scanner->cur == '\"') {
+    detail_scanner->quote = *detail_scanner->cur;
+    detail_scanner->quotes_state = KV_QUOTE_OPEN;
+    detail_scanner->state = KV_IN_QUOTE;
+  } else if (!_is_valid_key_character(*detail_scanner->cur)) {
+    detail_scanner->state = KV_VALUE;
+    detail_scanner->value_end = detail_scanner->cur;
   }
 }
 
 static void
-_kv_end_scanner_handle_kv_in_separator_state(KVValueEndScanner* end_scanner)
+_kv_detail_scanner_handle_kv_in_separator_state(KVValueDetails* detail_scanner)
 {
-  if (*end_scanner->cur == ' ') {
-    end_scanner->state = KV_IN_SEPARATOR;
-  } else if (*end_scanner->cur == 0) {
-    end_scanner->state = KV_FINISH;
-  } else if (!_is_valid_key_character(*end_scanner->cur)) {
-    end_scanner->state = KV_VALUE;
+  if (*detail_scanner->cur == ' ') {
+    detail_scanner->state = KV_IN_SEPARATOR;
+  } else if (*detail_scanner->cur == 0) {
+    detail_scanner->state = KV_FINISH;
+  } else if (*detail_scanner->cur == '\'' || *detail_scanner->cur == '\"') {
+    detail_scanner->quote = *detail_scanner->cur;
+    detail_scanner->quotes_state = KV_QUOTE_OPEN;
+    detail_scanner->state = KV_IN_QUOTE;
+  } else if (!_is_valid_key_character(*detail_scanner->cur)) {
+    detail_scanner->state = KV_VALUE;
   } else {
-    end_scanner->state = KV_KEY_OR_VALUE;
+    detail_scanner->state = KV_KEY_OR_VALUE;
   }
 }
 
-static gchar*
-_kv_scanner_get_values_end(KVScanner *self)
+void
+_kv_detail_scanner_handle_kv_in_quote_state(KVValueDetails* detail_scanner)
 {
-  KVValueEndScanner end_scanner;
+  if (*detail_scanner->cur == ' ' && *detail_scanner->cur-1 != ' ') {
+    detail_scanner->value_end = detail_scanner->cur;
+  } else if (*detail_scanner->cur == detail_scanner->quote) {
+    detail_scanner->value_end = detail_scanner->cur+1;
+    detail_scanner->quotes_state = KV_QOUTE_CLOSED;
+    detail_scanner->state = KV_FINISH;
+  } else if (*detail_scanner->cur == 0) {
+    detail_scanner->value_end = detail_scanner->cur;
+    detail_scanner->state = KV_FINISH;
+  }
+}
 
-  end_scanner.state = KV_VALUE;
-  end_scanner.cur = &self->input[self->input_pos];
-  end_scanner.value_separator = self->value_separator;
+static void
+_kv_scanner_get_value_details(KVValueDetails* detail_scanner)
+{
 
-  while(end_scanner.state != KV_FINISH) {
-    switch(end_scanner.state) {
+  while(detail_scanner->state != KV_FINISH) {
+    switch(detail_scanner->state) {
       case KV_VALUE:
-        _kv_end_scanner_handle_kv_value_state(&end_scanner);
+        _kv_detail_scanner_handle_kv_value_state(detail_scanner);
         break;
 
       case KV_KEY_OR_VALUE:
-        _kv_end_scanner_handle_kv_key_or_value_state(&end_scanner);
+        _kv_detail_scanner_handle_kv_key_or_value_state(detail_scanner);
         break;
 
       case KV_IN_SEPARATOR:
-        _kv_end_scanner_handle_kv_in_separator_state(&end_scanner);
+        _kv_detail_scanner_handle_kv_in_separator_state(detail_scanner);
+        break;
+
+      case KV_IN_QUOTE:
+        _kv_detail_scanner_handle_kv_in_quote_state(detail_scanner);
+        break;
     }
-    end_scanner.cur++;
+    detail_scanner->cur++;
   }
-  return end_scanner.value_end;
+}
+
+void
+_kv_scanner_get_value(KVValueDetails* detail_scanner, KVScanner *self)
+{
+  gchar *cur = &self->input[self->input_pos];
+  gchar *end = detail_scanner->value_end;
+  gboolean skip_quotes = FALSE;
+
+  if ( detail_scanner->quotes_state == KV_QUOTE_OPEN || \
+       *cur == detail_scanner->quote)
+    skip_quotes = TRUE;
+
+  for (; cur < end; cur++) {
+    if (*cur == '\\') {
+        cur ++;
+        if (*cur != 0)
+          _decode_backslash_escape(self, *cur);
+    }
+    if (skip_quotes == FALSE) {
+        g_string_append_c(self->value, *cur);
+    } else {
+      if (*cur != detail_scanner->quote) {
+        g_string_append_c(self->value, *cur);
+      }
+    }
+
+  }
 }
 
 static gboolean
 _kv_scanner_extract_value_with_spaces(KVScanner *self)
 {
-  gchar *cur, *end;
+  KVValueDetails detail_scanner;
+
+  detail_scanner.state = KV_VALUE;
+  detail_scanner.cur = &self->input[self->input_pos];
+  detail_scanner.value_separator = self->value_separator;
+  detail_scanner.quote = 0;
+  detail_scanner.quotes_state = KV_QUOTE_NONE;
 
   _kv_scanner_reset_value(self);
-  cur = &self->input[self->input_pos];
-  end = _kv_scanner_get_values_end(self);
+  _kv_scanner_get_value_details(&detail_scanner);
+  _kv_scanner_get_value(&detail_scanner, self);
 
-  for (; cur < end; cur++) {
-    if ( *cur != '\'' && *cur != '\"')
-      g_string_append_c(self->value, *cur);
-  }
-
-  self->input_pos = end - self->input;
+  self->input_pos = detail_scanner.value_end - self->input;
   return TRUE;
 }
 
