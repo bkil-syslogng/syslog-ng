@@ -21,6 +21,8 @@
 #include "kv-scanner.h"
 #include "testutils.h"
 
+#define NULLKV {NULL, NULL}
+
 static gboolean
 _assert_no_more_tokens(KVScanner *scanner)
 {
@@ -188,19 +190,20 @@ _test_key_buffer_underrun()
   const gchar *input = buffer + 2;
 
   KV expect_nothing[] = {
-    {NULL, NULL}
+    NULLKV
   };
 
   _scan_kv_pairs_scanner(create_kv_scanner((ScannerConfig){'=', FALSE}), input, expect_nothing);
 }
 
 static void
-_test_quotation_is_stored_in_the_was_quoted_value_member()
+_test_quotation_is_stored_in_the_was_quoted_value_member(void)
 {
   ScannerConfig config = {'=', FALSE};
   TEST_KV_SCAN_Q(create_kv_scanner(config), "foo=\"bar\"", {"foo", "bar", TRUE});
   TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar'", {"foo", "bar", TRUE});
   TEST_KV_SCAN_Q(create_kv_scanner(config), "foo=bar", {"foo", "bar", FALSE});
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar", {"foo", "bar", TRUE});
   TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar' k=v", {"foo", "bar", TRUE}, {"k", "v", FALSE});
 }
 
@@ -216,105 +219,101 @@ _parse_value_by_incrementing_all_bytes(KVScanner *self)
 }
 
 static void
-_test_transforms_values_if_parse_value_is_set()
+_test_transforms_values_if_parse_value_is_set(void)
 {
-  ScannerConfig config = {'=', FALSE};
-  KVScanner *scanner = create_kv_scanner(config);
+  KVScanner *scanner = create_kv_scanner((ScannerConfig){'=', FALSE});
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
-  KV expected[] = {
-    {"foo", "cbs"}, {NULL, NULL}
-  };
 
- _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", expected);
+  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
 }
 
 Testcase cases_without_allow_pair_separator_in_value[] = {
-  { {'=', FALSE}, "foo=bar", { {"foo", "bar"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k-j=v", { {"k-j", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "0=v", { {"0", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "_=v", { {"_", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "Z=v", { {"Z", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k==", { {"k", "="}, {NULL, NULL} } },
-  { {'=', FALSE}, "k===", { {"k", "=="}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\"a", { {"k", "a"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\\", { {"k", "\\"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\"\\", { {"k", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, "k='a", { {"k", "a"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k='\\", { {"k", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, " ==k=", { {"k", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, " = =k=", { {"k", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, " =k=", { {"k", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, " =k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, " ==k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, " =k=v=w", { {"k", "v=w"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\xc3", { {"k", "\xc3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\xc3v", { {"k", "\xc3v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\xff", { {"k", "\xff"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\xffv", { {"k", "\xffv"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\"\xc3v", { {"k", "\xc3v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\"\xff", { {"k", "\xff"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\"\xffv", { {"k", "\xffv"}, {NULL, NULL} } },
-  { {'=', FALSE}, "foo=", { {"foo", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, "foo=b", { {"foo", "b"}, {NULL, NULL} } },
-  { {'=', FALSE}, "lorem ipsum foo=bar", { {"foo", "bar"}, {NULL, NULL} } },
-  { {'=', FALSE}, "lorem ipsum/dolor @sitamen foo=bar", { {"foo", "bar"}, {NULL, NULL} } },
-  { {'=', FALSE}, "lorem ipsum/dolor = foo=bar", { {"foo", "bar"}, {NULL, NULL} } },
-  { {'=', FALSE}, "*k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "x *k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1 k2=v2 k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1    k2=v2     k3=v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1,k2=v2,k3=v3", { {"k1", "v1,k2=v2,k3=v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1\tk2=v2 k3=v3", { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1,\tk2=v2 k3=v3", { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1\t k2=v2 k3=v3", { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=\t", { {"k", "\t"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=,\t", { {"k", ",\t"}, {NULL, NULL} } },
-  { {'=', FALSE}, "foo=\"bar\"", { {"foo", "bar"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\"v1\", k2=\"v2\"", { {"k1", "v1"}, {"k2", "v2"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\"\\\"v1\"", { {"k1", "\"v1"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\"\\b \\f \\n \\r \\t \\\\\"", { {"k1", "\b \f \n \r \t \\"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\"\\p\"", { {"k1", "\\p"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1='\\'v1'", { {"k1", "'v1"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1='\\b \\f \\n \\r \\t \\\\'", { {"k1", "\b \f \n \r \t \\"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1='\\p'", { {"k1", "\\p"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\\b\\f\\n\\r\\t\\\\", { {"k1", "\\b\\f\\n\\r\\t\\\\"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=\b\f\n\r\\", { {"k1", "\b\f\n\r\\"}, {NULL, NULL} } },
+  { {'=', FALSE}, "foo=bar", { {"foo", "bar"}, NULLKV } },
+  { {'=', FALSE}, "k-j=v", { {"k-j", "v"}, NULLKV } },
+  { {'=', FALSE}, "0=v", { {"0", "v"}, NULLKV } },
+  { {'=', FALSE}, "_=v", { {"_", "v"}, NULLKV } },
+  { {'=', FALSE}, "Z=v", { {"Z", "v"}, NULLKV } },
+  { {'=', FALSE}, "k==", { {"k", "="}, NULLKV } },
+  { {'=', FALSE}, "k===", { {"k", "=="}, NULLKV } },
+  { {'=', FALSE}, "k=\"a", { {"k", "a"}, NULLKV } },
+  { {'=', FALSE}, "k=\\", { {"k", "\\"}, NULLKV } },
+  { {'=', FALSE}, "k=\"\\", { {"k", ""}, NULLKV } },
+  { {'=', FALSE}, "k='a", { {"k", "a"}, NULLKV } },
+  { {'=', FALSE}, "k='\\", { {"k", ""}, NULLKV } },
+  { {'=', FALSE}, " ==k=", { {"k", ""}, NULLKV } },
+  { {'=', FALSE}, " = =k=", { {"k", ""}, NULLKV } },
+  { {'=', FALSE}, " =k=", { {"k", ""}, NULLKV } },
+  { {'=', FALSE}, " =k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, " ==k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, " =k=v=w", { {"k", "v=w"}, NULLKV } },
+  { {'=', FALSE}, "k=\xc3", { {"k", "\xc3"}, NULLKV } },
+  { {'=', FALSE}, "k=\xc3v", { {"k", "\xc3v"}, NULLKV } },
+  { {'=', FALSE}, "k=\xff", { {"k", "\xff"}, NULLKV } },
+  { {'=', FALSE}, "k=\xffv", { {"k", "\xffv"}, NULLKV } },
+  { {'=', FALSE}, "k=\"\xc3v", { {"k", "\xc3v"}, NULLKV } },
+  { {'=', FALSE}, "k=\"\xff", { {"k", "\xff"}, NULLKV } },
+  { {'=', FALSE}, "k=\"\xffv", { {"k", "\xffv"}, NULLKV } },
+  { {'=', FALSE}, "foo=", { {"foo", ""}, NULLKV } },
+  { {'=', FALSE}, "foo=b", { {"foo", "b"}, NULLKV } },
+  { {'=', FALSE}, "lorem ipsum foo=bar", { {"foo", "bar"}, NULLKV } },
+  { {'=', FALSE}, "lorem ipsum/dolor @sitamen foo=bar", { {"foo", "bar"}, NULLKV } },
+  { {'=', FALSE}, "lorem ipsum/dolor = foo=bar", { {"foo", "bar"}, NULLKV } },
+  { {'=', FALSE}, "*k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, "x *k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1 k2=v2 k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1    k2=v2     k3=v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1,k2=v2,k3=v3", { {"k1", "v1,k2=v2,k3=v3"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1\tk2=v2 k3=v3", { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1,\tk2=v2 k3=v3", { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1\t k2=v2 k3=v3", { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k=\t", { {"k", "\t"}, NULLKV } },
+  { {'=', FALSE}, "k=,\t", { {"k", ",\t"}, NULLKV } },
+  { {'=', FALSE}, "foo=\"bar\"", { {"foo", "bar"}, NULLKV } },
+  { {'=', FALSE}, "k1=\"v1\", k2=\"v2\"", { {"k1", "v1"}, {"k2", "v2"}, NULLKV } },
+  { {'=', FALSE}, "k1=\"\\\"v1\"", { {"k1", "\"v1"}, NULLKV } },
+  { {'=', FALSE}, "k1=\"\\b \\f \\n \\r \\t \\\\\"", { {"k1", "\b \f \n \r \t \\"}, NULLKV } },
+  { {'=', FALSE}, "k1=\"\\p\"", { {"k1", "\\p"}, NULLKV } },
+  { {'=', FALSE}, "k1='\\'v1'", { {"k1", "'v1"}, NULLKV } },
+  { {'=', FALSE}, "k1='\\b \\f \\n \\r \\t \\\\'", { {"k1", "\b \f \n \r \t \\"}, NULLKV } },
+  { {'=', FALSE}, "k1='\\p'", { {"k1", "\\p"}, NULLKV } },
+  { {'=', FALSE}, "k1=\\b\\f\\n\\r\\t\\\\", { {"k1", "\\b\\f\\n\\r\\t\\\\"}, NULLKV } },
+  { {'=', FALSE}, "k1=\b\f\n\r\\", { {"k1", "\b\f\n\r\\"}, NULLKV } },
   { {'=', FALSE}, "k1=\"v foo, foo2 =@,\\\"\" k2='v foo,  a='",
-      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1, k2=v2, k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
+      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, NULLKV } },
+  { {'=', FALSE}, "k1=v1, k2=v2, k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
   { {'=', FALSE}, "foo=bar lorem ipsum key=value some more values",
-      { {"foo", "bar"}, {"key", "value"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1=v1,   k2=v2  ,    k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1 k2=v2, k3, k4=v4", { {"k2", "v2"}, {"k4", "v4"}, {NULL, NULL} } },
+      { {"foo", "bar"}, {"key", "value"}, NULLKV } },
+  { {'=', FALSE}, "k1=v1,   k2=v2  ,    k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
+  { {'=', FALSE}, "k1 k2=v2, k3, k4=v4", { {"k2", "v2"}, {"k4", "v4"}, NULLKV } },
   { {'=', FALSE}, "k1= k2=v2, k3=, k4=v4 k5= , k6=v6",
-      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1= v1 k2 = v2 k3 =v3 ", { {"k1", ""}, {NULL, NULL} } },
-  { {'=', FALSE}, "k1='v1', k2='v2'", { {"k1", "v1"}, {"k2", "v2"}, {NULL, NULL} } },
-  { {'=', FALSE}, ", k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, ",k=v", { {"k", "v"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=v,", { {"k", "v,"}, {NULL, NULL} } },
-  { {'=', FALSE}, "k=v, ", { {"k", "v"}, {NULL, NULL} } },
-  { {':', FALSE}, "k1:v1 k2:v2 k3:v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {NULL, NULL} } },
-  { {'-', FALSE}, "k-v", { {"k", "v"}, {NULL, NULL} } },
-  { {'-', FALSE}, "k--v", { {"k", "-v"}, {NULL, NULL} } },
-  { {'-', FALSE}, "---", { {"-", "-"}, {NULL, NULL} } },
-  { {'=', FALSE}, "=v", { {NULL, NULL} } },
-  { {'=', FALSE}, "k*=v", { {NULL, NULL} } },
-  { {'=', FALSE}, "=", { {NULL, NULL} } },
-  { {'=', FALSE}, "==", { {NULL, NULL} } },
-  { {'=', FALSE}, "===", { {NULL, NULL} } },
-  { {'=', FALSE}, " =", { {NULL, NULL} } },
-  { {'=', FALSE}, " ==", { {NULL, NULL} } },
-  { {'=', FALSE}, " ===", { {NULL, NULL} } },
-  { {'=', FALSE}, " = =", { {NULL, NULL} } },
-  { {'=', FALSE}, ":=", { {NULL, NULL} } },
-  { {'=', FALSE}, "á=v", { {NULL, NULL} } },
-  { {'=', FALSE}, "", { {NULL, NULL} } },
-  { {'=', FALSE}, "f", { {NULL, NULL} } },
-  { {'=', FALSE}, "fo", { {NULL, NULL} } },
-  { {'=', FALSE}, "foo", { {NULL, NULL} } },
+      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, NULLKV } },
+  { {'=', FALSE}, "k1= v1 k2 = v2 k3 =v3 ", { {"k1", ""}, NULLKV } },
+  { {'=', FALSE}, "k1='v1', k2='v2'", { {"k1", "v1"}, {"k2", "v2"}, NULLKV } },
+  { {'=', FALSE}, ", k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, ",k=v", { {"k", "v"}, NULLKV } },
+  { {'=', FALSE}, "k=v,", { {"k", "v,"}, NULLKV } },
+  { {'=', FALSE}, "k=v, ", { {"k", "v"}, NULLKV } },
+  { {':', FALSE}, "k1:v1 k2:v2 k3:v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
+  { {'-', FALSE}, "k-v", { {"k", "v"}, NULLKV } },
+  { {'-', FALSE}, "k--v", { {"k", "-v"}, NULLKV } },
+  { {'-', FALSE}, "---", { {"-", "-"}, NULLKV } },
+  { {'=', FALSE}, "=v", { NULLKV } },
+  { {'=', FALSE}, "k*=v", { NULLKV } },
+  { {'=', FALSE}, "=", { NULLKV } },
+  { {'=', FALSE}, "==", { NULLKV } },
+  { {'=', FALSE}, "===", { NULLKV } },
+  { {'=', FALSE}, " =", { NULLKV } },
+  { {'=', FALSE}, " ==", { NULLKV } },
+  { {'=', FALSE}, " ===", { NULLKV } },
+  { {'=', FALSE}, " = =", { NULLKV } },
+  { {'=', FALSE}, ":=", { NULLKV } },
+  { {'=', FALSE}, "á=v", { NULLKV } },
+  { {'=', FALSE}, "", { NULLKV } },
+  { {'=', FALSE}, "f", { NULLKV } },
+  { {'=', FALSE}, "fo", { NULLKV } },
+  { {'=', FALSE}, "foo", { NULLKV } },
 
-  { {0, FALSE  }, NULL,      { {NULL, NULL}                 } }
+  { {0, FALSE  }, NULL,      { NULLKV                 } }
 };
 
 gchar*
