@@ -136,6 +136,7 @@ matrix:
             libnet
             python
             riemann-client
+            mranno/soft/criterion
         - geoipupdate
         - pip install -r requirements.txt
         - export PATH=/usr/local/opt/bison/bin:/usr/local/opt/libnet/bin:$PATH
