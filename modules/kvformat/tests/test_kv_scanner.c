@@ -23,15 +23,10 @@
 
 #define NULLKV {NULL, NULL}
 
-static gboolean
+static void
 _assert_no_more_tokens(KVScanner *scanner)
 {
   gboolean ok = kv_scanner_scan_next(scanner);
-
-  if (!ok)
-  {
-    return TRUE;
-  }
 
   GString *msg = g_string_new("kv_scanner is expected to return no more key-value pairs ");
   do
@@ -46,8 +41,6 @@ _assert_no_more_tokens(KVScanner *scanner)
     } while (kv_scanner_scan_next(scanner));
   expect_false(ok, msg->str);
   g_string_free(msg, TRUE);
-
-  return !ok;
 }
 
 static gboolean
@@ -67,7 +60,7 @@ _assert_current_value_is(KVScanner *scanner, const gchar *expected_value)
 }
 
 static gboolean
-_compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value, gboolean *expect_more)
+_compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value)
 {
   g_assert(value);
 
@@ -80,7 +73,6 @@ _compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value, gbo
     }
   else
     {
-      *expect_more = FALSE;
       expect_true(ok, "kv_scanner is expected to return TRUE for scan_next(), "
                   "first unconsumed pair: [%s/%s]",
                   key, value);
@@ -115,17 +107,15 @@ _scan_kv_pairs_quoted(KVScanner *scanner, const gchar *input, KVQContainer args)
 {
   g_assert(input);
   kv_scanner_input(scanner, input);
-  gboolean expect_more = TRUE;
   for (gsize i = 0; i < args.n; i++)
     {
-      if (!_compare_key_value(scanner, args.arg[i].key, args.arg[i].value, &expect_more))
+      if (!_compare_key_value(scanner, args.arg[i].key, args.arg[i].value))
         break;
       expect_gboolean(scanner->value_was_quoted, args.arg[i].quoted,
                       "mismatch in value_was_quoted for [%s/%s]",
                       args.arg[i].key, args.arg[i].value);
     }
-  if (expect_more)
-    _assert_no_more_tokens(scanner);
+  _assert_no_more_tokens(scanner);
   kv_scanner_free(scanner);
 }
 
@@ -169,16 +159,14 @@ _scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, KV kvs[])
 {
   g_assert(input);
   kv_scanner_input(scanner, input);
-  gboolean expect_more = TRUE;
 
-  while ((*kvs).key)
+  while (kvs->key)
     {
-      if (!(*kvs).value || !_compare_key_value(scanner, (*kvs).key, (*kvs).value, &expect_more))
+      if (!kvs->value || !_compare_key_value(scanner, kvs->key, kvs->value))
         break;
       kvs++;
     }
-  if (expect_more)
-    _assert_no_more_tokens(scanner);
+  _assert_no_more_tokens(scanner);
   kv_scanner_free(scanner);
 }
 
@@ -227,124 +215,474 @@ _test_transforms_values_if_parse_value_is_set(void)
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
 }
 
-Testcase cases_without_allow_pair_separator_in_value[] = {
-  { {'=', FALSE}, "foo=bar", { {"foo", "bar"}, NULLKV } },
-  { {'=', FALSE}, "k-j=v", { {"k-j", "v"}, NULLKV } },
-  { {'=', FALSE}, "0=v", { {"0", "v"}, NULLKV } },
-  { {'=', FALSE}, "_=v", { {"_", "v"}, NULLKV } },
-  { {'=', FALSE}, "Z=v", { {"Z", "v"}, NULLKV } },
-  { {'=', FALSE}, "k==", { {"k", "="}, NULLKV } },
-  { {'=', FALSE}, "k===", { {"k", "=="}, NULLKV } },
-  { {'=', FALSE}, "k=\"a", { {"k", "a"}, NULLKV } },
-  { {'=', FALSE}, "k=\\", { {"k", "\\"}, NULLKV } },
-  { {'=', FALSE}, "k=\"\\", { {"k", ""}, NULLKV } },
-  { {'=', FALSE}, "k='a", { {"k", "a"}, NULLKV } },
-  { {'=', FALSE}, "k='\\", { {"k", ""}, NULLKV } },
-  { {'=', FALSE}, " ==k=", { {"k", ""}, NULLKV } },
-  { {'=', FALSE}, " = =k=", { {"k", ""}, NULLKV } },
-  { {'=', FALSE}, " =k=", { {"k", ""}, NULLKV } },
-  { {'=', FALSE}, " =k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, " ==k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, " =k=v=w", { {"k", "v=w"}, NULLKV } },
-  { {'=', FALSE}, "k=\xc3", { {"k", "\xc3"}, NULLKV } },
-  { {'=', FALSE}, "k=\xc3v", { {"k", "\xc3v"}, NULLKV } },
-  { {'=', FALSE}, "k=\xff", { {"k", "\xff"}, NULLKV } },
-  { {'=', FALSE}, "k=\xffv", { {"k", "\xffv"}, NULLKV } },
-  { {'=', FALSE}, "k=\"\xc3v", { {"k", "\xc3v"}, NULLKV } },
-  { {'=', FALSE}, "k=\"\xff", { {"k", "\xff"}, NULLKV } },
-  { {'=', FALSE}, "k=\"\xffv", { {"k", "\xffv"}, NULLKV } },
-  { {'=', FALSE}, "foo=", { {"foo", ""}, NULLKV } },
-  { {'=', FALSE}, "foo=b", { {"foo", "b"}, NULLKV } },
-  { {'=', FALSE}, "lorem ipsum foo=bar", { {"foo", "bar"}, NULLKV } },
-  { {'=', FALSE}, "lorem ipsum/dolor @sitamen foo=bar", { {"foo", "bar"}, NULLKV } },
-  { {'=', FALSE}, "lorem ipsum/dolor = foo=bar", { {"foo", "bar"}, NULLKV } },
-  { {'=', FALSE}, "*k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, "x *k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1 k2=v2 k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1    k2=v2     k3=v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1,k2=v2,k3=v3", { {"k1", "v1,k2=v2,k3=v3"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1\tk2=v2 k3=v3", { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1,\tk2=v2 k3=v3", { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1\t k2=v2 k3=v3", { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k=\t", { {"k", "\t"}, NULLKV } },
-  { {'=', FALSE}, "k=,\t", { {"k", ",\t"}, NULLKV } },
-  { {'=', FALSE}, "foo=\"bar\"", { {"foo", "bar"}, NULLKV } },
-  { {'=', FALSE}, "k1=\"v1\", k2=\"v2\"", { {"k1", "v1"}, {"k2", "v2"}, NULLKV } },
-  { {'=', FALSE}, "k1=\"\\\"v1\"", { {"k1", "\"v1"}, NULLKV } },
-  { {'=', FALSE}, "k1=\"\\b \\f \\n \\r \\t \\\\\"", { {"k1", "\b \f \n \r \t \\"}, NULLKV } },
-  { {'=', FALSE}, "k1=\"\\p\"", { {"k1", "\\p"}, NULLKV } },
-  { {'=', FALSE}, "k1='\\'v1'", { {"k1", "'v1"}, NULLKV } },
-  { {'=', FALSE}, "k1='\\b \\f \\n \\r \\t \\\\'", { {"k1", "\b \f \n \r \t \\"}, NULLKV } },
-  { {'=', FALSE}, "k1='\\p'", { {"k1", "\\p"}, NULLKV } },
-  { {'=', FALSE}, "k1=\\b\\f\\n\\r\\t\\\\", { {"k1", "\\b\\f\\n\\r\\t\\\\"}, NULLKV } },
-  { {'=', FALSE}, "k1=\b\f\n\r\\", { {"k1", "\b\f\n\r\\"}, NULLKV } },
-  { {'=', FALSE}, "k1=\"v foo, foo2 =@,\\\"\" k2='v foo,  a='",
-      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, NULLKV } },
-  { {'=', FALSE}, "k1=v1, k2=v2, k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "foo=bar lorem ipsum key=value some more values",
-      { {"foo", "bar"}, {"key", "value"}, NULLKV } },
-  { {'=', FALSE}, "k1=v1,   k2=v2  ,    k3=v3", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'=', FALSE}, "k1 k2=v2, k3, k4=v4", { {"k2", "v2"}, {"k4", "v4"}, NULLKV } },
-  { {'=', FALSE}, "k1= k2=v2, k3=, k4=v4 k5= , k6=v6",
-      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, NULLKV } },
-  { {'=', FALSE}, "k1= v1 k2 = v2 k3 =v3 ", { {"k1", ""}, NULLKV } },
-  { {'=', FALSE}, "k1='v1', k2='v2'", { {"k1", "v1"}, {"k2", "v2"}, NULLKV } },
-  { {'=', FALSE}, ", k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, ",k=v", { {"k", "v"}, NULLKV } },
-  { {'=', FALSE}, "k=v,", { {"k", "v,"}, NULLKV } },
-  { {'=', FALSE}, "k=v, ", { {"k", "v"}, NULLKV } },
-  { {':', FALSE}, "k1:v1 k2:v2 k3:v3 ", { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV } },
-  { {'-', FALSE}, "k-v", { {"k", "v"}, NULLKV } },
-  { {'-', FALSE}, "k--v", { {"k", "-v"}, NULLKV } },
-  { {'-', FALSE}, "---", { {"-", "-"}, NULLKV } },
-  { {'=', FALSE}, "=v", { NULLKV } },
-  { {'=', FALSE}, "k*=v", { NULLKV } },
-  { {'=', FALSE}, "=", { NULLKV } },
-  { {'=', FALSE}, "==", { NULLKV } },
-  { {'=', FALSE}, "===", { NULLKV } },
-  { {'=', FALSE}, " =", { NULLKV } },
-  { {'=', FALSE}, " ==", { NULLKV } },
-  { {'=', FALSE}, " ===", { NULLKV } },
-  { {'=', FALSE}, " = =", { NULLKV } },
-  { {'=', FALSE}, ":=", { NULLKV } },
-  { {'=', FALSE}, "á=v", { NULLKV } },
-  { {'=', FALSE}, "", { NULLKV } },
-  { {'=', FALSE}, "f", { NULLKV } },
-  { {'=', FALSE}, "fo", { NULLKV } },
-  { {'=', FALSE}, "foo", { NULLKV } },
+static void
+_test_value_separator_clone(void)
+{
+  KVScanner *scanner = kv_scanner_new();
+  kv_scanner_set_value_separator(scanner, ':');
+  KVScanner *cloned_scanner = kv_scanner_clone(scanner);
+  kv_scanner_free(scanner);
 
-  { {0, FALSE  }, NULL,      { NULLKV                 } }
-};
+  _scan_kv_pairs_scanner(
+    cloned_scanner,
+    "key1:value1 key2:value2 key3:value3 ",
+    (KV[]){{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV}
+  );
+}
 
-gchar*
+#define DEFAULT_CONFIG {.kv_separator='=', .allow_pair_separator_in_values=FALSE}
+
+static Testcase*
+provide_cases_without_allow_pair_separator_in_value()
+{
+  static Testcase cases_without_allow_pair_separator_in_value[] = {
+    {
+      DEFAULT_CONFIG,
+      "foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k-j=v",
+      { {"k-j", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "0=v",
+      { {"0", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "_=v",
+      { {"_", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "Z=v",
+      { {"Z", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k==",
+      { {"k", "="}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k===",
+      { {"k", "=="}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\"a",
+      { {"k", "a"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\\",
+      { {"k", "\\"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\"\\",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k='a",
+      { {"k", "a"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k='\\",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " ==k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " = =k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " =k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " =k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " ==k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " =k=v=w",
+      { {"k", "v=w"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\xc3",
+      { {"k", "\xc3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\xc3v",
+      { {"k", "\xc3v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\xff",
+      { {"k", "\xff"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\xffv",
+      { {"k", "\xffv"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\"\xc3v",
+      { {"k", "\xc3v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\"\xff",
+      { {"k", "\xff"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\"\xffv",
+      { {"k", "\xffv"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "foo=",
+      { {"foo", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "foo=b",
+      { {"foo", "b"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "lorem ipsum foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "lorem ipsum/dolor @sitamen foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "lorem ipsum/dolor = foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "*k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "x *k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1 k2=v2 k3=v3",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1    k2=v2     k3=v3 ",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1,k2=v2,k3=v3",
+      { {"k1", "v1,k2=v2,k3=v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1\tk2=v2 k3=v3",
+      { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1,\tk2=v2 k3=v3",
+      { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1\t k2=v2 k3=v3",
+      { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=\t",
+      { {"k", "\t"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=,\t",
+      { {"k", ",\t"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "foo=\"bar\"",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\"v1\", k2=\"v2\"",
+      { {"k1", "v1"}, {"k2", "v2"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\"\\\"v1\"",
+      { {"k1", "\"v1"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\"\\b \\f \\n \\r \\t \\\\\"",
+      { {"k1", "\b \f \n \r \t \\"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\"\\p\"",
+      { {"k1", "\\p"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1='\\'v1'",
+      { {"k1", "'v1"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1='\\b \\f \\n \\r \\t \\\\'",
+      { {"k1", "\b \f \n \r \t \\"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1='\\p'",
+      { {"k1", "\\p"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\\b\\f\\n\\r\\t\\\\",
+      { {"k1", "\\b\\f\\n\\r\\t\\\\"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\b\f\n\r\\",
+      { {"k1", "\b\f\n\r\\"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=\"v foo, foo2 =@,\\\"\" k2='v foo,  a='",
+      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1, k2=v2, k3=v3",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "foo=bar lorem ipsum key=value some more values",
+      { {"foo", "bar"}, {"key", "value"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1=v1,   k2=v2  ,    k3=v3",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1 k2=v2, k3, k4=v4",
+      { {"k2", "v2"}, {"k4", "v4"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1= k2=v2, k3=, k4=v4 k5= , k6=v6",
+      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1= v1 k2 = v2 k3 =v3 ",
+      { {"k1", ""}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k1='v1', k2='v2'",
+      { {"k1", "v1"}, {"k2", "v2"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      ", k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      ",k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=v,",
+      { {"k", "v,"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k=v, ",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      {':', FALSE},
+      "k1:v1 k2:v2 k3:v3 ",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      {':', FALSE},
+      "k1: v1 k2 : v2 k3 :v3 ",
+      { {"k1", ""}, NULLKV }
+    },
+    {
+      {'-', FALSE},
+      "k-v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      {'-', FALSE},
+      "k--v",
+      { {"k", "-v"}, NULLKV }
+    },
+    {
+      {'-', FALSE},
+      "---",
+      { {"-", "-"}, NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "=v",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "k*=v",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "=",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "==",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "===",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " =",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " ==",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " ===",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      " = =",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      ":=",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "á=v",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "f",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "fo",
+      { NULLKV }
+    },
+    {
+      DEFAULT_CONFIG,
+      "foo",
+      { NULLKV }
+    },
+
+    { {0, FALSE  }, NULL,      { NULLKV                 } }
+  };
+
+  return cases_without_allow_pair_separator_in_value;
+}
+
+static GString*
 _expected_to_string(KV* kvs)
 {
-  gchar* result = "";
-  if ((*kvs).key)
+  GString* result = g_string_new("");
+  gboolean first = TRUE;
+  while (kvs->key)
   {
-    result = (*kvs).key;
-    result = g_strjoin("=", result, (*kvs).value, NULL);
-    kvs++;
-  }
-  while ((*kvs).key)
-  {
-    result = g_strjoin(" ", result, (*kvs).key, NULL);
-    result = g_strjoin("=", result, (*kvs).value, NULL);
+    if (!first)
+    {
+      g_string_append_c(result, ' ');
+    }
+    first = FALSE;
+    g_string_append_printf(result, "%s=%s", kvs->key, kvs->value);
     kvs++;
   }
 
   return result;
 }
 
-void
+static void
 _run_testcase(Testcase tc)
 {
-  testcase_begin("input:(%s), expected:(%s)", tc.input, _expected_to_string(tc.expected));
+  GString* pretty_expected = _expected_to_string(tc.expected);
+  testcase_begin("input:(%s), expected:(%s)", tc.input, pretty_expected->str);
   _scan_kv_pairs_scanner(create_kv_scanner(tc.config), tc.input, tc.expected);
   testcase_end();
+  g_string_free(pretty_expected, TRUE);
 }
 
-void
+static void
 _run_testcases(Testcase* cases)
 {
   Testcase* tc = cases;
@@ -360,7 +698,8 @@ int main(int argc, char *argv[])
   _test_quotation_is_stored_in_the_was_quoted_value_member();
   _test_key_buffer_underrun();
   _test_transforms_values_if_parse_value_is_set();
-  _run_testcases(cases_without_allow_pair_separator_in_value);
+  _test_value_separator_clone();
+  _run_testcases(provide_cases_without_allow_pair_separator_in_value());
   if (testutils_deinit())
     return 0;
   else
