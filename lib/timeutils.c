@@ -102,8 +102,8 @@ TLS_BLOCK_START
 }
 TLS_BLOCK_END;
 
-#define current_time_value   __tls_deref(current_time_value)
-#define invalidate_time_task __tls_deref(invalidate_time_task)
+#define _current_time_value   __tls_deref(current_time_value)
+#define _invalidate_time_task __tls_deref(invalidate_time_task)
 #define local_time_cache     __tls_deref(local_time_cache)
 #define gm_time_cache        __tls_deref(gm_time_cache)
 #define mktime_prev_tm       __tls_deref(mktime_prev_tm)
@@ -116,7 +116,7 @@ static GStaticMutex localtime_lock = G_STATIC_MUTEX_INIT;
 void
 invalidate_cached_time(void)
 {
-  current_time_value.tv_sec = 0;
+  _current_time_value.tv_sec = 0;
 }
 
 /*
@@ -126,25 +126,26 @@ invalidate_cached_time(void)
 void
 cached_g_current_time(GTimeVal *result)
 {
-  if (current_time_value.tv_sec == 0)
+  struct __tls_variables *tls = &__tls;
+  if (tls->current_time_value.tv_sec == 0)
     {
-      g_get_current_time(&current_time_value);
+      g_get_current_time(&tls->current_time_value);
     }
-  *result = current_time_value;
+  *result = tls->current_time_value;
 
   if (iv_inited())
     {
-      if (invalidate_time_task.handler == NULL)
+      if (tls->invalidate_time_task.handler == NULL)
         {
-          IV_TASK_INIT(&invalidate_time_task);
-          invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
+          IV_TASK_INIT(&tls->invalidate_time_task);
+          tls->invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
         }
-      if (!iv_task_registered(&invalidate_time_task))
-        iv_task_register(&invalidate_time_task);
+      if (!iv_task_registered(&tls->invalidate_time_task))
+        iv_task_register(&tls->invalidate_time_task);
     }
   else
     {
-      invalidate_cached_time();
+      tls->current_time_value.tv_sec = 0;
     }
 }
 
