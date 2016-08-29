@@ -128,19 +128,21 @@ cached_g_current_time(GTimeVal *result)
 {
   if (current_time_value.tv_sec == 0)
     {
-      g_get_current_time(&current_time_value);
+      g_get_current_time(result);
     }
-  *result = current_time_value;
+  current_time_value = *result;
 
   if (iv_inited())
     {
-      if (invalidate_time_task.handler == NULL)
+      struct iv_task tls_invalidate_time_task = invalidate_time_task;
+      if (tls_invalidate_time_task.handler == NULL)
         {
-          IV_TASK_INIT(&invalidate_time_task);
-          invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
+          IV_TASK_INIT(&tls_invalidate_time_task);
+          tls_invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
         }
-      if (!iv_task_registered(&invalidate_time_task))
-        iv_task_register(&invalidate_time_task);
+      if (!iv_task_registered(&tls_invalidate_time_task))
+        iv_task_register(&tls_invalidate_time_task);
+      invalidate_time_task = tls_invalidate_time_task;
     }
   else
     {
