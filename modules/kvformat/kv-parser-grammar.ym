@@ -51,6 +51,7 @@
 %token KW_LINUX_AUDIT_PARSER
 %token KW_PREFIX
 %token KW_VALUE_SEPARATOR
+%token KW_ALLOW_PAIR_SEPARATOR_OPTION
 
 %type	<ptr> parser_expr_kv
 
