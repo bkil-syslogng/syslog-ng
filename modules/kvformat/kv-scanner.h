@@ -24,12 +24,28 @@
 
 #include "syslog-ng.h"
 
+typedef struct _KVToken KVToken;
+struct _KVToken
+{
+  gchar *begin;
+  gchar *end;
+};
+
+typedef struct _KVValueDetails KVValueDetails;
+struct _KVValueDetails
+{
+  gint state;
+  KVToken next_key;
+  KVToken value;
+ };
+
 typedef struct _KVScanner KVScanner;
 struct _KVScanner
 {
   const gchar *input;
   gsize input_pos;
   gsize input_len;
+  KVValueDetails details;
   GString *key;
   GString *value;
   GString *decoded_value;
