@@ -598,7 +598,7 @@ kv_scanner_init(KVScanner *self)
   self->decoded_value = g_string_sized_new(64);
   self->free_fn = kv_scanner_free_method;
   self->value_separator = '=';
-  self->allow_pair_separator_in_values = TRUE;
+  self->allow_pair_separator_in_values = FALSE;
 }
 
 KVScanner *
