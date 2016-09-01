@@ -646,8 +646,153 @@ provide_cases_without_allow_pair_separator_in_value()
       "foo",
       { NULLKV }
     },
+    {
+      {'=', TRUE},
+      "foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo =bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo =bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=bar ggg",
+      { {"foo", "bar ggg"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=bar ggg baz=ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      " foo =bar ggg baz=ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo =bar ggg baz =ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo =bar ggg baz   =ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo =  bar ggg baz   =   ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "a b c=d",
+      { {"c", "d"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      " k= b",
+      { {"k", "b"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k= a=b c=d",
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k=a=b c=d",
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=a \"bar baz\" ",
+      { {"foo", "a \"bar baz\""}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=a \"bar baz",
+      { {"foo", "a \"bar baz"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=a \"bar baz c=d",
+      { {"foo", "a \"bar baz"}, {"c", "d"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=a \"bar baz\"=f c=d a",
+      { {"foo", "a \"bar baz\"=f"}, {"c", "d a"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=\"bar baz\"",
+      { {"foo", "bar baz"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=\"bar\" baz c=d",
+      { {"foo", "\"bar\" baz"}, {"c", "d"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "foo=bar\"",
+      { {"foo", "bar\""}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k==",
+      { {"k", "="}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k===",
+      { {"k", "=="}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k===a",
+      { {"k", "==a"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k===  a",
+      { {"k", "==  a"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "k===a=b",
+      { {"k", "==a=b"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "a==b=",
+      { {"a", "=b="}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "a=,=b=a",
+      { {"a", ",=b=a"}, NULLKV }
+    },
+    {
+      {'=', TRUE},
+      "a= =a",
+      { {"a", "=a"}, NULLKV }
+    },
 
-    { {0, FALSE  }, NULL,      { NULLKV                 } }
+    { {0, FALSE  }, NULL, { NULLKV } }
   };
 
   return cases_without_allow_pair_separator_in_value;
