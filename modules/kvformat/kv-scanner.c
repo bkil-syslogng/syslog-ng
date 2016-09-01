@@ -49,9 +49,9 @@ enum {
 };
 
 void
-kv_scanner_set_allow_pair_separator_in_values(KVScanner *self, gboolean allowed)
+kv_scanner_allow_pair_separator_in_value(KVScanner *self, gboolean allowed)
 {
-  self->allow_pair_separator_in_values = allowed;
+  self->allow_pair_separator_in_value = allowed;
 }
 
 void
@@ -261,7 +261,7 @@ _end_value(KVScanner *self)
 void
 handle_key_or_value_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   if (*cur == 0)
     {
@@ -289,7 +289,7 @@ handle_key_or_value_state(KVScanner *self)
 void
 handle_value_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   if (*cur == 0)
     {
@@ -306,7 +306,7 @@ handle_value_state(KVScanner *self)
 void
 handle_in_separator_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   if (*cur == 0)
     {
@@ -337,7 +337,7 @@ handle_in_separator_state(KVScanner *self)
 void
 _handle_init_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   if (*cur == 0)
     {
@@ -369,7 +369,7 @@ _handle_init_state(KVScanner *self)
 void
 handle_after_quote_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   _end_value(self);
   if (*cur == 0)
@@ -399,7 +399,7 @@ handle_after_quote_state(KVScanner *self)
 void
 handle_in_quote_state(KVScanner *self)
 {
-  gchar *cur = self->input + self->input_pos;
+  const gchar *cur = self->input + self->input_pos;
 
   if (*cur == 0)
     {
@@ -416,8 +416,7 @@ handle_in_quote_state(KVScanner *self)
 gboolean
 _kv_scanner_extract_value_new(KVScanner *self)
 {
-  KVValueDetails detail_scanner;
-  gchar *cur;
+  const gchar *cur;
 
   _kv_scanner_reset_value(self);
   //
@@ -463,7 +462,7 @@ _kv_scanner_extract_value_new(KVScanner *self)
 static gboolean
 _find_first_key(KVScanner *self)
 {
-  gchar *cur = &self->input[self->input_pos];
+  const gchar *cur = &self->input[self->input_pos];
   gboolean found = FALSE;
   self->details.state = KV_FIND_FIRST_KEY_TRIM;
 
@@ -543,7 +542,7 @@ kv_scanner_scan_next(KVScanner *self)
 {
   _kv_scanner_skip_space(self);
 
-  if (self->allow_pair_separator_in_values) {
+  if (self->allow_pair_separator_in_value) {
     if (_kv_scanner_finished(self) ||
         !_kv_scanner_extract_key_new(self) ||
         !_kv_scanner_extract_value_new(self))
@@ -585,7 +584,7 @@ kv_scanner_clone(KVScanner *self)
   KVScanner *cloned = kv_scanner_new();
   cloned->parse_value = self->parse_value;
   cloned->value_separator = self->value_separator;
-  cloned->allow_pair_separator_in_values = self->allow_pair_separator_in_values;
+  cloned->allow_pair_separator_in_value = self->allow_pair_separator_in_value;
   return cloned;
 }
 
@@ -598,7 +597,7 @@ kv_scanner_init(KVScanner *self)
   self->decoded_value = g_string_sized_new(64);
   self->free_fn = kv_scanner_free_method;
   self->value_separator = '=';
-  self->allow_pair_separator_in_values = FALSE;
+  self->allow_pair_separator_in_value = FALSE;
 }
 
 KVScanner *

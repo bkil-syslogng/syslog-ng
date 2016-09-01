@@ -27,8 +27,8 @@
 typedef struct _KVToken KVToken;
 struct _KVToken
 {
-  gchar *begin;
-  gchar *end;
+  const gchar *begin;
+  const gchar *end;
 };
 
 typedef struct _KVValueDetails KVValueDetails;
@@ -54,12 +54,12 @@ struct _KVScanner
   gchar quote_char;
   gint quote_state;
   gint next_quote_state;
-  gboolean allow_pair_separator_in_values;
+  gboolean allow_pair_separator_in_value;
   gboolean (*parse_value)(KVScanner *self);
   void (*free_fn)(KVScanner *self);
 };
 
-void kv_scanner_set_allow_pair_separator_in_values(KVScanner *self, gboolean allowed);
+void kv_scanner_allow_pair_separator_in_value(KVScanner *self, gboolean allowed);
 void kv_scanner_set_value_separator(KVScanner *self, gchar value_separator);
 void kv_scanner_input(KVScanner *self, const gchar *input);
 gboolean kv_scanner_scan_next(KVScanner *self);
