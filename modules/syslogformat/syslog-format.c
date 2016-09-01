@@ -421,13 +421,11 @@ __get_normalized_time(LogStamp const timestamp, gint const normalized_hour, gint
 
 /* FIXME: this function should really be exploded to a lot of smaller functions... (Bazsi) */
 static gboolean
-log_msg_parse_date(LogMessage *self, const guchar **data, gint *length, guint parse_flags, glong assume_timezone)
+log_msg_parse_date_unnormalized(LogMessage *self, const guchar **data, gint *length, guint parse_flags, struct tm *tm)
 {
   const guchar *src = *data;
   gint left = *length;
   GTimeVal now;
-  struct tm tm;
-  gint unnormalized_hour;
 
   cached_g_current_time(&now);
 
@@ -451,14 +449,13 @@ log_msg_parse_date(LogMessage *self, const guchar **data, gint *length, guint pa
   /* If the next chars look like a date, then read them as a date. */
   if (__is_iso_stamp((const gchar *)src, left))
     {
-      if (!__parse_iso_stamp(&now, self, &tm, &src, &left))
+      if (!__parse_iso_stamp(&now, self, tm, &src, &left))
         goto error;
-      tm.tm_isdst = -1;
     }
   else if ((parse_flags & LP_SYSLOG_PROTOCOL) == 0)
     {
       glong usec = 0;
-      if (!__parse_bsd_timestamp(&src, &left, &now, &tm, &usec))
+      if (!__parse_bsd_timestamp(&src, &left, &now, tm, &usec))
         goto error;
       self->timestamps[LM_TS_STAMP].tv_usec = usec;
     }
@@ -476,11 +473,6 @@ log_msg_parse_date(LogMessage *self, const guchar **data, gint *length, guint pa
         return FALSE;
     }
 
-  unnormalized_hour = tm.tm_hour;
-  self->timestamps[LM_TS_STAMP].tv_sec = cached_mktime(&tm);
-  __set_zone_offset(&(self->timestamps[LM_TS_STAMP]), assume_timezone);
-  self->timestamps[LM_TS_STAMP].tv_sec = __get_normalized_time(self->timestamps[LM_TS_STAMP], tm.tm_hour,
-                                         unnormalized_hour);
 
   *data = src;
   *length = left;
@@ -490,6 +482,28 @@ error:
 
   self->timestamps[LM_TS_STAMP] = self->timestamps[LM_TS_RECVD];
   return FALSE;
+}
+
+static gboolean
+log_msg_parse_date(LogMessage *self, const guchar **data, gint *length, guint parse_flags, glong assume_timezone)
+{
+  struct tm tm;
+  if (!log_msg_parse_date_unnormalized(self, data, length, parse_flags, &tm))
+    return FALSE;
+
+  if (parse_flags & LP_NO_PARSE_DATE)
+    {
+      self->timestamps[LM_TS_STAMP] = (const LogStamp){};
+    } else {
+      tm.tm_isdst = -1;
+      gint unnormalized_hour = tm.tm_hour;
+      self->timestamps[LM_TS_STAMP].tv_sec = cached_mktime(&tm);
+      __set_zone_offset(&(self->timestamps[LM_TS_STAMP]), assume_timezone);
+      self->timestamps[LM_TS_STAMP].tv_sec = __get_normalized_time(self->timestamps[LM_TS_STAMP], tm.tm_hour,
+                                                                   unnormalized_hour);
+    }
+
+  return TRUE;
 }
 
 static gboolean

@@ -115,6 +115,7 @@ CfgFlagHandler msg_format_flag_handlers[] =
   { "dont-store-legacy-msghdr", CFH_CLEAR, offsetof(MsgFormatOptions, flags), LP_STORE_LEGACY_MSGHDR },
   { "expect-hostname",            CFH_SET, offsetof(MsgFormatOptions, flags), LP_EXPECT_HOSTNAME },
   { "no-hostname",              CFH_CLEAR, offsetof(MsgFormatOptions, flags), LP_EXPECT_HOSTNAME },
+  { "no-parse-date", CFH_SET, offsetof(MsgFormatOptions, flags), LP_NO_PARSE_DATE },
 
   { NULL },
 };
