@@ -86,6 +86,7 @@ matrix:
     - env: B=style-check
       dist: trusty
       sudo: required
+      compiler: gcc
       install:
       - curl http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04/Release.key | sudo apt-key add -
       - echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_14.04 ./" | sudo tee --append /etc/apt/sources.list.d/syslog-ng-obs.list
@@ -94,7 +95,7 @@ matrix:
           astyle
       before_script:
       script:
-      - scripts/style-checker.sh check
+      - scripts/style-checker.sh diff
     - env: B=copyright-check
       sudo: false
       compiler: gcc
