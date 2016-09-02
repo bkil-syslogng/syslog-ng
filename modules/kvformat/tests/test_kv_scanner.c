@@ -196,6 +196,17 @@ _test_quotation_is_stored_in_the_was_quoted_value_member(void)
   TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar' k=v", {"foo", "bar", TRUE}, {"k", "v", FALSE});
 }
 
+static void
+_test_quotation_is_stored_in_the_was_quoted_value_member_with_space_separator_option(void)
+{
+  ScannerConfig config = {'=', TRUE};
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo=\"bar\"", {"foo", "bar", TRUE});
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar'", {"foo", "bar", TRUE});
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo=bar", {"foo", "bar", FALSE});
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar", {"foo", "'bar", FALSE});
+  TEST_KV_SCAN_Q(create_kv_scanner(config), "foo='bar' k=v", {"foo", "bar", TRUE}, {"k", "v", FALSE});
+}
+
 static gboolean
 _parse_value_by_incrementing_all_bytes(KVScanner *self)
 {
@@ -211,6 +222,15 @@ static void
 _test_transforms_values_if_parse_value_is_set(void)
 {
   KVScanner *scanner = create_kv_scanner((ScannerConfig){'=', FALSE});
+  scanner->parse_value = _parse_value_by_incrementing_all_bytes;
+
+  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
+}
+
+static void
+_test_transforms_values_if_parse_value_is_set_with_space_separator_option(void)
+{
+  KVScanner *scanner = create_kv_scanner((ScannerConfig){'=', TRUE});
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
 
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
@@ -814,6 +834,11 @@ provide_cases_with_allow_pair_separator_in_value()
       "foo=\"bar baz\"",
       { {"foo", "bar baz"}, NULLKV }
     },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo='bar",
+      { {"foo", "'bar"}, NULLKV }
+    },
 
     { {NULLCFG  }, NULL, { NULLKV } }
   };
@@ -871,8 +896,10 @@ _run_testcases(Testcase* cases)
 int main(int argc, char *argv[])
 {
   _test_quotation_is_stored_in_the_was_quoted_value_member();
+  _test_quotation_is_stored_in_the_was_quoted_value_member_with_space_separator_option();
   _test_key_buffer_underrun();
   _test_transforms_values_if_parse_value_is_set();
+  _test_transforms_values_if_parse_value_is_set_with_space_separator_option();
   _test_value_separator_clone();
   _run_testcases(provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(provide_common_cases());
