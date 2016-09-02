@@ -141,7 +141,7 @@ typedef struct _KV
 
 typedef struct Testcase_t
 {
-  ScannerConfig config[20];
+  ScannerConfig config[5];
   gchar* input;
   KV expected[20];
 } Testcase;
@@ -232,46 +232,162 @@ _test_value_separator_clone(void)
 }
 
 #define DEFAULT_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=FALSE}
+#define SPACE_HANDLING_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=TRUE}
 
 static Testcase*
-provide_cases_without_allow_pair_separator_in_value()
+provide_common_cases()
 {
-  static Testcase cases_without_allow_pair_separator_in_value[] = {
+  static Testcase common_cases[] = {
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "foo=bar",
       { {"foo", "bar"}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "k-j=v",
       { {"k-j", "v"}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "0=v",
       { {"0", "v"}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "_=v",
       { {"_", "v"}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "Z=v",
       { {"Z", "v"}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "k==",
       { {"k", "="}, NULLKV }
     },
     {
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "k===",
       { {"k", "=="}, NULLKV }
     },
+    {
+      { SPACE_HANDLING_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===a",
+      { {"k", "==a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===  a",
+      { {"k", "==  a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===a=b",
+      { {"k", "==a=b"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      " ==k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      " = =k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      " =k=",
+      { {"k", ""}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      " =k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      " ==k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=\xc3",
+      { {"k", "\xc3"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=\xc3v",
+      { {"k", "\xc3v"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=\xff",
+      { {"k", "\xff"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=\xffv",
+      { {"k", "\xffv"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=",
+      { {"foo", ""}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=b",
+      { {"foo", "b"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "lorem ipsum foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "lorem ipsum/dolor @sitamen foo=bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "*k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "x *k=v",
+      { {"k", "v"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k1=v1 k2=v2 k3=v3",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k1=v1    k2=v2     k3=v3 ",
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k1=v1,k2=v2,k3=v3",
+      { {"k1", "v1,k2=v2,k3=v3"}, NULLKV }
+    },
+
+    { {NULLCFG  }, NULL, { NULLKV } }
+  };
+
+  return common_cases;
+}
+static Testcase*
+provide_cases_without_allow_pair_separator_in_value()
+{
+  static Testcase cases_without_allow_pair_separator_in_value[] = {
     {
       { DEFAULT_CONFIG, NULLCFG },
       "k=\"a",
@@ -299,53 +415,8 @@ provide_cases_without_allow_pair_separator_in_value()
     },
     {
       { DEFAULT_CONFIG, NULLCFG },
-      " ==k=",
-      { {"k", ""}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      " = =k=",
-      { {"k", ""}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      " =k=",
-      { {"k", ""}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      " =k=v",
-      { {"k", "v"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      " ==k=v",
-      { {"k", "v"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
       " =k=v=w",
       { {"k", "v=w"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k=\xc3",
-      { {"k", "\xc3"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k=\xc3v",
-      { {"k", "\xc3v"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k=\xff",
-      { {"k", "\xff"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k=\xffv",
-      { {"k", "\xffv"}, NULLKV }
     },
     {
       { DEFAULT_CONFIG, NULLCFG },
@@ -364,53 +435,8 @@ provide_cases_without_allow_pair_separator_in_value()
     },
     {
       { DEFAULT_CONFIG, NULLCFG },
-      "foo=",
-      { {"foo", ""}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "foo=b",
-      { {"foo", "b"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "lorem ipsum foo=bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "lorem ipsum/dolor @sitamen foo=bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
       "lorem ipsum/dolor = foo=bar",
       { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "*k=v",
-      { {"k", "v"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "x *k=v",
-      { {"k", "v"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k1=v1 k2=v2 k3=v3",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k1=v1    k2=v2     k3=v3 ",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
-    },
-    {
-      { DEFAULT_CONFIG, NULLCFG },
-      "k1=v1,k2=v2,k3=v3",
-      { {"k1", "v1,k2=v2,k3=v3"}, NULLKV }
     },
     {
       { DEFAULT_CONFIG, NULLCFG },
@@ -647,156 +673,152 @@ provide_cases_without_allow_pair_separator_in_value()
       "foo",
       { NULLKV }
     },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo =bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo =bar",
-      { {"foo", "bar"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=bar ggg",
-      { {"foo", "bar ggg"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=bar ggg baz=ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      " foo =bar ggg baz=ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo =bar ggg baz =ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo =bar ggg baz   =ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo =  bar ggg baz   =   ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "a b c=d",
-      { {"c", "d"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      " k= b",
-      { {"k", "b"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k= a=b c=d",
-      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k=a=b c=d",
-      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=a \"bar baz\" ",
-      { {"foo", "a \"bar baz\""}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=a \"bar baz",
-      { {"foo", "a \"bar baz"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=a \"bar baz c=d",
-      { {"foo", "a \"bar baz"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=a \"bar baz\"=f c=d a",
-      { {"foo", "a \"bar baz\"=f"}, {"c", "d a"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=\"bar baz\"",
-      { {"foo", "bar baz"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=\"bar\" baz c=d",
-      { {"foo", "\"bar\" baz"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "foo=bar\"",
-      { {"foo", "bar\""}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k==",
-      { {"k", "="}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k===",
-      { {"k", "=="}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k===a",
-      { {"k", "==a"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k===  a",
-      { {"k", "==  a"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "k===a=b",
-      { {"k", "==a=b"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "a==b=",
-      { {"a", "=b="}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "a=,=b=a",
-      { {"a", ",=b=a"}, NULLKV }
-    },
-    {
-      { {'=', TRUE}, NULLCFG },
-      "a= =a",
-      { {"a", "=a"}, NULLKV }
-    },
 
     { {NULLCFG  }, NULL, { NULLKV } }
   };
 
   return cases_without_allow_pair_separator_in_value;
+}
+
+static Testcase*
+provide_cases_with_allow_pair_separator_in_value()
+{
+  static Testcase cases_with_allow_pair_separator_in_value[] = {
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo =bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo =bar",
+      { {"foo", "bar"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=bar ggg",
+      { {"foo", "bar ggg"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=bar ggg baz=ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      " foo =bar ggg baz=ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo =bar ggg baz =ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo =bar ggg baz   =ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo =  bar ggg baz   =   ez",
+      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "a b c=d",
+      { {"c", "d"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      " k= b",
+      { {"k", "b"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "k= a=b c=d",
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=a=b c=d",
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=a \"bar baz\" ",
+      { {"foo", "a \"bar baz\""}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=a \"bar baz",
+      { {"foo", "a \"bar baz"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=a \"bar baz c=d",
+      { {"foo", "a \"bar baz"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=a \"bar baz\"=f c=d a",
+      { {"foo", "a \"bar baz\"=f"}, {"c", "d a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=\\\"bar baz\\\"",
+      { {"foo", "\\\"bar baz\\\""}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=\"bar\" baz c=d",
+      { {"foo", "\"bar\" baz"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=bar\"",
+      { {"foo", "bar\""}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===a",
+      { {"k", "==a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===  a",
+      { {"k", "==  a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "k===a=b",
+      { {"k", "==a=b"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "a==b=",
+      { {"a", "=b="}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "a=,=b=a",
+      { {"a", ",=b=a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "a= =a",
+      { {"a", "=a"}, NULLKV }
+    },
+    {
+      { SPACE_HANDLING_CONFIG, NULLCFG },
+      "foo=\"bar baz\"",
+      { {"foo", "bar baz"}, NULLKV }
+    },
+
+    { {NULLCFG  }, NULL, { NULLKV } }
+  };
+
+  return cases_with_allow_pair_separator_in_value;
 }
 
 static GString*
@@ -818,14 +840,16 @@ _expected_to_string(KV* kvs)
   return result;
 }
 
-static void
+void
 _run_testcase(Testcase tc)
 {
-  GString* pretty_expected = _expected_to_string(tc.expected);
+  GString* pretty_expected;
   ScannerConfig *cfg = tc.config;
-  while (cfg->kv_separator != '\0')
+  while (cfg->kv_separator != 0)
   {
-    testcase_begin("input:(%s), expected:(%s)", tc.input, pretty_expected->str);
+    pretty_expected = _expected_to_string(tc.expected);
+    testcase_begin("input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
+                   tc.input, pretty_expected->str, cfg->kv_separator, cfg->allow_pair_separator_in_value);
     _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc.input, tc.expected);
     testcase_end();
     g_string_free(pretty_expected, TRUE);
@@ -851,6 +875,8 @@ int main(int argc, char *argv[])
   _test_transforms_values_if_parse_value_is_set();
   _test_value_separator_clone();
   _run_testcases(provide_cases_without_allow_pair_separator_in_value());
+  _run_testcases(provide_common_cases());
+  _run_testcases(provide_cases_with_allow_pair_separator_in_value());
   if (testutils_deinit())
     return 0;
   else
