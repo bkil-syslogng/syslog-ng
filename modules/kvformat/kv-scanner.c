@@ -149,7 +149,9 @@ _decode_backslash_escape(KVScanner *self, gchar ch)
       break;
     default:
       if (self->quote_char != ch)
+          {
         g_string_append_c(self->value, '\\');
+          }
       control = ch;
       break;
     }
@@ -224,7 +226,7 @@ _kv_scanner_decode_value(KVScanner *self)
   return TRUE;
 }
 
-void
+static void
 _dismiss_next_key(KVScanner *self)
 {
   if (self->details.next_key.begin < self->details.next_key.end)
@@ -234,32 +236,32 @@ _dismiss_next_key(KVScanner *self)
   }
 }
 
-void
+static void
 _start_next_key(KVScanner *self)
 {
   self->details.next_key.begin = self->details.next_key.end = self->input + self->input_pos;
 }
 
-void
+static void
 _end_next_key(KVScanner *self)
 {
   self->details.next_key.end = self->input + self->input_pos;
 }
 
-void
+static void
 _start_value(KVScanner *self)
 {
   self->details.value.begin = self->details.value.end = self->input + self->input_pos;
 }
 
-void
+static void
 _end_value(KVScanner *self)
 {
   self->details.value.end = self->input + self->input_pos;
 }
 
-void
-handle_key_or_value_state(KVScanner *self)
+static void
+_handle_key_or_value_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
 
@@ -286,8 +288,8 @@ handle_key_or_value_state(KVScanner *self)
   }
 }
 
-void
-handle_value_state(KVScanner *self)
+static void
+_handle_value_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
 
@@ -303,8 +305,8 @@ handle_value_state(KVScanner *self)
   }
 }
 
-void
-handle_in_separator_state(KVScanner *self)
+static void
+_handle_in_separator_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
 
@@ -334,7 +336,7 @@ handle_in_separator_state(KVScanner *self)
     }
 }
 
-void
+static void
 _handle_init_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
@@ -366,8 +368,8 @@ _handle_init_state(KVScanner *self)
     }
 }
 
-void
-handle_after_quote_state(KVScanner *self)
+static void
+_handle_after_quote_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
 
@@ -396,8 +398,8 @@ handle_after_quote_state(KVScanner *self)
   }
 }
 
-void
-handle_in_quote_state(KVScanner *self)
+static void
+_handle_in_quote_state(KVScanner *self)
 {
   const gchar *cur = self->input + self->input_pos;
 
@@ -413,46 +415,50 @@ handle_in_quote_state(KVScanner *self)
     }
 }
 
-gboolean
+static gboolean
 _kv_scanner_extract_value_new(KVScanner *self)
 {
   const gchar *cur;
+  gboolean back_slash_found = FALSE;
 
   _kv_scanner_reset_value(self);
-  //
   self->details.state = KV_FIND_VALUE_INIT;
 
   while (self->details.state != KV_FIND_VALUE_FINISH &&
-         self->details.state != KV_FIND_EOL) {
-    switch (self->details.state) {
+         self->details.state != KV_FIND_EOL)
+    {
+      switch (self->details.state)
+        {
       case KV_FIND_VALUE_INIT:
         _handle_init_state(self);
         break;
       case KV_FIND_VALUE_VALUE:
-        handle_value_state(self);
+          _handle_value_state(self);
         break;
       case KV_FIND_VALUE_KEY_OR_VALUE:
-        handle_key_or_value_state(self);
+          _handle_key_or_value_state(self);
         break;
       case KV_FIND_VALUE_IN_SEPARATOR:
-        handle_in_separator_state(self);
+          _handle_in_separator_state(self);
         break;
       case KV_FIND_VALUE_IN_QUOTE:
-        handle_in_quote_state(self);
+          _handle_in_quote_state(self);
         break;
       case KV_FIND_VALUE_AFTER_QUOTE:
-        handle_after_quote_state(self);
+          _handle_after_quote_state(self);
         break;
     }
     self->input_pos++;
   }
 
-  if (*self->details.value.begin == self->quote_char && *(self->details.value.end-1) == self->quote_char) {
+  if (*self->details.value.begin == self->quote_char && *(self->details.value.end-1) == self->quote_char)
+    {
     self->details.value.begin++;
     self->details.value.end--;
   }
 
-  for (cur = self->details.value.begin; cur < self->details.value.end ; cur++) {
+  for (cur = self->details.value.begin; cur < self->details.value.end ; cur++)
+    {
         g_string_append_c(self->value, *cur);
   }
 
@@ -466,42 +472,58 @@ _find_first_key(KVScanner *self)
   gboolean found = FALSE;
   self->details.state = KV_FIND_FIRST_KEY_TRIM;
 
-  while (*cur && self->details.state != KV_FIND_FIRST_KEY_FINISH) {
-    switch (self->details.state) {
-
+  while (*cur && self->details.state != KV_FIND_FIRST_KEY_FINISH)
+    {
+      switch (self->details.state)
+        {
       case KV_FIND_FIRST_KEY_TRIM:
-        if (!_is_valid_key_character(*cur)) {
+          if (!_is_valid_key_character(*cur))
+            {
           ;
-    } else {
+            }
+          else
+            {
           self->details.next_key.begin = cur;
           self->details.state = KV_FIND_FIRST_KEY_IN_KEY;
   }
         break;
 
       case KV_FIND_FIRST_KEY_IN_KEY:
-        if (*cur == ' ') {
+          if (*cur == ' ')
+            {
           self->details.next_key.end = cur;
           self->details.state = KV_FIND_FIRST_KEY_IN_SEPARATOR;
-        } else if (*cur == self->value_separator) {
+            }
+          else if (*cur == self->value_separator)
+            {
           self->details.next_key.end = cur;
           self->details.state = KV_FIND_FIRST_KEY_FINISH;
           found = TRUE;
-        } else if (!_is_valid_key_character(*cur)) {
+            }
+          else if (!_is_valid_key_character(*cur))
+            {
           self->details.next_key.begin = NULL;
           self->details.state = KV_FIND_FIRST_KEY_TRIM;
     }
         break;
 
       case KV_FIND_FIRST_KEY_IN_SEPARATOR:
-        if (*cur == ' ') {
+          if (*cur == ' ')
+            {
           ;
-        } else if (*cur == self->value_separator) {
+            }
+          else if (*cur == self->value_separator)
+            {
           self->details.state = KV_FIND_FIRST_KEY_FINISH;
           found = TRUE;
-        } else if (!_is_valid_key_character(*cur)) {
+            }
+          else if (!_is_valid_key_character(*cur))
+            {
           self->details.next_key.begin = NULL;
           self->details.state = KV_FIND_FIRST_KEY_TRIM;
-        } else {
+            }
+          else
+            {
           self->details.next_key.begin = cur;
           self->details.state = KV_FIND_FIRST_KEY_IN_KEY;
         }
@@ -509,29 +531,35 @@ _find_first_key(KVScanner *self)
     }
     cur++;
   }
+
   self->input_pos = cur - self->input;
   return found;
 }
 
-gboolean
+static gboolean
 _kv_scanner_extract_key_new(KVScanner *self)
 {
   KVValueDetails *det = &self->details;
 
   if (self->input[self->input_pos] == 0)
+    {
     return FALSE;
+    }
 
   if (det->next_key.begin == NULL ||
-      det->next_key.end == NULL ) {
+      det->next_key.end == NULL )
+    {
     if (!_find_first_key(self))
+        {
       return FALSE;
   }
+    }
   g_string_assign_len(self->key, self->details.next_key.begin, self->details.next_key.end - self->details.next_key.begin);
 
   return TRUE;
 }
 
-gboolean
+static gboolean
 _kv_scanner_finished(KVScanner *self)
 {
   return self->details.state == KV_FIND_EOL;
