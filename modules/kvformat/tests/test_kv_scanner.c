@@ -846,6 +846,33 @@ provide_cases_with_allow_pair_separator_in_value()
   return cases_with_allow_pair_separator_in_value;
 }
 
+static Testcase*
+provide_cases_for_performance_test_nothing_to_parse()
+{
+  static Testcase cases_for_performance_test_nothing_to_parse[] = {
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "Reducing the compressed framebuffer size. This may lead to less power savings than a non-reduced-size. \
+Try to increase stolen memory size if available in BIOS.",
+      { NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "interrupt took too long (3136 > 3127), lowering kernel.perf_event_max_sample_rate to 63750",
+      { NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "Linux version 4.6.3-040603-generic (kernel@gomeisa) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-4ubuntu1) ) \
+#201606241434 SMP Fri Jun 24 18:36:33 UTC 2016",
+      { NULLKV }
+    },
+    { {NULLCFG  }, NULL, { NULLKV } }
+  };
+
+  return cases_for_performance_test_nothing_to_parse;
+}
+
 static GString*
 _expected_to_string(KV* kvs)
 {
@@ -865,7 +892,7 @@ _expected_to_string(KV* kvs)
   return result;
 }
 
-void
+static void
 _run_testcase(Testcase tc)
 {
   GString* pretty_expected;
@@ -893,6 +920,46 @@ _run_testcases(Testcase* cases)
   }
 }
 
+#define ITERATION_NUMBER 10000
+
+static void
+_test_performance(Testcase *tcs, gchar* title)
+{
+  GString* pretty_expected;
+  ScannerConfig *cfg;
+  gint cfg_index = 0;
+  Testcase* tc;
+  gint iteration_index = 0;
+
+  if (title) {
+    printf("Performance test: %s\n", title);
+  }
+
+  for (cfg_index = 0; tcs->config[cfg_index].kv_separator != 0; cfg_index++) {
+
+    start_stopwatch();
+
+    for (iteration_index = 0; iteration_index < ITERATION_NUMBER; iteration_index++) {
+      for (tc = tcs; tc->input; tc++) {
+        cfg = &tc->config[cfg_index];
+
+        pretty_expected = _expected_to_string(tc->expected);
+        testcase_begin("input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
+                       tc->input, pretty_expected->str, cfg->kv_separator, cfg->allow_pair_separator_in_value);
+        _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc->input, tc->expected);
+        testcase_end();
+        g_string_free(pretty_expected, TRUE);
+      }
+    }
+
+    if (cfg) {
+      stop_stopwatch_and_display_result("Is pair-separator allowed in values: %d KV-eparator: '%c' ",
+                                        cfg->allow_pair_separator_in_value,
+                                        cfg->kv_separator);
+    }
+  }
+}
+
 int main(int argc, char *argv[])
 {
   _test_quotation_is_stored_in_the_was_quoted_value_member();
@@ -904,6 +971,8 @@ int main(int argc, char *argv[])
   _run_testcases(provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(provide_common_cases());
   _run_testcases(provide_cases_with_allow_pair_separator_in_value());
+  _test_performance(provide_common_cases(), "Common test cases");
+  _test_performance(provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
   if (testutils_deinit())
     return 0;
   else
