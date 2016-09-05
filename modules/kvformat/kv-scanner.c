@@ -79,7 +79,7 @@ _kv_scanner_reset_value(KVScanner *self)
   self->value_was_quoted = FALSE;
 }
 
-static gboolean
+static inline gboolean
 _kv_scanner_skip_space(KVScanner *self)
 {
   while (self->input[self->input_pos] == ' ')
@@ -87,7 +87,7 @@ _kv_scanner_skip_space(KVScanner *self)
   return TRUE;
 }
 
-static gboolean
+static inline gboolean
 _is_valid_key_character(int c)
 {
   return (c >= 'a' && c <= 'z') ||
@@ -227,7 +227,7 @@ _kv_scanner_decode_value(KVScanner *self)
   return TRUE;
 }
 
-static void
+static inline void
 _dismiss_next_key(KVScanner *self)
 {
   if (self->details.next_key.begin < self->details.next_key.end)
@@ -237,31 +237,31 @@ _dismiss_next_key(KVScanner *self)
   }
 }
 
-static void
+static inline void
 _start_next_key(KVScanner *self)
 {
   self->details.next_key.begin = self->details.next_key.end = self->input + self->input_pos;
 }
 
-static void
+static inline void
 _end_next_key(KVScanner *self)
 {
   self->details.next_key.end = self->input + self->input_pos;
 }
 
-static void
+static inline void
 _start_value(KVScanner *self)
 {
   self->details.value.begin = self->details.value.end = self->input + self->input_pos;
 }
 
-static void
+static inline void
 _end_value(KVScanner *self)
 {
   self->details.value.end = self->input + self->input_pos;
 }
 
-static void
+static inline void
 _handle_key_or_value_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -289,7 +289,7 @@ _handle_key_or_value_state(KVScanner *self)
   }
 }
 
-static void
+static inline void
 _handle_value_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -306,7 +306,7 @@ _handle_value_state(KVScanner *self)
   }
 }
 
-static void
+static inline void
 _handle_in_separator_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -337,7 +337,7 @@ _handle_in_separator_state(KVScanner *self)
     }
 }
 
-static void
+static inline void
 _handle_init_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -369,7 +369,7 @@ _handle_init_state(KVScanner *self)
     }
 }
 
-static void
+static inline void
 _handle_after_quote_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -399,7 +399,7 @@ _handle_after_quote_state(KVScanner *self)
   }
 }
 
-static void
+static inline void
 _handle_in_quote_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
@@ -420,7 +420,6 @@ static gboolean
 _kv_scanner_extract_value_new(KVScanner *self)
 {
   const gchar *cur;
-  gboolean back_slash_found = FALSE;
 
   _kv_scanner_reset_value(self);
   self->details.state = KV_FIND_VALUE_INIT;
@@ -561,8 +560,8 @@ _kv_scanner_extract_key_new(KVScanner *self)
   return TRUE;
 }
 
-static gboolean
-_kv_scanner_finished(KVScanner *self)
+static inline gboolean
+_kv_scanner_finished_new(KVScanner *self)
 {
   return self->details.state == KV_FIND_EOL;
 }
@@ -573,7 +572,7 @@ kv_scanner_scan_next(KVScanner *self)
   _kv_scanner_skip_space(self);
 
   if (self->allow_pair_separator_in_value) {
-    if (_kv_scanner_finished(self) ||
+    if (_kv_scanner_finished_new(self) ||
         !_kv_scanner_extract_key_new(self) ||
         !_kv_scanner_extract_value_new(self) ||
         !_kv_scanner_decode_value(self))
