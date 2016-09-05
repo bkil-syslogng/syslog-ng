@@ -103,8 +103,8 @@ TLS_BLOCK_START
 }
 TLS_BLOCK_END;
 
-#define current_time_value   __tls_deref(current_time_value)
-#define invalidate_time_task __tls_deref(invalidate_time_task)
+#define __current_time_value   __tls_deref(current_time_value)
+#define __invalidate_time_task __tls_deref(invalidate_time_task)
 #define local_time_cache     __tls_deref(local_time_cache)
 #define gm_time_cache        __tls_deref(gm_time_cache)
 #define mktime_prev_tm       __tls_deref(mktime_prev_tm)
@@ -117,9 +117,10 @@ static GStaticMutex localtime_lock = G_STATIC_MUTEX_INIT;
 void
 invalidate_cached_time(void)
 {
-  current_time_value.tv_sec = 0;
+  __current_time_value.tv_sec = 0;
 }
 
+#include <stdio.h>
 /*
  * this shuld replace the g_get_current_time and the g_source_get_current_time calls in the main thread
  * (log_msg_init, afinter_postpone_mark)
@@ -127,25 +128,27 @@ invalidate_cached_time(void)
 void
 cached_g_current_time(GTimeVal *result)
 {
-  if (current_time_value.tv_sec == 0)
+  struct __tls_variables *local = &__tls;
+  printf("%p\n", local);
+  if (local->current_time_value.tv_sec == 0)
     {
-      g_get_current_time(&current_time_value);
+      g_get_current_time(&local->current_time_value);
     }
-  *result = current_time_value;
+  *result = local->current_time_value;
 
   if (iv_inited())
     {
-      if (invalidate_time_task.handler == NULL)
+      if (local->invalidate_time_task.handler == NULL)
         {
-          IV_TASK_INIT(&invalidate_time_task);
-          invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
+          IV_TASK_INIT(&local->invalidate_time_task);
+          local->invalidate_time_task.handler = (void (*)(void *)) invalidate_cached_time;
         }
-      if (!iv_task_registered(&invalidate_time_task))
-        iv_task_register(&invalidate_time_task);
+      if (!iv_task_registered(&local->invalidate_time_task))
+        iv_task_register(&local->invalidate_time_task);
     }
   else
     {
-      invalidate_cached_time();
+      local->current_time_value.tv_sec = 0;
     }
 }
 
