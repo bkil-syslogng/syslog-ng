@@ -147,19 +147,19 @@ _kv_scanner_extract_value(KVScanner *self)
   self->value_was_quoted = FALSE;
   cur = &self->input[self->input_pos];
 
-  self->quote_state = KV_QUOTE_INITIAL;
-  while (*cur && self->quote_state != KV_QUOTE_FINISH)
+  self->data.simple.quote_state = KV_QUOTE_INITIAL;
+  while (*cur && self->data.simple.quote_state != KV_QUOTE_FINISH)
     {
-      switch (self->quote_state)
+      switch (self->data.simple.quote_state)
         {
         case KV_QUOTE_INITIAL:
           if (_is_delimiter(cur))
             {
-              self->quote_state = KV_QUOTE_FINISH;
+              self->data.simple.quote_state = KV_QUOTE_FINISH;
             }
           else if (*cur == '\"' || *cur == '\'')
             {
-              self->quote_state = KV_QUOTE_STRING;
+              self->data.simple.quote_state = KV_QUOTE_STRING;
               self->quote_char = *cur;
               if (self->value->len == 0)
                 self->value_was_quoted = TRUE;
@@ -171,15 +171,15 @@ _kv_scanner_extract_value(KVScanner *self)
           break;
         case KV_QUOTE_STRING:
           if (*cur == self->quote_char)
-            self->quote_state = KV_QUOTE_INITIAL;
+            self->data.simple.quote_state = KV_QUOTE_INITIAL;
           else if (*cur == '\\')
-            self->quote_state = KV_QUOTE_BACKSLASH;
+            self->data.simple.quote_state = KV_QUOTE_BACKSLASH;
           else
             g_string_append_c(self->value, *cur);
           break;
         case KV_QUOTE_BACKSLASH:
           _decode_backslash_escape(self, *cur);
-          self->quote_state = KV_QUOTE_STRING;
+          self->data.simple.quote_state = KV_QUOTE_STRING;
           break;
         }
       cur++;

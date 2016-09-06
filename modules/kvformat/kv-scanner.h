@@ -31,30 +31,38 @@ struct _KVToken
   const gchar *end;
 };
 
-typedef struct _KVValueDetails KVValueDetails;
-struct _KVValueDetails
+typedef struct _KVGenericDetails KVGenericDetails;
+struct _KVGenericDetails
 {
   gint state;
   KVToken next_key;
   KVToken value;
  };
 
+typedef struct _KVSimpleDetails KVSimpleDetails;
+struct _KVSimpleDetails
+{
+  gint quote_state;
+};
+
 typedef struct _KVScanner KVScanner;
 struct _KVScanner
 {
   const gchar *input;
   gsize input_pos;
-  KVValueDetails details;
   GString *key;
   GString *value;
   GString *decoded_value;
   gboolean value_was_quoted;
   gchar value_separator;
   gchar quote_char;
-  gint quote_state;
   gboolean allow_pair_separator_in_value;
   gboolean (*parse_value)(KVScanner *self);
   void (*free_fn)(KVScanner *self);
+  union {
+    KVGenericDetails generic;
+    KVSimpleDetails  simple;
+  } data;
 };
 
 void kv_scanner_allow_pair_separator_in_value(KVScanner *self, gboolean allowed);
