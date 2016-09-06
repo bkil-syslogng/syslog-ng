@@ -39,6 +39,7 @@ enum {
   KV_FIND_FIRST_KEY_IN_SEPARATOR,
   KV_FIND_FIRST_KEY_FINISH,
   KV_FIND_VALUE_INIT,
+  KV_FIND_VALUE_SEPARATOR_AFTER_INIT,
   KV_FIND_VALUE_VALUE,
   KV_FIND_VALUE_KEY_OR_VALUE,
   KV_FIND_VALUE_IN_QUOTE,
@@ -348,6 +349,32 @@ _handle_init_state(KVScanner *self)
     }
   else if (ch == ' ')
     {
+      self->details.state = KV_FIND_VALUE_SEPARATOR_AFTER_INIT;
+    }
+  else if (ch == '\'' || ch == '\"')
+    {
+      _start_value(self);
+      self->quote_char = ch;
+      self->details.state = KV_FIND_VALUE_IN_QUOTE;
+    }
+  else
+    {
+      _start_value(self);
+      self->details.state = KV_FIND_VALUE_VALUE;
+    }
+}
+
+static inline void
+_handle_separator_after_init_state(KVScanner *self)
+{
+  gchar ch = self->input[self->input_pos];
+
+  if (ch == 0)
+    {
+      self->details.state = KV_FIND_EOL;
+    }
+  else if (ch == ' ')
+    {
       ;
     }
   else if (ch == '\'' || ch == '\"')
@@ -431,6 +458,9 @@ _kv_scanner_extract_value_new(KVScanner *self)
         {
         case KV_FIND_VALUE_INIT:
           _handle_init_state(self);
+          break;
+        case KV_FIND_VALUE_SEPARATOR_AFTER_INIT:
+          _handle_separator_after_init_state(self);
           break;
         case KV_FIND_VALUE_VALUE:
           _handle_value_state(self);

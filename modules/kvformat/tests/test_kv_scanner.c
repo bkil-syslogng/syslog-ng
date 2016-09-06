@@ -385,6 +385,16 @@ provide_common_cases()
     },
     {
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k= a=b c=d",
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=a=b c=d",
+      { {"k", "a=b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "k1=v1    k2=v2     k3=v3 ",
       { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
     },
@@ -756,16 +766,6 @@ provide_cases_with_allow_pair_separator_in_value()
     },
     {
       { SPACE_HANDLING_CONFIG, NULLCFG },
-      "k= a=b c=d",
-      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { SPACE_HANDLING_CONFIG, NULLCFG },
-      "k=a=b c=d",
-      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
-    },
-    {
-      { SPACE_HANDLING_CONFIG, NULLCFG },
       "foo=a \"bar baz\" ",
       { {"foo", "a \"bar baz\""}, NULLKV }
     },
@@ -971,8 +971,8 @@ int main(int argc, char *argv[])
   _run_testcases(provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(provide_common_cases());
   _run_testcases(provide_cases_with_allow_pair_separator_in_value());
-  _test_performance(provide_common_cases(), "Common test cases");
-  _test_performance(provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
+  //_test_performance(provide_common_cases(), "Common test cases");
+  //_test_performance(provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
   if (testutils_deinit())
     return 0;
   else
