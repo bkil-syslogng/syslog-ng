@@ -44,7 +44,6 @@ struct _KVScanner
 {
   const gchar *input;
   gsize input_pos;
-  gsize input_len;
   KVValueDetails details;
   GString *key;
   GString *value;
@@ -53,7 +52,6 @@ struct _KVScanner
   gchar value_separator;
   gchar quote_char;
   gint quote_state;
-  gint next_quote_state;
   gboolean allow_pair_separator_in_value;
   gboolean (*parse_value)(KVScanner *self);
   void (*free_fn)(KVScanner *self);
