@@ -203,14 +203,13 @@ _kv_scanner_decode_value(KVScanner *self)
 gboolean
 kv_scanner_scan_next(KVScanner *self)
 {
-  _kv_scanner_skip_space(self);
-
   if (self->allow_pair_separator_in_value) {
     if (!kv_scanner_generic_extract_key(self) ||
         !kv_scanner_generic_extract_value(self) ||
         !_kv_scanner_decode_value(self))
       return FALSE;
   } else {
+    _kv_scanner_skip_space(self);
   if (!_kv_scanner_extract_key(self) ||
       !_kv_scanner_extract_value(self) ||
       !_kv_scanner_decode_value(self))
