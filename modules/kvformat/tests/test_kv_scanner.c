@@ -143,7 +143,7 @@ typedef struct Testcase_t
 {
   ScannerConfig config[5];
   gchar* input;
-  KV expected[20];
+  KV expected[25];
 } Testcase;
 
 KVScanner*
@@ -387,6 +387,11 @@ _provide_common_cases(void)
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
       "k= a=b c=d",
       { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "k=v arg= code=27",
+      { {"k", "v"}, {"arg", ""}, {"code", "27"}, NULLKV }
     },
     {
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
@@ -874,6 +879,94 @@ Try to increase stolen memory size if available in BIOS.",
   return cases_for_performance_test_nothing_to_parse;
 }
 
+static Testcase*
+_provide_cases_for_performance_test_parse_long_msg(void)
+{
+  static Testcase cases_for_performance_test_parse_long_msg[] = {
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "PF: filter/forward DROP \
+      IN=15dd205a6ac8b0c80ab3bcdcc5649c9c830074cdbdc094ff1d79f20f17c56843 \
+      OUT=980816f36b77e58d342de41f85854376d10cf9bf33aa1934e129ffd77ddc833d \
+      SRC=cc8177fc0c8681d3d5d2a42bc1ed86990f773589592fa3100c23fae445f8a260 \
+      DST=5fee25396500fc798e10b4dcb0b3fb315618ff11843be59978c0d5b41cd9f12c \
+      LEN=71ee45a3c0db9a9865f7313dd3372cf60dca6479d46261f3542eb9346e4a04d6 \
+      TOS=c4dd67368286d02d62bdaa7a775b7594765d5210c9ad20cc3c24148d493353d7 \
+      PREC=c4dd67368286d02d62bdaa7a775b7594765d5210c9ad20cc3c24148d493353d7 \
+      TTL=da4ea2a5506f2693eae190d9360a1f31793c98a1adade51d93533a6f520ace1c \
+      ID=242a9377518dd1afaf021b2d0bfe6484e3fe48a878152f76dec99a396160022c \
+      PROTO=dc4030f9688d6e67dfc4c5f8f7afcbdbf5c30de866d8a3c6e1dd038768ab91c3 \
+      SPT=1e7996c7b0181429bba237ac2799ee5edc31aca2d5d90c39a48f9e9a3d4078bd \
+      DPT=ca902d4a8acbdea132ada81a004081f51c5c9279d409cee414de5a39a139fab6 \
+      LEN=c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db",
+      { {"IN", "15dd205a6ac8b0c80ab3bcdcc5649c9c830074cdbdc094ff1d79f20f17c56843"},
+        {"OUT", "980816f36b77e58d342de41f85854376d10cf9bf33aa1934e129ffd77ddc833d"},
+        {"SRC", "cc8177fc0c8681d3d5d2a42bc1ed86990f773589592fa3100c23fae445f8a260"},
+        {"DST", "5fee25396500fc798e10b4dcb0b3fb315618ff11843be59978c0d5b41cd9f12c"},
+        {"LEN", "71ee45a3c0db9a9865f7313dd3372cf60dca6479d46261f3542eb9346e4a04d6"},
+        {"TOS", "c4dd67368286d02d62bdaa7a775b7594765d5210c9ad20cc3c24148d493353d7"},
+        {"PREC", "c4dd67368286d02d62bdaa7a775b7594765d5210c9ad20cc3c24148d493353d7"},
+        {"TTL", "da4ea2a5506f2693eae190d9360a1f31793c98a1adade51d93533a6f520ace1c"},
+        {"ID", "242a9377518dd1afaf021b2d0bfe6484e3fe48a878152f76dec99a396160022c"},
+        {"PROTO", "dc4030f9688d6e67dfc4c5f8f7afcbdbf5c30de866d8a3c6e1dd038768ab91c3"},
+        {"SPT", "1e7996c7b0181429bba237ac2799ee5edc31aca2d5d90c39a48f9e9a3d4078bd"},
+        {"DPT", "ca902d4a8acbdea132ada81a004081f51c5c9279d409cee414de5a39a139fab6"},
+        {"LEN", "c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db"},
+        NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "fw=108.53.156.38 pri=6 c=262144 m=98 msg=\"Connection Opened\" f=2 sess=\"None\" \
+      n=16351474 src=10.0.5.200:57719:X0:MOGWAI dst=71.250.0.14:53:X1 dstMac=f8:c0:01:73:c7:c1 proto=udp/dns sent=66",
+      { {"fw", "108.53.156.38"},
+        {"pri", "6"},
+        {"c", "262144"},
+        {"m", "98"},
+        {"msg", "Connection Opened"},
+        {"f", "2"},
+        {"sess", "None"},
+        {"n", "16351474"},
+        {"src", "10.0.5.200:57719:X0:MOGWAI"},
+        {"dst", "71.250.0.14:53:X1"},
+        {"dstMac", "f8:c0:01:73:c7:c1"},
+        {"proto", "udp/dns"},
+        {"sent", "66"},
+        NULLKV }
+    },
+    {
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      "sn=C0EAE484E43E time=\"2016-07-08 13:42:58\" fw=132.237.143.192 pri=5 c=4 m=16 msg=\"Web site access allowed\" \
+      app=11 sess=\"Auto\" n=5086 usr=\"DEMO\\primarystudent\" src=10.2.3.64:50682:X2-V3023 dst=157.55.240.220:443:X1 \
+      srcMac=00:50:56:8e:55:8e dstMac=c0:ea:e4:84:e4:40 proto=tcp/https dstname=sls.update.microsoft.com arg= code=27 \
+      Category=\"Information Technology/Computers\" fw_action=\"process\"",
+      { {"sn", "C0EAE484E43E"},
+        {"time", "2016-07-08 13:42:58"},
+        {"fw", "132.237.143.192"},
+        {"pri", "5"},
+        {"c", "4"},
+        {"m", "16"},
+        {"msg", "Web site access allowed"},
+        {"app", "11"},
+        {"sess", "Auto"},
+        {"n", "5086"},
+        {"usr", "DEMO\\primarystudent"},
+        {"src", "10.2.3.64:50682:X2-V3023"},
+        {"dst", "157.55.240.220:443:X1"},
+        {"srcMac", "00:50:56:8e:55:8e"},
+        {"dstMac", "c0:ea:e4:84:e4:40"},
+        {"proto", "tcp/https"},
+        {"dstname", "sls.update.microsoft.com"},
+        {"arg", ""},
+        {"code", "27"},
+        {"Category", "Information Technology/Computers"},
+        {"fw_action", "process"},
+        NULLKV }
+    },
+    {}
+  };
+  return cases_for_performance_test_parse_long_msg;
+}
+
 static GString*
 _expected_to_string(KV* kvs)
 {
@@ -927,7 +1020,7 @@ static void
 _test_performance(Testcase *tcs, gchar* title)
 {
   GString* pretty_expected;
-  ScannerConfig *cfg;
+  ScannerConfig *cfg = NULL;
   gint cfg_index = 0;
   Testcase* tc;
   gint iteration_index = 0;
@@ -953,9 +1046,9 @@ _test_performance(Testcase *tcs, gchar* title)
       }
     }
 
-    if (cfg) {
-      stop_stopwatch_and_display_result("Is pair-separator allowed in values: %d KV-eparator: '%c' ",
-                                        cfg->allow_pair_separator_in_value,
+    if (cfg != NULL) {
+      stop_stopwatch_and_display_result("Is pair-separator allowed in values: %s KV-eparator: '%c' ",
+                                        cfg->allow_pair_separator_in_value?"TRUE ":"FALSE",
                                         cfg->kv_separator);
     }
   }
@@ -972,8 +1065,11 @@ int main(int argc, char *argv[])
   _run_testcases(_provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(_provide_common_cases());
   _run_testcases(_provide_cases_with_allow_pair_separator_in_value());
-  //_test_performance(_provide_common_cases(), "Common test cases");
-  //_test_performance(_provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
+  if (0) {
+    _test_performance(_provide_common_cases(), "Common test cases");
+    _test_performance(_provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
+    _test_performance(_provide_cases_for_performance_test_parse_long_msg(), "Parse long strings");
+  }
   if (testutils_deinit())
     return 0;
   else
