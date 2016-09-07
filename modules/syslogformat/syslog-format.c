@@ -419,6 +419,30 @@ __get_normalized_time(LogStamp const timestamp, gint const normalized_hour, gint
          - timestamp.zone_offset;
 }
 
+static void
+_parse_date_is_synced(LogMessage *self, guint parse_flags, const guchar **src, gint *left)
+{
+  /* Cisco timestamp extensions, the first '*' indicates that the clock is
+   * unsynced, '.' if it is known to be synced */
+  const gchar *found_synced = NULL;
+  if (G_UNLIKELY((*src)[0] == '*'))
+    {
+      found_synced = "0";
+      (*src)++;
+      (*left)--;
+    }
+  else if (G_UNLIKELY((*src)[0] == '.'))
+    {
+      found_synced = "1";
+      (*src)++;
+      (*left)--;
+    }
+  if (found_synced && !(parse_flags & LP_NO_PARSE_DATE))
+    {
+      log_msg_set_value(self, is_synced, found_synced, 1);
+    }
+}
+
 /* FIXME: this function should really be exploded to a lot of smaller functions... (Bazsi) */
 static gboolean
 log_msg_parse_date_unnormalized(LogMessage *self, const guchar **data, gint *length, guint parse_flags, struct tm *tm)
@@ -431,22 +455,7 @@ log_msg_parse_date_unnormalized(LogMessage *self, const guchar **data, gint *len
 
   if ((parse_flags & LP_SYSLOG_PROTOCOL) == 0)
     {
-      /* Cisco timestamp extensions, the first '*' indicates that the clock is
-       * unsynced, '.' if it is known to be synced */
-      if (G_UNLIKELY(src[0] == '*'))
-        {
-          if (!(parse_flags & LP_NO_PARSE_DATE))
-            log_msg_set_value(self, is_synced, "0", 1);
-          src++;
-          left--;
-        }
-      else if (G_UNLIKELY(src[0] == '.'))
-        {
-          if (!(parse_flags & LP_NO_PARSE_DATE))
-            log_msg_set_value(self, is_synced, "1", 1);
-          src++;
-          left--;
-        }
+      _parse_date_is_synced(self, parse_flags, &src, &left);
     }
   /* If the next chars look like a date, then read them as a date. */
   if (__is_iso_stamp((const gchar *)src, left))
@@ -474,7 +483,6 @@ log_msg_parse_date_unnormalized(LogMessage *self, const guchar **data, gint *len
       else
         return FALSE;
     }
-
 
   *data = src;
   *length = left;
