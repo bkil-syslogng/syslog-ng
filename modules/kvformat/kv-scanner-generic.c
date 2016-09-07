@@ -23,11 +23,7 @@
 #include "misc.h"
 
 enum {
-  KV_FIND_FIRST_KEY_TRIM = 0,
-  KV_FIND_FIRST_KEY_IN_KEY,
-  KV_FIND_FIRST_KEY_IN_SEPARATOR,
-  KV_FIND_FIRST_KEY_FINISH,
-  KV_FIND_VALUE_INIT,
+  KV_FIND_VALUE_INIT = 0,
   KV_FIND_VALUE_SEPARATOR_AFTER_INIT,
   KV_FIND_VALUE_VALUE,
   KV_FIND_VALUE_KEY_OR_VALUE,
@@ -337,72 +333,36 @@ kv_scanner_generic_extract_value(KVScanner *self)
 static inline gboolean
 _find_first_key(KVScanner *self)
 {
-  const gchar *cur = &self->input[self->input_pos];
-  gboolean found = FALSE;
-  self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
+  const gchar *separator, *start_of_key, *end_of_key;
+  gint len;
 
-  while (*cur && self->data.generic.state != KV_FIND_FIRST_KEY_FINISH)
+  separator = strchr(self->input, self->value_separator);
+
+  do
     {
-      switch (self->data.generic.state)
-        {
-        case KV_FIND_FIRST_KEY_TRIM:
-          if (_is_valid_key_character(*cur))
-            {
-              self->data.generic.next_key.begin = cur;
-              self->data.generic.state = KV_FIND_FIRST_KEY_IN_KEY;
-            }
-          break;
+      if (!separator)
+        return FALSE;
 
-        case KV_FIND_FIRST_KEY_IN_KEY:
-          if (*cur == ' ')
-            {
-              self->data.generic.next_key.end = cur;
-              self->data.generic.state = KV_FIND_FIRST_KEY_IN_SEPARATOR;
-            }
-          else if (*cur == self->value_separator)
-            {
-              self->data.generic.next_key.end = cur;
-              self->data.generic.state = KV_FIND_FIRST_KEY_FINISH;
-              found = TRUE;
-            }
-          else if (_is_valid_key_character(*cur))
-            {
-              ;
-            }
-          else
-            {
-              self->data.generic.next_key.begin = NULL;
-              self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
-            }
-          break;
+      end_of_key = separator-1;
+      while (end_of_key >= self->input && *end_of_key == ' ')
+        end_of_key--;
 
-        case KV_FIND_FIRST_KEY_IN_SEPARATOR:
-          if (*cur == ' ')
-            {
-              ;
-            }
-          else if (*cur == self->value_separator)
-            {
-              self->data.generic.state = KV_FIND_FIRST_KEY_FINISH;
-              found = TRUE;
-            }
-          else if (_is_valid_key_character(*cur))
-            {
-              self->data.generic.next_key.begin = cur;
-              self->data.generic.state = KV_FIND_FIRST_KEY_IN_KEY;
-            }
-          else
-            {
-              self->data.generic.next_key.begin = NULL;
-              self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
-            } 
-          break;
-        }
-      cur++;
+      start_of_key = end_of_key;
+
+      while (start_of_key >= self->input && _is_valid_key_character(*start_of_key))
+        start_of_key--;
+
+      len = end_of_key - start_of_key;
+
+      if (len < 1)
+        separator = strchr(separator + 1, self->value_separator);
     }
+  while (len < 1);
 
-  self->input_pos = cur - self->input;
-  return found;
+  self->data.generic.next_key.begin = start_of_key + 1;
+  self->data.generic.next_key.end = end_of_key + 1;
+  self->input_pos = separator - self->input + 1;
+  return TRUE;
 }
 
 gboolean
