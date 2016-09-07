@@ -342,11 +342,7 @@ _find_first_key(KVScanner *self)
       switch (self->data.generic.state)
         {
         case KV_FIND_FIRST_KEY_TRIM:
-          if (!_is_valid_key_character(*cur))
-            {
-              ;
-            }
-          else
+          if (_is_valid_key_character(*cur))
             {
               self->data.generic.next_key.begin = cur;
               self->data.generic.state = KV_FIND_FIRST_KEY_IN_KEY;

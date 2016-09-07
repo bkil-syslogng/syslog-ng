@@ -21,8 +21,8 @@
 #include "kv-scanner.h"
 #include "testutils.h"
 
-#define NULLKV  {NULL, NULL}
-#define NULLCFG {.kv_separator=0, .allow_pair_separator_in_value=FALSE}
+#define NULLKV  {}
+#define NULLCFG {}
 
 static void
 _assert_no_more_tokens(KVScanner *scanner)
@@ -173,7 +173,7 @@ _scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, KV kvs[])
 
 
 static void
-_test_key_buffer_underrun()
+_test_key_buffer_underrun(void)
 {
   const gchar *buffer = "ab=v";
   const gchar *input = buffer + 2;
@@ -255,7 +255,7 @@ _test_value_separator_clone(void)
 #define SPACE_HANDLING_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=TRUE}
 
 static Testcase*
-provide_common_cases()
+_provide_common_cases(void)
 {
   static Testcase common_cases[] = {
     {
@@ -534,13 +534,14 @@ provide_common_cases()
       { {"k", "v"}, NULLKV }
     },
 
-    { {NULLCFG  }, NULL, { NULLKV } }
+    {}
   };
 
   return common_cases;
 }
+
 static Testcase*
-provide_cases_without_allow_pair_separator_in_value()
+_provide_cases_without_allow_pair_separator_in_value(void)
 {
   static Testcase cases_without_allow_pair_separator_in_value[] = {
     {
@@ -699,14 +700,14 @@ provide_cases_without_allow_pair_separator_in_value()
       { {"-", "-"}, NULLKV }
     },
 
-    { {NULLCFG  }, NULL, { NULLKV } }
+    {}
   };
 
   return cases_without_allow_pair_separator_in_value;
 }
 
 static Testcase*
-provide_cases_with_allow_pair_separator_in_value()
+_provide_cases_with_allow_pair_separator_in_value(void)
 {
   static Testcase cases_with_allow_pair_separator_in_value[] = {
     {
@@ -840,14 +841,14 @@ provide_cases_with_allow_pair_separator_in_value()
       { {"foo", "'bar"}, NULLKV }
     },
 
-    { {NULLCFG  }, NULL, { NULLKV } }
+    {}
   };
 
   return cases_with_allow_pair_separator_in_value;
 }
 
 static Testcase*
-provide_cases_for_performance_test_nothing_to_parse()
+_provide_cases_for_performance_test_nothing_to_parse(void)
 {
   static Testcase cases_for_performance_test_nothing_to_parse[] = {
     {
@@ -867,7 +868,7 @@ Try to increase stolen memory size if available in BIOS.",
 #201606241434 SMP Fri Jun 24 18:36:33 UTC 2016",
       { NULLKV }
     },
-    { {NULLCFG  }, NULL, { NULLKV } }
+    {}
   };
 
   return cases_for_performance_test_nothing_to_parse;
@@ -968,11 +969,11 @@ int main(int argc, char *argv[])
   _test_transforms_values_if_parse_value_is_set();
   _test_transforms_values_if_parse_value_is_set_with_space_separator_option();
   _test_value_separator_clone();
-  _run_testcases(provide_cases_without_allow_pair_separator_in_value());
-  _run_testcases(provide_common_cases());
-  _run_testcases(provide_cases_with_allow_pair_separator_in_value());
-  //_test_performance(provide_common_cases(), "Common test cases");
-  //_test_performance(provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
+  _run_testcases(_provide_cases_without_allow_pair_separator_in_value());
+  _run_testcases(_provide_common_cases());
+  _run_testcases(_provide_cases_with_allow_pair_separator_in_value());
+  //_test_performance(_provide_common_cases(), "Common test cases");
+  //_test_performance(_provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
   if (testutils_deinit())
     return 0;
   else
