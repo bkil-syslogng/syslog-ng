@@ -993,6 +993,7 @@ Try to increase stolen memory size if available in BIOS.",
 #201606241434 SMP Fri Jun 24 18:36:33 UTC 2016",
       { NULLKV }
     },
+
     {}
   };
 
@@ -1085,6 +1086,7 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"fw_action", "process"},
         NULLKV }
     },
+
     {}
   };
   return cases_for_performance_test_parse_long_msg;

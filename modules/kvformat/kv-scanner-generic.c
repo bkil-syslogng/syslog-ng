@@ -192,7 +192,11 @@ _value_key_or_value_state(KVScanner *self)
       _end_next_key(self);
       self->data.generic.state = KV_FIND_VALUE_FINISH;
     }
-  else if (!_is_valid_key_character(ch))
+  else if (_is_valid_key_character(ch))
+    {
+      ;
+    }
+  else
     {
       _dismiss_next_key(self);
       self->data.generic.state = KV_FIND_VALUE_VALUE;
@@ -235,14 +239,14 @@ _value_after_quote_state(KVScanner *self)
       self->quote_char = ch;
       self->data.generic.state = KV_FIND_VALUE_IN_QUOTE;
     }
-  else if (!_is_valid_key_character(ch))
-    {
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
-    }
-  else
+  else if (_is_valid_key_character(ch))
     {
       _start_next_key(self);
       self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+    }
+  else
+    {
+      self->data.generic.state = KV_FIND_VALUE_VALUE;
     }
 }
 
@@ -264,16 +268,16 @@ _value_in_separator_state(KVScanner *self)
     {
       self->data.generic.state = KV_FIND_VALUE_FINISH;
     }
-  else if (!_is_valid_key_character(ch))
-    {
-      _dismiss_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
-    }
-  else
+  else if (_is_valid_key_character(ch))
     {
       _dismiss_next_key(self);
       _start_next_key(self);
       self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+    }
+  else
+    {
+      _dismiss_next_key(self);
+      self->data.generic.state = KV_FIND_VALUE_VALUE;
     }
 }
 
@@ -361,7 +365,11 @@ _find_first_key(KVScanner *self)
               self->data.generic.state = KV_FIND_FIRST_KEY_FINISH;
               found = TRUE;
             }
-          else if (!_is_valid_key_character(*cur))
+          else if (_is_valid_key_character(*cur))
+            {
+              ;
+            }
+          else
             {
               self->data.generic.next_key.begin = NULL;
               self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
@@ -378,15 +386,15 @@ _find_first_key(KVScanner *self)
               self->data.generic.state = KV_FIND_FIRST_KEY_FINISH;
               found = TRUE;
             }
-          else if (!_is_valid_key_character(*cur))
-            {
-              self->data.generic.next_key.begin = NULL;
-              self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
-            }
-          else
+          else if (_is_valid_key_character(*cur))
             {
               self->data.generic.next_key.begin = cur;
               self->data.generic.state = KV_FIND_FIRST_KEY_IN_KEY;
+            }
+          else
+            {
+              self->data.generic.next_key.begin = NULL;
+              self->data.generic.state = KV_FIND_FIRST_KEY_TRIM;
             } 
           break;
         }
