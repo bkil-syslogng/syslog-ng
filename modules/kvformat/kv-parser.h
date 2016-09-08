@@ -29,5 +29,6 @@ void kv_parser_set_prefix(LogParser *p, const gchar *prefix);
 void kv_parser_allow_pair_separator_in_value(LogParser *p, gboolean allow_pair_separator_in_value);
 void kv_parser_set_value_separator(LogParser *p, gchar value_separator);
 LogParser *kv_parser_new(GlobalConfig *cfg, KVScanner *kv_scanner);
+gboolean kv_parser_is_valid_separator_character(char c);
 
 #endif
