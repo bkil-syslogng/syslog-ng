@@ -31,6 +31,14 @@ typedef struct _KVParser
   KVScanner *kv_scanner;
 } KVParser;
 
+gboolean
+kv_parser_is_valid_separator_character(char c)
+{
+  return (c != ' '  &&
+          c != '\'' &&
+          c != '\"' );
+}
+
 void
 kv_parser_set_prefix(LogParser *p, const gchar *prefix)
 {
