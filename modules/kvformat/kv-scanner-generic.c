@@ -137,16 +137,16 @@ _value_separator_after_init_state(KVScanner *self)
       self->quote_char = ch;
       self->data.generic.state = KV_FIND_VALUE_IN_QUOTE;
     }
-  else if (!_is_valid_key_character(ch))
-    {
-      _start_value(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
-    }
-  else
+  else if (_is_valid_key_character(ch))
     {
       _start_value(self);
       _start_next_key(self);
       self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+    }
+  else
+    {
+      _start_value(self);
+      self->data.generic.state = KV_FIND_VALUE_VALUE;
     }
 }
 
