@@ -749,8 +749,7 @@ log_msg_parse_sd(LogMessage *self, const guchar **data, gint *length, const MsgF
   if (left && src[0] == '-')
     {
       /* Nothing to do here */
-      src++;
-      left--;
+      sd_step_and_store(self, &src, &left);
     }
   else if (left && src[0] == '[')
     {

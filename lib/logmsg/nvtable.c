@@ -42,50 +42,79 @@ nv_registry_get_handle(NVRegistry *self, const gchar *name)
   return 0;
 }
 
+static __thread GHashTable *tls_name_map;
+static __thread gsize tls_names_len;
+
 NVHandle
 nv_registry_alloc_handle(NVRegistry *self, const gchar *name)
 {
-  gpointer p;
+  gpointer p = NULL;
   NVHandleDesc stored;
   gsize len;
   NVHandle res = 0;
 
-  g_static_mutex_lock(&nv_registry_lock);
-  p = g_hash_table_lookup(self->name_map, name);
+  if (!tls_name_map)
+    tls_name_map = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+  else
+    p = g_hash_table_lookup(tls_name_map, name);
+
   if (p)
     {
       res = GPOINTER_TO_UINT(p);
-      goto exit;
+      return res;
     }
 
   len = strlen(name);
   if (len == 0)
     {
-      goto exit;
+      return res;
     }
   else if (len > 255)
     {
-      msg_error("Value names cannot be longer than 255 characters, this value will always expand to the emptry string",
+      msg_error("Value names cannot be longer than 255 characters, this value will always expand to the empty string",
                 evt_tag_str("value", name));
-      goto exit;
+      return res;
     }
-  else if (self->names->len >= self->nvhandle_max_value)
+  else if (tls_names_len >= self->nvhandle_max_value)
     {
       msg_error("Hard wired limit of name-value pairs have been reached, all further name-value pair will expand to nothing",
                 evt_tag_printf("limit", "%"G_GUINT32_FORMAT, self->nvhandle_max_value),
                 evt_tag_str("value", name));
-      goto exit;
+      return res;
     }
   /* flags (2 bytes) || length (1 byte) || name (len bytes) || NUL */
   /* memory layout: flags || length || name (NUL terminated) */
   stored.flags = 0;
   stored.name_len = len;
-  stored.name = g_strdup(name);
+  stored.name = g_strndup(name, len);
+
+  g_static_mutex_lock(&nv_registry_lock);
+  p = g_hash_table_lookup(self->name_map, name);
+  if (p)
+    {
+      g_static_mutex_unlock(&nv_registry_lock);
+      res = GPOINTER_TO_UINT(p);
+      g_hash_table_insert(tls_name_map, stored.name, GUINT_TO_POINTER(res));
+      return res;
+    }
+
+  if (self->names->len >= self->nvhandle_max_value)
+    {
+      tls_names_len = self->names->len;
+      g_static_mutex_unlock(&nv_registry_lock);
+      msg_error("Hard wired limit of name-value pairs have been reached, all further name-value pair will expand to nothing",
+                evt_tag_printf("limit", "%"G_GUINT32_FORMAT, self->nvhandle_max_value),
+                evt_tag_str("value", name));
+      return res;
+    }
+
   g_array_append_val(self->names, stored);
-  g_hash_table_insert(self->name_map, stored.name, GUINT_TO_POINTER(self->names->len));
   res = self->names->len;
-exit:
+  g_hash_table_insert(self->name_map, stored.name, GUINT_TO_POINTER(res));
   g_static_mutex_unlock(&nv_registry_lock);
+
+  tls_names_len = res;
+  g_hash_table_insert(tls_name_map, g_strndup(name, len), GUINT_TO_POINTER(res));
   return res;
 }
 
