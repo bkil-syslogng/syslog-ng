@@ -49,14 +49,20 @@ enum
   KV_FIND_EOL
 };
 
+static inline const gchar*
+_get_current_position(KVScannerGeneric *self)
+{
+  return self->super.input + self->super.input_pos;
+}
+
 static void
 _reset_value(KVScannerGeneric *self)
 {
   g_string_truncate(self->super.value, 0);
   self->next_key.begin = NULL;
   self->next_key.end = NULL;
-  self->next_value.begin = self->super.input + self->super.input_pos;
-  self->next_value.end = self->super.input + self->super.input_pos;
+  self->next_value.begin = _get_current_position(self);
+  self->next_value.end = _get_current_position(self);
   self->super.value_was_quoted = FALSE;
 }
 
@@ -86,25 +92,25 @@ _dismiss_next_key(KVScannerGeneric *self)
 static inline void
 _start_next_key(KVScannerGeneric *self)
 {
-  self->next_key.begin = self->next_key.end = self->super.input + self->super.input_pos;
+  self->next_key.begin = self->next_key.end = _get_current_position(self);
 }
 
 static inline void
 _end_next_key(KVScannerGeneric *self)
 {
-  self->next_key.end = self->super.input + self->super.input_pos;
+  self->next_key.end = _get_current_position(self);
 }
 
 static inline void
 _start_value(KVScannerGeneric *self)
 {
-  self->next_value.begin = self->next_value.end = self->super.input + self->super.input_pos;
+  self->next_value.begin = self->next_value.end = _get_current_position(self);
 }
 
 static inline void
 _end_value(KVScannerGeneric *self)
 {
-  self->next_value.end = self->super.input + self->super.input_pos;
+  self->next_value.end = _get_current_position(self);
 }
 
 static inline void
