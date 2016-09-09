@@ -49,7 +49,7 @@ _reset_value(KVScanner *self)
  * Will be different from the original in the future
  */
 static inline gboolean
-_is_valid_key_character(int c)
+_is_valid_key_character(char c)
 {
   return (c >= 'a' && c <= 'z') ||
          (c >= 'A' && c <= 'Z') ||
@@ -97,7 +97,7 @@ _value_init_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       self->data.generic.state = KV_FIND_EOL;
     }
@@ -123,7 +123,7 @@ _value_separator_after_init_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       self->data.generic.state = KV_FIND_EOL;
     }
@@ -155,7 +155,7 @@ _value_value_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       _end_value(self);
       self->data.generic.state = KV_FIND_EOL;
@@ -172,7 +172,7 @@ _value_key_or_value_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       _end_next_key(self);
       _dismiss_next_key(self);
@@ -204,7 +204,7 @@ _value_in_quote_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       _end_value(self);
       self->data.generic.state = KV_FIND_EOL;
@@ -222,7 +222,7 @@ _value_after_quote_state(KVScanner *self)
   gchar ch = self->input[self->input_pos];
 
   _end_value(self);
-  if (ch == 0)
+  if (ch == '\0')
     {
       self->data.generic.state = KV_FIND_EOL;
     }
@@ -251,7 +251,7 @@ _value_in_separator_state(KVScanner *self)
 {
   gchar ch = self->input[self->input_pos];
 
-  if (ch == 0)
+  if (ch == '\0')
     {
       _dismiss_next_key(self);
       self->data.generic.state = KV_FIND_EOL;
@@ -369,7 +369,7 @@ gboolean
 kv_scanner_generic_extract_key(KVScanner *self)
 {
 
-  if (self->data.generic.state == KV_FIND_EOL || self->input[self->input_pos] == 0)
+  if (self->data.generic.state == KV_FIND_EOL || self->input[self->input_pos] == '\0')
     {
       return FALSE;
     }
