@@ -20,7 +20,7 @@
  *
  */
 #include "kv-scanner-generic.h"
-#include "misc.h"
+#include "str-utils.h"
 
 enum
 {
