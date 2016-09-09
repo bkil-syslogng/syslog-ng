@@ -20,6 +20,7 @@
  *
  */
 #include "kv-scanner.h"
+#include "kv-scanner-generic.h"
 #include "misc.h"
 #include "utf8utils.h"
 
