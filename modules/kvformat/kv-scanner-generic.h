@@ -25,7 +25,6 @@
 #include "syslog-ng.h"
 #include "kv-scanner.h"
 
-gboolean kv_scanner_generic_extract_key(KVScanner *self);
-gboolean kv_scanner_generic_extract_value(KVScanner *self);
+KVScanner* kv_scanner_generic_new(gchar value_separator);
 
 #endif

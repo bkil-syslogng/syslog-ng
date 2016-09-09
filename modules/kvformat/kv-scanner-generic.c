@@ -20,7 +20,21 @@
  *
  */
 #include "kv-scanner-generic.h"
-#include "str-utils.h"
+
+typedef struct _KVToken KVToken;
+struct _KVToken
+{
+  const gchar *begin;
+  const gchar *end;
+};
+
+typedef struct _KVScannerGeneric KVScannerGeneric;
+struct _KVScannerGeneric {
+  KVScanner super;
+  gint state;
+  KVToken next_key;
+  KVToken next_value;
+};
 
 enum
 {
@@ -36,14 +50,14 @@ enum
 };
 
 static void
-_reset_value(KVScanner *self)
+_reset_value(KVScannerGeneric *self)
 {
-  g_string_truncate(self->value, 0);
-  self->data.generic.next_key.begin = NULL;
-  self->data.generic.next_key.end = NULL;
-  self->data.generic.value.begin = self->input + self->input_pos;
-  self->data.generic.value.end = self->input + self->input_pos;
-  self->value_was_quoted = FALSE;
+  g_string_truncate(self->super.value, 0);
+  self->next_key.begin = NULL;
+  self->next_key.end = NULL;
+  self->next_value.begin = self->super.input + self->super.input_pos;
+  self->next_value.end = self->super.input + self->super.input_pos;
+  self->super.value_was_quoted = FALSE;
 }
 
 /*
@@ -60,73 +74,73 @@ _is_valid_key_character(char c)
 }
 
 static inline void
-_dismiss_next_key(KVScanner *self)
+_dismiss_next_key(KVScannerGeneric *self)
 {
-  if (self->data.generic.next_key.begin < self->data.generic.next_key.end)
+  if (self->next_key.begin < self->next_key.end)
     {
-      self->data.generic.value.end = self->data.generic.next_key.end;
-      self->data.generic.next_key.begin = self->data.generic.next_key.end = NULL;
+      self->next_value.end = self->next_key.end;
+      self->next_key.begin = self->next_key.end = NULL;
     }
 }
 
 static inline void
-_start_next_key(KVScanner *self)
+_start_next_key(KVScannerGeneric *self)
 {
-  self->data.generic.next_key.begin = self->data.generic.next_key.end = self->input + self->input_pos;
+  self->next_key.begin = self->next_key.end = self->super.input + self->super.input_pos;
 }
 
 static inline void
-_end_next_key(KVScanner *self)
+_end_next_key(KVScannerGeneric *self)
 {
-  self->data.generic.next_key.end = self->input + self->input_pos;
+  self->next_key.end = self->super.input + self->super.input_pos;
 }
 
 static inline void
-_start_value(KVScanner *self)
+_start_value(KVScannerGeneric *self)
 {
-  self->data.generic.value.begin = self->data.generic.value.end = self->input + self->input_pos;
+  self->next_value.begin = self->next_value.end = self->super.input + self->super.input_pos;
 }
 
 static inline void
-_end_value(KVScanner *self)
+_end_value(KVScannerGeneric *self)
 {
-  self->data.generic.value.end = self->input + self->input_pos;
+  self->next_value.end = self->super.input + self->super.input_pos;
 }
 
 static inline void
-_value_init_state(KVScanner *self)
+_value_init_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
-      self->data.generic.state = KV_FIND_VALUE_SEPARATOR_AFTER_INIT;
+      self->state = KV_FIND_VALUE_SEPARATOR_AFTER_INIT;
     }
   else if (ch == '\'' || ch == '\"')
     {
       _start_value(self);
-      self->quote_char = ch;
-      self->data.generic.state = KV_FIND_VALUE_IN_QUOTE;
+      self->super.quote_char = ch;
+      self->state = KV_FIND_VALUE_IN_QUOTE;
     }
   else
     {
       _start_value(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
+      self->state = KV_FIND_VALUE_VALUE;
     }
 }
 
 static inline void
-_value_separator_after_init_state(KVScanner *self)
+_value_separator_after_init_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
@@ -135,59 +149,59 @@ _value_separator_after_init_state(KVScanner *self)
   else if (ch == '\'' || ch == '\"')
     {
       _start_value(self);
-      self->quote_char = ch;
-      self->data.generic.state = KV_FIND_VALUE_IN_QUOTE;
+      self->super.quote_char = ch;
+      self->state = KV_FIND_VALUE_IN_QUOTE;
     }
   else if (_is_valid_key_character(ch))
     {
       _start_value(self);
       _start_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+      self->state = KV_FIND_VALUE_KEY_OR_VALUE;
     }
   else
     {
       _start_value(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
+      self->state = KV_FIND_VALUE_VALUE;
     }
 }
 
 static inline void
-_value_value_state(KVScanner *self)
+_value_value_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
       _end_value(self);
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
       _end_value(self);
-      self->data.generic.state = KV_FIND_VALUE_IN_SEPARATOR;
+      self->state = KV_FIND_VALUE_IN_SEPARATOR;
     }
 }
 
 static inline void
-_value_key_or_value_state(KVScanner *self)
+_value_key_or_value_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
       _end_next_key(self);
       _dismiss_next_key(self);
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
       _end_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_IN_SEPARATOR;
+      self->state = KV_FIND_VALUE_IN_SEPARATOR;
     }
-  else if (ch == self->value_separator)
+  else if (ch == self->super.value_separator)
     {
       _end_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_FINISH;
+      self->state = KV_FIND_VALUE_FINISH;
     }
   else if (_is_valid_key_character(ch))
     {
@@ -196,100 +210,100 @@ _value_key_or_value_state(KVScanner *self)
   else
     {
       _dismiss_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
+      self->state = KV_FIND_VALUE_VALUE;
     }
 }
 
 static inline void
-_value_in_quote_state(KVScanner *self)
+_value_in_quote_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
       _end_value(self);
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
-  else if (ch == self->quote_char)
+  else if (ch == self->super.quote_char)
     {
       _end_value(self);
-      self->data.generic.state = KV_FIND_VALUE_AFTER_QUOTE;
+      self->state = KV_FIND_VALUE_AFTER_QUOTE;
     }
 }
 
 static inline void
-_value_after_quote_state(KVScanner *self)
+_value_after_quote_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   _end_value(self);
   if (ch == '\0')
     {
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
-      self->data.generic.state = KV_FIND_VALUE_IN_SEPARATOR;
+      self->state = KV_FIND_VALUE_IN_SEPARATOR;
     }
   else if (ch == '\'' || ch == '\"')
     {
-      self->quote_char = ch;
-      self->data.generic.state = KV_FIND_VALUE_IN_QUOTE;
+      self->super.quote_char = ch;
+      self->state = KV_FIND_VALUE_IN_QUOTE;
     }
   else if (_is_valid_key_character(ch))
     {
       _start_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+      self->state = KV_FIND_VALUE_KEY_OR_VALUE;
     }
   else
     {
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
+      self->state = KV_FIND_VALUE_VALUE;
     }
 }
 
 static inline void
-_value_in_separator_state(KVScanner *self)
+_value_in_separator_state(KVScannerGeneric *self)
 {
-  gchar ch = self->input[self->input_pos];
+  gchar ch = self->super.input[self->super.input_pos];
 
   if (ch == '\0')
     {
       _dismiss_next_key(self);
-      self->data.generic.state = KV_FIND_EOL;
+      self->state = KV_FIND_EOL;
     }
   else if (ch == ' ')
     {
       ;
     }
-  else if (ch == self->value_separator)
+  else if (ch == self->super.value_separator)
     {
-      self->data.generic.state = KV_FIND_VALUE_FINISH;
+      self->state = KV_FIND_VALUE_FINISH;
     }
   else if (_is_valid_key_character(ch))
     {
       _dismiss_next_key(self);
       _start_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_KEY_OR_VALUE;
+      self->state = KV_FIND_VALUE_KEY_OR_VALUE;
     }
   else
     {
       _dismiss_next_key(self);
-      self->data.generic.state = KV_FIND_VALUE_VALUE;
+      self->state = KV_FIND_VALUE_VALUE;
     }
 }
 
-gboolean
-kv_scanner_generic_extract_value(KVScanner *self)
+static inline gboolean
+_extract_value(KVScannerGeneric *self)
 {
   const gchar *cur;
 
   _reset_value(self);
-  self->data.generic.state = KV_FIND_VALUE_INIT;
+  self->state = KV_FIND_VALUE_INIT;
 
-  while (self->data.generic.state != KV_FIND_VALUE_FINISH &&
-         self->data.generic.state != KV_FIND_EOL)
+  while (self->state != KV_FIND_VALUE_FINISH &&
+         self->state != KV_FIND_EOL)
     {
-      switch (self->data.generic.state)
+      switch (self->state)
         {
         case KV_FIND_VALUE_INIT:
           _value_init_state(self);
@@ -313,31 +327,31 @@ kv_scanner_generic_extract_value(KVScanner *self)
           _value_in_separator_state(self);
           break;
         }
-      self->input_pos++;
+      self->super.input_pos++;
     }
 
-  if (*self->data.generic.value.begin == self->quote_char && *(self->data.generic.value.end-1) == self->quote_char)
+  if (*self->next_value.begin == self->super.quote_char && *(self->next_value.end-1) == self->super.quote_char)
     {
-      self->value_was_quoted = TRUE;
-      self->data.generic.value.begin++;
-      self->data.generic.value.end--;
+      self->super.value_was_quoted = TRUE;
+      self->next_value.begin++;
+      self->next_value.end--;
     }
 
-  for (cur = self->data.generic.value.begin; cur < self->data.generic.value.end ; cur++)
+  for (cur = self->next_value.begin; cur < self->next_value.end ; cur++)
     {
-      g_string_append_c(self->value, *cur);
+      g_string_append_c(self->super.value, *cur);
     }
 
   return TRUE;
 }
 
 static inline gboolean
-_find_first_key(KVScanner *self)
+_find_first_key(KVScannerGeneric *self)
 {
   const gchar *separator, *start_of_key, *end_of_key;
   gint len;
 
-  separator = strchr(self->input, self->value_separator);
+  separator = strchr(self->super.input, self->super.value_separator);
 
   do
     {
@@ -345,43 +359,60 @@ _find_first_key(KVScanner *self)
         return FALSE;
 
       end_of_key = separator-1;
-      while (end_of_key >= self->input && *end_of_key == ' ')
+      while (end_of_key >= self->super.input && *end_of_key == ' ')
         end_of_key--;
 
       start_of_key = end_of_key;
 
-      while (start_of_key >= self->input && _is_valid_key_character(*start_of_key))
+      while (start_of_key >= self->super.input && _is_valid_key_character(*start_of_key))
         start_of_key--;
 
       len = end_of_key - start_of_key;
 
       if (len < 1)
-        separator = strchr(separator + 1, self->value_separator);
+        separator = strchr(separator + 1, self->super.value_separator);
     }
   while (len < 1);
 
-  self->data.generic.next_key.begin = start_of_key + 1;
-  self->data.generic.next_key.end = end_of_key + 1;
-  self->input_pos = separator - self->input + 1;
+  self->next_key.begin = start_of_key + 1;
+  self->next_key.end = end_of_key + 1;
+  self->super.input_pos = separator - self->super.input + 1;
   return TRUE;
 }
 
-gboolean
-kv_scanner_generic_extract_key(KVScanner *self)
+static inline gboolean
+_extract_key(KVScannerGeneric *self)
 {
 
-  if (self->data.generic.state == KV_FIND_EOL || self->input[self->input_pos] == '\0')
+  if (self->state == KV_FIND_EOL || self->super.input[self->super.input_pos] == '\0')
     {
       return FALSE;
     }
 
-  if ((self->data.generic.next_key.begin == NULL || self->data.generic.next_key.end == NULL) && !_find_first_key(self))
+  if ((self->next_key.begin == NULL || self->next_key.end == NULL) && !_find_first_key(self))
     {
       return FALSE;
     }
 
-  g_string_assign_len(self->key, self->data.generic.next_key.begin,
-                      self->data.generic.next_key.end - self->data.generic.next_key.begin);
+  g_string_assign_len(self->super.key, self->next_key.begin, self->next_key.end - self->next_key.begin);
 
   return TRUE;
+}
+
+static gboolean
+_scan_next(KVScanner* s)
+{
+  KVScannerGeneric* self = (KVScannerGeneric*)s;
+
+  return _extract_key(self) && _extract_value(self) && kv_scanner_decode_value(s);
+}
+
+KVScanner* kv_scanner_generic_new(gchar value_separator)
+{
+ KVScannerGeneric *self = g_new0(KVScannerGeneric, 1);
+
+ kv_scanner_init(&self->super, value_separator);
+ self->super.scan_next = _scan_next;
+
+ return &self->super;
 }

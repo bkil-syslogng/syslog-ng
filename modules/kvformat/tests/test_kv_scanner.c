@@ -18,7 +18,8 @@
  * OpenSSL libraries as published by the OpenSSL project. See the file
  * COPYING for details.
  */
-#include "kv-scanner.h"
+#include "kv-scanner-generic.h"
+#include "kv-scanner-simple.h"
 #include "testutils.h"
 
 #define NULLKV  {}
@@ -27,7 +28,7 @@
 static void
 _assert_no_more_tokens(KVScanner *scanner)
 {
-  gboolean ok = kv_scanner_scan_next(scanner);
+  gboolean ok = scanner->scan_next(scanner);
 
   GString *msg = g_string_new("kv_scanner is expected to return no more key-value pairs ");
   do
@@ -40,7 +41,7 @@ _assert_no_more_tokens(KVScanner *scanner)
         value = "";
       g_string_append_printf(msg, "[%s/%s]", key, value);
     }
-  while (kv_scanner_scan_next(scanner));
+  while (scanner->scan_next(scanner));
   expect_false(ok, msg->str);
   g_string_free(msg, TRUE);
 }
@@ -66,7 +67,7 @@ _compare_key_value(KVScanner *scanner, const gchar *key, const gchar *value)
 {
   g_assert(value);
 
-  gboolean ok = kv_scanner_scan_next(scanner);
+  gboolean ok = scanner->scan_next(scanner);
   if (ok)
     {
       _assert_current_key_is(scanner, key);
@@ -152,10 +153,9 @@ typedef struct Testcase_t
 KVScanner *
 create_kv_scanner(ScannerConfig config)
 {
-  KVScanner *new = kv_scanner_new();
-  kv_scanner_allow_pair_separator_in_value(new, config.allow_pair_separator_in_value);
-  kv_scanner_set_value_separator(new, config.kv_separator);
-  return new;
+  return (config.allow_pair_separator_in_value ?
+    kv_scanner_generic_new(config.kv_separator) :
+    kv_scanner_simple_new(config.kv_separator));
 }
 
 static void
@@ -248,23 +248,6 @@ _test_transforms_values_if_parse_value_is_set_with_space_separator_option(void)
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
   { {"foo", "cbs"}, NULLKV
   });
-}
-
-static void
-_test_value_separator_clone(void)
-{
-  KVScanner *scanner = kv_scanner_new();
-  kv_scanner_set_value_separator(scanner, ':');
-  KVScanner *cloned_scanner = kv_scanner_clone(scanner);
-  kv_scanner_free(scanner);
-
-  _scan_kv_pairs_scanner(
-    cloned_scanner,
-    "key1:value1 key2:value2 key3:value3 ",
-    (KV[])
-  { {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV
-  }
-  );
 }
 
 #define DEFAULT_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=FALSE}
@@ -1218,7 +1201,6 @@ int main(int argc, char *argv[])
   _test_key_buffer_underrun();
   _test_transforms_values_if_parse_value_is_set();
   _test_transforms_values_if_parse_value_is_set_with_space_separator_option();
-  _test_value_separator_clone();
   _run_testcases(_provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(_provide_common_cases());
   _run_testcases(_provide_cases_with_allow_pair_separator_in_value());

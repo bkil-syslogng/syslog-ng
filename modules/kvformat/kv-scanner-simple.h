@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Balabit
+ * Copyright (c) 2016 Balabit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -19,25 +19,12 @@
  * COPYING for details.
  *
  */
+#ifndef KV_SCANNER_SIMPLE_H_INCLUDED
+#define KV_SCANNER_SIMPLE_H_INCLUDED
+
+#include "syslog-ng.h"
 #include "kv-scanner.h"
 
-void
-kv_scanner_init(KVScanner *self, gchar value_separator)
-{
-  memset(self, 0, sizeof(*self));
-  self->key = g_string_sized_new(32);
-  self->value = g_string_sized_new(64);
-  self->decoded_value = g_string_sized_new(64);
-  self->value_separator = value_separator;
-}
+KVScanner* kv_scanner_simple_new(gchar value_separator);
 
-void
-kv_scanner_free(KVScanner *self)
-{
-  if (!self)
-    return;
-  g_string_free(self->key, TRUE);
-  g_string_free(self->value, TRUE);
-  g_string_free(self->decoded_value, TRUE);
-  g_free(self);
-}
+#endif
