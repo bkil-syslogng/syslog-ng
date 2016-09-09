@@ -22,7 +22,8 @@
 #include "kv-scanner-generic.h"
 #include "misc.h"
 
-enum {
+enum
+{
   KV_FIND_VALUE_INIT = 0,
   KV_FIND_VALUE_SEPARATOR_AFTER_INIT,
   KV_FIND_VALUE_VALUE,
@@ -379,7 +380,8 @@ kv_scanner_generic_extract_key(KVScanner *self)
       return FALSE;
     }
 
-  g_string_assign_len(self->key, self->data.generic.next_key.begin, self->data.generic.next_key.end - self->data.generic.next_key.begin);
+  g_string_assign_len(self->key, self->data.generic.next_key.begin,
+                      self->data.generic.next_key.end - self->data.generic.next_key.begin);
 
   return TRUE;
 }

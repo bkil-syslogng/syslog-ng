@@ -39,7 +39,8 @@ _assert_no_more_tokens(KVScanner *scanner)
       if (!value)
         value = "";
       g_string_append_printf(msg, "[%s/%s]", key, value);
-    } while (kv_scanner_scan_next(scanner));
+    }
+  while (kv_scanner_scan_next(scanner));
   expect_false(ok, msg->str);
   g_string_free(msg, TRUE);
 }
@@ -135,23 +136,23 @@ typedef struct _ScannerConfig
 
 typedef struct _KV
 {
-  gchar* key;
-  gchar* value;
+  gchar *key;
+  gchar *value;
 } KV;
 
 typedef struct Testcase_t
 {
   gint line;
-  const gchar* function;
+  const gchar *function;
   ScannerConfig config[5];
-  gchar* input;
+  gchar *input;
   KV expected[25];
 } Testcase;
 
-KVScanner*
+KVScanner *
 create_kv_scanner(ScannerConfig config)
 {
-  KVScanner* new = kv_scanner_new();
+  KVScanner *new = kv_scanner_new();
   kv_scanner_allow_pair_separator_in_value(new, config.allow_pair_separator_in_value);
   kv_scanner_set_value_separator(new, config.kv_separator);
   return new;
@@ -180,11 +181,14 @@ _test_key_buffer_underrun(void)
   const gchar *buffer = "ab=v";
   const gchar *input = buffer + 2;
 
-  KV expect_nothing[] = {
+  KV expect_nothing[] =
+  {
     NULLKV
   };
 
-  _scan_kv_pairs_scanner(create_kv_scanner((ScannerConfig){'=', FALSE}), input, expect_nothing);
+  _scan_kv_pairs_scanner(create_kv_scanner((ScannerConfig)
+  {'=', FALSE
+  }), input, expect_nothing);
 }
 
 static void
@@ -223,19 +227,27 @@ _parse_value_by_incrementing_all_bytes(KVScanner *self)
 static void
 _test_transforms_values_if_parse_value_is_set(void)
 {
-  KVScanner *scanner = create_kv_scanner((ScannerConfig){'=', FALSE});
+  KVScanner *scanner = create_kv_scanner((ScannerConfig)
+  {'=', FALSE
+  });
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
 
-  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
+  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
+  { {"foo", "cbs"}, NULLKV
+  });
 }
 
 static void
 _test_transforms_values_if_parse_value_is_set_with_space_separator_option(void)
 {
-  KVScanner *scanner = create_kv_scanner((ScannerConfig){'=', TRUE});
+  KVScanner *scanner = create_kv_scanner((ScannerConfig)
+  {'=', TRUE
+  });
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
 
-  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[]){ {"foo", "cbs"}, NULLKV });
+  _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
+  { {"foo", "cbs"}, NULLKV
+  });
 }
 
 static void
@@ -249,7 +261,9 @@ _test_value_separator_clone(void)
   _scan_kv_pairs_scanner(
     cloned_scanner,
     "key1:value1 key2:value2 key3:value3 ",
-    (KV[]){{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV}
+    (KV[])
+  { {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV
+  }
   );
 }
 
@@ -258,10 +272,11 @@ _test_value_separator_clone(void)
 
 #define TC_HEAD .line=__LINE__, .function=__FUNCTION__
 
-static Testcase*
+static Testcase *
 _provide_common_cases(void)
 {
-  static Testcase common_cases[] = {
+  static Testcase common_cases[] =
+  {
     {
       TC_HEAD,
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
@@ -605,10 +620,11 @@ _provide_common_cases(void)
   return common_cases;
 }
 
-static Testcase*
+static Testcase *
 _provide_cases_without_allow_pair_separator_in_value(void)
 {
-  static Testcase cases_without_allow_pair_separator_in_value[] = {
+  static Testcase cases_without_allow_pair_separator_in_value[] =
+  {
     {
       TC_HEAD,
       { DEFAULT_CONFIG, NULLCFG },
@@ -802,10 +818,11 @@ _provide_cases_without_allow_pair_separator_in_value(void)
   return cases_without_allow_pair_separator_in_value;
 }
 
-static Testcase*
+static Testcase *
 _provide_cases_with_allow_pair_separator_in_value(void)
 {
-  static Testcase cases_with_allow_pair_separator_in_value[] = {
+  static Testcase cases_with_allow_pair_separator_in_value[] =
+  {
     {
       TC_HEAD,
       { SPACE_HANDLING_CONFIG, NULLCFG },
@@ -969,10 +986,11 @@ _provide_cases_with_allow_pair_separator_in_value(void)
   return cases_with_allow_pair_separator_in_value;
 }
 
-static Testcase*
+static Testcase *
 _provide_cases_for_performance_test_nothing_to_parse(void)
 {
-  static Testcase cases_for_performance_test_nothing_to_parse[] = {
+  static Testcase cases_for_performance_test_nothing_to_parse[] =
+  {
     {
       TC_HEAD,
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
@@ -1000,10 +1018,11 @@ Try to increase stolen memory size if available in BIOS.",
   return cases_for_performance_test_nothing_to_parse;
 }
 
-static Testcase*
+static Testcase *
 _provide_cases_for_performance_test_parse_long_msg(void)
 {
-  static Testcase cases_for_performance_test_parse_long_msg[] = {
+  static Testcase cases_for_performance_test_parse_long_msg[] =
+  {
     {
       TC_HEAD,
       { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
@@ -1034,7 +1053,8 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"SPT", "1e7996c7b0181429bba237ac2799ee5edc31aca2d5d90c39a48f9e9a3d4078bd"},
         {"DPT", "ca902d4a8acbdea132ada81a004081f51c5c9279d409cee414de5a39a139fab6"},
         {"LEN", "c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db"},
-        NULLKV }
+        NULLKV
+      }
     },
     {
       TC_HEAD,
@@ -1054,7 +1074,8 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"dstMac", "f8:c0:01:73:c7:c1"},
         {"proto", "udp/dns"},
         {"sent", "66"},
-        NULLKV }
+        NULLKV
+      }
     },
     {
       TC_HEAD,
@@ -1084,7 +1105,8 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"code", "27"},
         {"Category", "Information Technology/Computers"},
         {"fw_action", "process"},
-        NULLKV }
+        NULLKV
+      }
     },
 
     {}
@@ -1092,21 +1114,21 @@ _provide_cases_for_performance_test_parse_long_msg(void)
   return cases_for_performance_test_parse_long_msg;
 }
 
-static GString*
-_expected_to_string(KV* kvs)
+static GString *
+_expected_to_string(KV *kvs)
 {
-  GString* result = g_string_new("");
+  GString *result = g_string_new("");
   gboolean first = TRUE;
   while (kvs->key)
-  {
-    if (!first)
     {
-      g_string_append_c(result, ' ');
+      if (!first)
+        {
+          g_string_append_c(result, ' ');
+        }
+      first = FALSE;
+      g_string_append_printf(result, "%s=%s", kvs->key, kvs->value);
+      kvs++;
     }
-    first = FALSE;
-    g_string_append_printf(result, "%s=%s", kvs->key, kvs->value);
-    kvs++;
-  }
 
   return result;
 }
@@ -1114,74 +1136,79 @@ _expected_to_string(KV* kvs)
 static void
 _run_testcase(Testcase tc)
 {
-  GString* pretty_expected;
+  GString *pretty_expected;
   ScannerConfig *cfg = tc.config;
   while (cfg->kv_separator != 0)
-  {
-    pretty_expected = _expected_to_string(tc.expected);
-    testcase_begin("line:(%d), function:(%s), input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
-                   tc.line,
-                   tc.function,
-                   tc.input,
-                   pretty_expected->str,
-                   cfg->kv_separator,
-                   cfg->allow_pair_separator_in_value);
-    _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc.input, tc.expected);
-    testcase_end();
-    g_string_free(pretty_expected, TRUE);
-    cfg++;
-  }
+    {
+      pretty_expected = _expected_to_string(tc.expected);
+      testcase_begin("line:(%d), function:(%s), input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
+                     tc.line,
+                     tc.function,
+                     tc.input,
+                     pretty_expected->str,
+                     cfg->kv_separator,
+                     cfg->allow_pair_separator_in_value);
+      _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc.input, tc.expected);
+      testcase_end();
+      g_string_free(pretty_expected, TRUE);
+      cfg++;
+    }
 }
 
 static void
-_run_testcases(Testcase* cases)
+_run_testcases(Testcase *cases)
 {
-  Testcase* tc = cases;
+  Testcase *tc = cases;
   while (tc->input)
-  {
-    _run_testcase(*tc);
-    tc++;
-  }
+    {
+      _run_testcase(*tc);
+      tc++;
+    }
 }
 
 #define ITERATION_NUMBER 10000
 
 static void
-_test_performance(Testcase *tcs, gchar* title)
+_test_performance(Testcase *tcs, gchar *title)
 {
-  GString* pretty_expected;
+  GString *pretty_expected;
   ScannerConfig *cfg = NULL;
   gint cfg_index = 0;
-  Testcase* tc;
+  Testcase *tc;
   gint iteration_index = 0;
 
-  if (title) {
-    printf("Performance test: %s\n", title);
-  }
-
-  for (cfg_index = 0; tcs->config[cfg_index].kv_separator != 0; cfg_index++) {
-
-    start_stopwatch();
-
-    for (iteration_index = 0; iteration_index < ITERATION_NUMBER; iteration_index++) {
-      for (tc = tcs; tc->input; tc++) {
-        cfg = &tc->config[cfg_index];
-
-        pretty_expected = _expected_to_string(tc->expected);
-        testcase_begin("input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
-                       tc->input, pretty_expected->str, cfg->kv_separator, cfg->allow_pair_separator_in_value);
-        _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc->input, tc->expected);
-        testcase_end();
-        g_string_free(pretty_expected, TRUE);
-      }
+  if (title)
+    {
+      printf("Performance test: %s\n", title);
     }
 
-    if (cfg != NULL) {
-      stop_stopwatch_and_display_result("Is pair-separator allowed in values: %s KV-separator: '%c' ",
-                                        cfg->allow_pair_separator_in_value?"YES":"NO ",
-                                        cfg->kv_separator);
+  for (cfg_index = 0; tcs->config[cfg_index].kv_separator != 0; cfg_index++)
+    {
+
+      start_stopwatch();
+
+      for (iteration_index = 0; iteration_index < ITERATION_NUMBER; iteration_index++)
+        {
+          for (tc = tcs; tc->input; tc++)
+            {
+              cfg = &tc->config[cfg_index];
+
+              pretty_expected = _expected_to_string(tc->expected);
+              testcase_begin("input:(%s), expected:(%s), separator(%c), separator_in_values(%d)",
+                             tc->input, pretty_expected->str, cfg->kv_separator, cfg->allow_pair_separator_in_value);
+              _scan_kv_pairs_scanner(create_kv_scanner(*cfg), tc->input, tc->expected);
+              testcase_end();
+              g_string_free(pretty_expected, TRUE);
+            }
+        }
+
+      if (cfg != NULL)
+        {
+          stop_stopwatch_and_display_result("Is pair-separator allowed in values: %s KV-separator: '%c' ",
+                                            cfg->allow_pair_separator_in_value?"YES":"NO ",
+                                            cfg->kv_separator);
+        }
     }
-  }
 }
 
 int main(int argc, char *argv[])
@@ -1195,11 +1222,12 @@ int main(int argc, char *argv[])
   _run_testcases(_provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(_provide_common_cases());
   _run_testcases(_provide_cases_with_allow_pair_separator_in_value());
-  if (0) {
-    _test_performance(_provide_common_cases(), "Common test cases");
-    _test_performance(_provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
-    _test_performance(_provide_cases_for_performance_test_parse_long_msg(), "Parse long strings");
-  }
+  if (0)
+    {
+      _test_performance(_provide_common_cases(), "Common test cases");
+      _test_performance(_provide_cases_for_performance_test_nothing_to_parse(), "Nothing to parse in the message");
+      _test_performance(_provide_cases_for_performance_test_parse_long_msg(), "Parse long strings");
+    }
   if (testutils_deinit())
     return 0;
   else
