@@ -58,7 +58,7 @@ kv_parser_set_prefix(LogParser *p, const gchar *prefix)
 }
 
 void
-kv_parser_allow_pair_separator_in_value (LogParser *s, gboolean allow_pair_separator_in_value)
+kv_parser_allow_pair_separator_in_value(LogParser *s, gboolean allow_pair_separator_in_value)
 {
   KVParser *self = (KVParser *) s;
 
