@@ -1204,7 +1204,7 @@ _test_performance(Testcase *tcs, gchar *title)
 
       if (cfg != NULL)
         {
-          stop_stopwatch_and_display_result("Is pair-separator allowed in values: %s KV-separator: '%c' ",
+          stop_stopwatch_and_display_result(1, "Is pair-separator allowed in values: %s KV-separator: '%c' ",
                                             cfg->allow_pair_separator_in_value?"YES":"NO ",
                                             cfg->kv_separator);
         }
