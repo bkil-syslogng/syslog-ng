@@ -25,12 +25,14 @@
 #include <string.h>
 
 typedef struct _KVScannerSimple KVScannerSimple;
-struct _KVScannerSimple {
+struct _KVScannerSimple
+{
   KVScanner super;
   gint quote_state;
 };
 
-enum {
+enum
+{
   KV_QUOTE_INITIAL = 0,
   KV_QUOTE_STRING,
   KV_QUOTE_BACKSLASH,
@@ -58,11 +60,11 @@ _extract_key(KVScannerSimple *self)
   separator = strchr(input_ptr, self->super.value_separator);
   do
     {
-  if (!separator)
-    return FALSE;
-  start_of_key = separator;
-  while (start_of_key > input_ptr && _is_valid_key_character(*(start_of_key - 1)))
-    start_of_key--;
+      if (!separator)
+        return FALSE;
+      start_of_key = separator;
+      while (start_of_key > input_ptr && _is_valid_key_character(*(start_of_key - 1)))
+        start_of_key--;
       len = separator - start_of_key;
       if (len < 1)
         separator = strchr(separator + 1, self->super.value_separator);
@@ -80,31 +82,31 @@ _decode_backslash_escape(KVScannerSimple *self, gchar ch)
   gchar control;
   switch (ch)
     {
-      case 'b':
-        control = '\b';
-        break;
-      case 'f':
-        control = '\f';
-        break;
-      case 'n':
-        control = '\n';
-        break;
-      case 'r':
-        control = '\r';
-        break;
-      case 't':
-        control = '\t';
-        break;
-      case '\\':
-        control = '\\';
-        break;
-      default:
-        if (self->super.quote_char != ch)
-          {
-            g_string_append_c(self->super.value, '\\');
-          }
-        control = ch;
-        break;
+    case 'b':
+      control = '\b';
+      break;
+    case 'f':
+      control = '\f';
+      break;
+    case 'n':
+      control = '\n';
+      break;
+    case 'r':
+      control = '\r';
+      break;
+    case 't':
+      control = '\t';
+      break;
+    case '\\':
+      control = '\\';
+      break;
+    default:
+      if (self->super.quote_char != ch)
+        {
+          g_string_append_c(self->super.value, '\\');
+        }
+      control = ch;
+      break;
     }
   g_string_append_c(self->super.value, control);
 }
@@ -168,25 +170,25 @@ _extract_value(KVScannerSimple *self)
 static gboolean
 _scan_next(KVScanner *s)
 {
-  KVScannerSimple* self = (KVScannerSimple*)s;
+  KVScannerSimple *self = (KVScannerSimple *)s;
 
   return _extract_key(self) && _extract_value(self) && kv_scanner_decode_value(s);
 }
 
-static KVScanner*
+static KVScanner *
 _clone(KVScanner *s)
 {
   return kv_scanner_simple_new(s->value_separator, s->parse_value);
 }
 
-KVScanner*
-kv_scanner_simple_new(gchar value_separator, KVParseValue* parse_value)
+KVScanner *
+kv_scanner_simple_new(gchar value_separator, KVParseValue *parse_value)
 {
- KVScannerSimple *self = g_new0(KVScannerSimple, 1);
+  KVScannerSimple *self = g_new0(KVScannerSimple, 1);
 
- kv_scanner_init(&self->super, value_separator, parse_value);
- self->super.scan_next = _scan_next;
- self->super.clone = _clone;
+  kv_scanner_init(&self->super, value_separator, parse_value);
+  self->super.scan_next = _scan_next;
+  self->super.clone = _clone;
 
- return &self->super;
+  return &self->super;
 }

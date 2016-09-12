@@ -90,7 +90,7 @@ _get_formatted_key(KVParser *self, const gchar *key)
   return self->formatted_key->str;
 }
 
-static inline KVScanner*
+static inline KVScanner *
 _create_kv_scanner(KVParser *self)
 {
   KVScanner *kv_scanner;
@@ -144,7 +144,7 @@ kv_parser_clone(LogPipe *s)
   log_parser_set_template(cloned, log_template_ref(self->super.template));
 
   if (self->kv_scanner)
-    ((KVParser*)cloned)->kv_scanner = self->kv_scanner->clone(self->kv_scanner);
+    ((KVParser *)cloned)->kv_scanner = self->kv_scanner->clone(self->kv_scanner);
 
   return &cloned->super;
 }

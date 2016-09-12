@@ -29,7 +29,8 @@ struct _KVToken
 };
 
 typedef struct _KVScannerGeneric KVScannerGeneric;
-struct _KVScannerGeneric {
+struct _KVScannerGeneric
+{
   KVScanner super;
   gint state;
   KVToken next_key;
@@ -49,7 +50,7 @@ enum
   KV_EOL
 };
 
-static inline const gchar*
+static inline const gchar *
 _get_current_position(KVScannerGeneric *self)
 {
   return self->super.input + self->super.input_pos;
@@ -406,26 +407,26 @@ _extract_key(KVScannerGeneric *self)
 }
 
 static gboolean
-_scan_next(KVScanner* s)
+_scan_next(KVScanner *s)
 {
-  KVScannerGeneric* self = (KVScannerGeneric*)s;
+  KVScannerGeneric *self = (KVScannerGeneric *)s;
 
   return _extract_key(self) && _extract_value(self) && kv_scanner_decode_value(s);
 }
 
-static KVScanner*
+static KVScanner *
 _clone(KVScanner *s)
 {
   return kv_scanner_generic_new(s->value_separator, s->parse_value);
 }
 
-KVScanner* kv_scanner_generic_new(gchar value_separator, KVParseValue *parse_value)
+KVScanner *kv_scanner_generic_new(gchar value_separator, KVParseValue *parse_value)
 {
- KVScannerGeneric *self = g_new0(KVScannerGeneric, 1);
+  KVScannerGeneric *self = g_new0(KVScannerGeneric, 1);
 
- kv_scanner_init(&self->super, value_separator, parse_value);
- self->super.scan_next = _scan_next;
- self->super.clone = _clone;
+  kv_scanner_init(&self->super, value_separator, parse_value);
+  self->super.scan_next = _scan_next;
+  self->super.clone = _clone;
 
- return &self->super;
+  return &self->super;
 }

@@ -157,8 +157,8 @@ KVScanner *
 create_kv_scanner(const ScannerConfig config)
 {
   return (config.allow_pair_separator_in_value ?
-    kv_scanner_generic_new(config.kv_separator, NULL_KVPARSEVALUE) :
-    kv_scanner_simple_new(config.kv_separator, NULL_KVPARSEVALUE));
+          kv_scanner_generic_new(config.kv_separator, NULL_KVPARSEVALUE) :
+          kv_scanner_simple_new(config.kv_separator, NULL_KVPARSEVALUE));
 }
 
 static void
@@ -262,7 +262,9 @@ _test_value_separator_clone(void)
   _scan_kv_pairs_scanner(
     cloned_scanner,
     "key1:value1 key2:value2 key3:value3 ",
-    (KV[]){ {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, {}}
+    (KV[])
+  { {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, {}
+  }
   );
 }
 
@@ -274,9 +276,9 @@ _test_parse_value_clone(void)
   kv_scanner_free(scanner);
 
   _scan_kv_pairs_scanner(cloned_scanner, "foo=\"hal\"", (KV[])
-    { {"foo", "ibm"}, {}
-    }
-  );
+  { {"foo", "ibm"}, {}
+  }
+                        );
 }
 
 #define DEFAULT_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=FALSE}
