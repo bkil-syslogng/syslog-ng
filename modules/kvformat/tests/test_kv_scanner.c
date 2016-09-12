@@ -154,8 +154,8 @@ KVScanner *
 create_kv_scanner(ScannerConfig config)
 {
   return (config.allow_pair_separator_in_value ?
-    kv_scanner_generic_new(config.kv_separator) :
-    kv_scanner_simple_new(config.kv_separator));
+    kv_scanner_generic_new(config.kv_separator, NULL_KVPARSEVALUE) :
+    kv_scanner_simple_new(config.kv_separator, NULL_KVPARSEVALUE));
 }
 
 static void
@@ -248,6 +248,33 @@ _test_transforms_values_if_parse_value_is_set_with_space_separator_option(void)
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
   { {"foo", "cbs"}, NULLKV
   });
+}
+
+static void
+_test_value_separator_clone(void)
+{
+  KVScanner *scanner = kv_scanner_simple_new(':', NULL_KVPARSEVALUE);
+  KVScanner *cloned_scanner = scanner->clone(scanner);
+  kv_scanner_free(scanner);
+
+  _scan_kv_pairs_scanner(
+    cloned_scanner,
+    "key1:value1 key2:value2 key3:value3 ",
+    (KV[]){ {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV}
+  );
+}
+
+static void
+_test_parse_value_clone(void)
+{
+  KVScanner *scanner = kv_scanner_simple_new('=', _parse_value_by_incrementing_all_bytes);
+  KVScanner *cloned_scanner = scanner->clone(scanner);
+  kv_scanner_free(scanner);
+
+  _scan_kv_pairs_scanner(cloned_scanner, "foo=\"hal\"", (KV[])
+    { {"foo", "ibm"}, NULLKV
+    }
+  );
 }
 
 #define DEFAULT_CONFIG {.kv_separator='=', .allow_pair_separator_in_value=FALSE}
@@ -1201,6 +1228,8 @@ int main(int argc, char *argv[])
   _test_key_buffer_underrun();
   _test_transforms_values_if_parse_value_is_set();
   _test_transforms_values_if_parse_value_is_set_with_space_separator_option();
+  _test_value_separator_clone();
+  _test_parse_value_clone();
   _run_testcases(_provide_cases_without_allow_pair_separator_in_value());
   _run_testcases(_provide_common_cases());
   _run_testcases(_provide_cases_with_allow_pair_separator_in_value());

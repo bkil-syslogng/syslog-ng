@@ -413,12 +413,19 @@ _scan_next(KVScanner* s)
   return _extract_key(self) && _extract_value(self) && kv_scanner_decode_value(s);
 }
 
-KVScanner* kv_scanner_generic_new(gchar value_separator)
+static KVScanner*
+_clone(KVScanner *s)
+{
+  return kv_scanner_generic_new(s->value_separator, s->parse_value);
+}
+
+KVScanner* kv_scanner_generic_new(gchar value_separator, KVParseValue *parse_value)
 {
  KVScannerGeneric *self = g_new0(KVScannerGeneric, 1);
 
- kv_scanner_init(&self->super, value_separator);
+ kv_scanner_init(&self->super, value_separator, parse_value);
  self->super.scan_next = _scan_next;
+ self->super.clone = _clone;
 
  return &self->super;
 }

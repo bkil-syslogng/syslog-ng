@@ -25,7 +25,12 @@
 #include "syslog-ng.h"
 #include "misc.h"
 
+
 typedef struct _KVScanner KVScanner;
+
+typedef gboolean KVParseValue(KVScanner *);
+#define NULL_KVPARSEVALUE (KVParseValue*)NULL
+
 struct _KVScanner
 {
   const gchar *input;
@@ -36,12 +41,12 @@ struct _KVScanner
   gboolean value_was_quoted;
   gchar value_separator;
   gchar quote_char;
-  gboolean allow_pair_separator_in_value;
-  gboolean (*parse_value)(KVScanner *self);
+  KVParseValue *parse_value;
   gboolean (*scan_next)(KVScanner *self);
+  KVScanner* (*clone)(KVScanner *self);
 };
 
-void kv_scanner_init(KVScanner *self, gchar value_separator);
+void kv_scanner_init(KVScanner *self, gchar value_separator, KVParseValue *parse_value);
 void kv_scanner_free(KVScanner *self);
 
 static inline void

@@ -97,11 +97,11 @@ _create_kv_scanner(KVParser *self)
 
   if (self->allow_pair_separator_in_value)
     {
-      kv_scanner = kv_scanner_generic_new(self->value_separator);
+      kv_scanner = kv_scanner_generic_new(self->value_separator, NULL_KVPARSEVALUE);
     }
   else
     {
-      kv_scanner = kv_scanner_simple_new(self->value_separator);
+      kv_scanner = kv_scanner_simple_new(self->value_separator, NULL_KVPARSEVALUE);
     }
 
   if (self->input_format == KV_PARSER_INPUT_IS_LINUX_AUDIT)
@@ -145,6 +145,9 @@ kv_parser_clone(LogPipe *s)
   kv_parser_allow_pair_separator_in_value(cloned, self->allow_pair_separator_in_value);
   kv_parser_set_value_separator(cloned, self->value_separator);
   log_parser_set_template(cloned, log_template_ref(self->super.template));
+
+  if (self->kv_scanner)
+    ((KVParser*)cloned)->kv_scanner = self->kv_scanner->clone(self->kv_scanner);
 
   return &cloned->super;
 }

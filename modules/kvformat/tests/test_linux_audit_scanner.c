@@ -27,7 +27,8 @@
     {                                                           \
       testcase_begin("%s(%s)", func, args);                     \
       kv_scanner =                                              \
-        linux_audit_scanner_new(kv_scanner_simple_new('='));   \
+        linux_audit_scanner_new(                                \
+          kv_scanner_simple_new('=', NULL_KVPARSEVALUE));       \
     }                                                           \
   while (0)
 
