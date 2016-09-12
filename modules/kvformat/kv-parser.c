@@ -118,9 +118,6 @@ kv_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptions *path_op
 {
   KVParser *self = (KVParser *) s;
 
-  if (!self->kv_scanner)
-    self->kv_scanner = _create_kv_scanner(self);
-
   /* FIXME: input length */
   kv_scanner_input(self->kv_scanner, input);
   while (self->kv_scanner->scan_next(self->kv_scanner))
@@ -175,12 +172,31 @@ kv_parser_process_threaded(LogParser *s, LogMessage **pmsg, const LogPathOptions
   return ok;
 }
 
+static gboolean
+_init(LogPipe *s)
+{
+  KVParser *self = (KVParser *)s;
+  self->kv_scanner = _create_kv_scanner(self);
+  return TRUE;
+}
+
+static gboolean
+_deinit(LogPipe *s)
+{
+  KVParser *self = (KVParser *)s;
+  kv_scanner_free(self->kv_scanner);
+  self->kv_scanner = NULL;
+  return TRUE;
+}
+
 LogParser *
 kv_parser_new(GlobalConfig *cfg, int input_format)
 {
   KVParser *self = g_new0(KVParser, 1);
 
   log_parser_init_instance(&self->super, cfg);
+  self->super.super.init = _init;
+  self->super.super.deinit = _deinit;
   self->super.super.free_fn = kv_parser_free;
   self->super.super.clone = kv_parser_clone;
   self->super.process = kv_parser_process_threaded;
