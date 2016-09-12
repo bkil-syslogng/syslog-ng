@@ -28,9 +28,15 @@
 static void
 _assert_no_more_tokens(KVScanner *scanner)
 {
+  GString *msg;
   gboolean ok = scanner->scan_next(scanner);
 
-  GString *msg = g_string_new("kv_scanner is expected to return no more key-value pairs ");
+  if (!ok)
+    {
+      return;
+    }
+
+  msg = g_string_new("kv_scanner is expected to return no more key-value pairs ");
   do
     {
       const gchar *key = kv_scanner_get_current_key(scanner);
