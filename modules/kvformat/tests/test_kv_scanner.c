@@ -22,9 +22,6 @@
 #include "kv-scanner-simple.h"
 #include "testutils.h"
 
-#define NULLKV  {}
-#define NULLCFG {}
-
 static void
 _assert_no_more_tokens(KVScanner *scanner)
 {
@@ -189,7 +186,7 @@ _test_key_buffer_underrun(void)
 
   KV expect_nothing[] =
   {
-    NULLKV
+    {}
   };
 
   _scan_kv_pairs_scanner(create_kv_scanner((ScannerConfig)
@@ -239,7 +236,7 @@ _test_transforms_values_if_parse_value_is_set(void)
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
 
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
-  { {"foo", "cbs"}, NULLKV
+  { {"foo", "cbs"}, {}
   });
 }
 
@@ -252,7 +249,7 @@ _test_transforms_values_if_parse_value_is_set_with_space_separator_option(void)
   scanner->parse_value = _parse_value_by_incrementing_all_bytes;
 
   _scan_kv_pairs_scanner(scanner, "foo=\"bar\"", (KV[])
-  { {"foo", "cbs"}, NULLKV
+  { {"foo", "cbs"}, {}
   });
 }
 
@@ -266,7 +263,7 @@ _test_value_separator_clone(void)
   _scan_kv_pairs_scanner(
     cloned_scanner,
     "key1:value1 key2:value2 key3:value3 ",
-    (KV[]){ {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, NULLKV}
+    (KV[]){ {"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}, {}}
   );
 }
 
@@ -278,7 +275,7 @@ _test_parse_value_clone(void)
   kv_scanner_free(scanner);
 
   _scan_kv_pairs_scanner(cloned_scanner, "foo=\"hal\"", (KV[])
-    { {"foo", "ibm"}, NULLKV
+    { {"foo", "ibm"}, {}
     }
   );
 }
@@ -295,339 +292,339 @@ _provide_common_cases(void)
   {
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "foo=bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k-j=v",
-      { {"k-j", "v"}, NULLKV }
+      { {"k-j", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "0=v",
-      { {"0", "v"}, NULLKV }
+      { {"0", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "_=v",
-      { {"_", "v"}, NULLKV }
+      { {"_", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "Z=v",
-      { {"Z", "v"}, NULLKV }
+      { {"Z", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k==",
-      { {"k", "="}, NULLKV }
+      { {"k", "="}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k===",
-      { {"k", "=="}, NULLKV }
+      { {"k", "=="}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k===a",
-      { {"k", "==a"}, NULLKV }
+      { {"k", "==a"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k===a=b",
-      { {"k", "==a=b"}, NULLKV }
+      { {"k", "==a=b"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " ==k=",
-      { {"k", ""}, NULLKV }
+      { {"k", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " = =k=",
-      { {"k", ""}, NULLKV }
+      { {"k", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " =k=",
-      { {"k", ""}, NULLKV }
+      { {"k", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " =k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " ==k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\xc3",
-      { {"k", "\xc3"}, NULLKV }
+      { {"k", "\xc3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\xc3v",
-      { {"k", "\xc3v"}, NULLKV }
+      { {"k", "\xc3v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\xff",
-      { {"k", "\xff"}, NULLKV }
+      { {"k", "\xff"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\xffv",
-      { {"k", "\xffv"}, NULLKV }
+      { {"k", "\xffv"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "foo=",
-      { {"foo", ""}, NULLKV }
+      { {"foo", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "foo=b",
-      { {"foo", "b"}, NULLKV }
+      { {"foo", "b"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "lorem ipsum foo=bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "lorem ipsum/dolor @sitamen foo=bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "*k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "x *k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1 k2=v2 k3=v3",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k= a=b c=d",
-      { {"k", ""}, {"a", "b"}, {"c", "d"}, NULLKV }
+      { {"k", ""}, {"a", "b"}, {"c", "d"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=v arg= code=27",
-      { {"k", "v"}, {"arg", ""}, {"code", "27"}, NULLKV }
+      { {"k", "v"}, {"arg", ""}, {"code", "27"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=a=b c=d",
-      { {"k", "a=b"}, {"c", "d"}, NULLKV }
+      { {"k", "a=b"}, {"c", "d"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1    k2=v2     k3=v3 ",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1,k2=v2,k3=v3",
-      { {"k1", "v1,k2=v2,k3=v3"}, NULLKV }
+      { {"k1", "v1,k2=v2,k3=v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\\",
-      { {"k", "\\"}, NULLKV }
+      { {"k", "\\"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1\tk2=v2 k3=v3",
-      { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1\tk2=v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1,\tk2=v2 k3=v3",
-      { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1,\tk2=v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=v1\t k2=v2 k3=v3",
-      { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1\t"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=\t",
-      { {"k", "\t"}, NULLKV }
+      { {"k", "\t"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k=,\t",
-      { {"k", ",\t"}, NULLKV }
+      { {"k", ",\t"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "foo=\"bar\"",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=\\b\\f\\n\\r\\t\\\\",
-      { {"k1", "\\b\\f\\n\\r\\t\\\\"}, NULLKV }
+      { {"k1", "\\b\\f\\n\\r\\t\\\\"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k1=\b\f\n\r\\",
-      { {"k1", "\b\f\n\r\\"}, NULLKV }
+      { {"k1", "\b\f\n\r\\"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "=v",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "k*=v",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "=",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "==",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "===",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " =",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " ==",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " ===",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       " = =",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       ":=",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "á=v",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "f",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "fo",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "foo",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       ", k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       ",k=v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
 
     {}
@@ -643,189 +640,189 @@ _provide_cases_without_allow_pair_separator_in_value(void)
   {
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=\"a",
-      { {"k", "a"}, NULLKV }
+      { {"k", "a"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=\"\\",
-      { {"k", ""}, NULLKV }
+      { {"k", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k='a",
-      { {"k", "a"}, NULLKV }
+      { {"k", "a"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k='\\",
-      { {"k", ""}, NULLKV }
+      { {"k", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       " =k=v=w",
-      { {"k", "v=w"}, NULLKV }
+      { {"k", "v=w"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=\"\xc3v",
-      { {"k", "\xc3v"}, NULLKV }
+      { {"k", "\xc3v"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=\"\xff",
-      { {"k", "\xff"}, NULLKV }
+      { {"k", "\xff"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=\"\xffv",
-      { {"k", "\xffv"}, NULLKV }
+      { {"k", "\xffv"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "lorem ipsum/dolor = foo=bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=\"v1\", k2=\"v2\"",
-      { {"k1", "v1"}, {"k2", "v2"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=\"\\\"v1\"",
-      { {"k1", "\"v1"}, NULLKV }
+      { {"k1", "\"v1"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=\"\\b \\f \\n \\r \\t \\\\\"",
-      { {"k1", "\b \f \n \r \t \\"}, NULLKV }
+      { {"k1", "\b \f \n \r \t \\"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=\"\\p\"",
-      { {"k1", "\\p"}, NULLKV }
+      { {"k1", "\\p"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1='\\'v1'",
-      { {"k1", "'v1"}, NULLKV }
+      { {"k1", "'v1"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1='\\b \\f \\n \\r \\t \\\\'",
-      { {"k1", "\b \f \n \r \t \\"}, NULLKV }
+      { {"k1", "\b \f \n \r \t \\"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1='\\p'",
-      { {"k1", "\\p"}, NULLKV }
+      { {"k1", "\\p"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=\"v foo, foo2 =@,\\\"\" k2='v foo,  a='",
-      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, NULLKV }
+      { {"k1", "v foo, foo2 =@,\""}, {"k2", "v foo,  a="}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=v1, k2=v2, k3=v3",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "foo=bar lorem ipsum key=value some more values",
-      { {"foo", "bar"}, {"key", "value"}, NULLKV }
+      { {"foo", "bar"}, {"key", "value"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1=v1,   k2=v2  ,    k3=v3",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1 k2=v2, k3, k4=v4",
-      { {"k2", "v2"}, {"k4", "v4"}, NULLKV }
+      { {"k2", "v2"}, {"k4", "v4"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1= k2=v2, k3=, k4=v4 k5= , k6=v6",
-      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, NULLKV }
+      { {"k1", ""}, {"k2", "v2"}, {"k3", ""}, {"k4", "v4"}, {"k5", ""}, {"k6", "v6"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1= v1 k2 = v2 k3 =v3 ",
-      { {"k1", ""}, NULLKV }
+      { {"k1", ""}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k1='v1', k2='v2'",
-      { {"k1", "v1"}, {"k2", "v2"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=v,",
-      { {"k", "v,"}, NULLKV }
+      { {"k", "v,"}, {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, {} },
       "k=v, ",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { {':', FALSE}, NULLCFG },
+      { {':', FALSE}, {} },
       "k1:v1 k2:v2 k3:v3 ",
-      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, NULLKV }
+      { {"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {} }
     },
     {
       TC_HEAD,
-      { {':', FALSE}, NULLCFG },
+      { {':', FALSE}, {} },
       "k1: v1 k2 : v2 k3 :v3 ",
-      { {"k1", ""}, NULLKV }
+      { {"k1", ""}, {} }
     },
     {
       TC_HEAD,
-      { {'-', FALSE}, NULLCFG },
+      { {'-', FALSE}, {} },
       "k-v",
-      { {"k", "v"}, NULLKV }
+      { {"k", "v"}, {} }
     },
     {
       TC_HEAD,
-      { {'-', FALSE}, NULLCFG },
+      { {'-', FALSE}, {} },
       "k--v",
-      { {"k", "-v"}, NULLKV }
+      { {"k", "-v"}, {} }
     },
     {
       TC_HEAD,
-      { {'-', FALSE}, NULLCFG },
+      { {'-', FALSE}, {} },
       "---",
-      { {"-", "-"}, NULLKV }
+      { {"-", "-"}, {} }
     },
 
     {}
@@ -841,159 +838,159 @@ _provide_cases_with_allow_pair_separator_in_value(void)
   {
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo =bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo =bar",
-      { {"foo", "bar"}, NULLKV }
+      { {"foo", "bar"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=bar ggg",
-      { {"foo", "bar ggg"}, NULLKV }
+      { {"foo", "bar ggg"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=bar ggg baz=ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+      { {"foo", "bar ggg"}, {"baz", "ez"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       " foo =bar ggg baz=ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+      { {"foo", "bar ggg"}, {"baz", "ez"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo =bar ggg baz =ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+      { {"foo", "bar ggg"}, {"baz", "ez"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo =bar ggg baz   =ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+      { {"foo", "bar ggg"}, {"baz", "ez"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo =  bar ggg baz   =   ez",
-      { {"foo", "bar ggg"}, {"baz", "ez"}, NULLKV }
+      { {"foo", "bar ggg"}, {"baz", "ez"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "k===  a",
-      { {"k", "==  a"}, NULLKV }
+      { {"k", "==  a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "a b c=d",
-      { {"c", "d"}, NULLKV }
+      { {"c", "d"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       " k= b",
-      { {"k", "b"}, NULLKV }
+      { {"k", "b"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=a \"bar baz\" ",
-      { {"foo", "a \"bar baz\""}, NULLKV }
+      { {"foo", "a \"bar baz\""}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=a \"bar baz",
-      { {"foo", "a \"bar baz"}, NULLKV }
+      { {"foo", "a \"bar baz"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=a \"bar baz c=d",
-      { {"foo", "a \"bar baz"}, {"c", "d"}, NULLKV }
+      { {"foo", "a \"bar baz"}, {"c", "d"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=a \"bar baz\"=f c=d a",
-      { {"foo", "a \"bar baz\"=f"}, {"c", "d a"}, NULLKV }
+      { {"foo", "a \"bar baz\"=f"}, {"c", "d a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=\\\"bar baz\\\"",
-      { {"foo", "\\\"bar baz\\\""}, NULLKV }
+      { {"foo", "\\\"bar baz\\\""}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=\"bar\" baz c=d",
-      { {"foo", "\"bar\" baz"}, {"c", "d"}, NULLKV }
+      { {"foo", "\"bar\" baz"}, {"c", "d"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=bar\"",
-      { {"foo", "bar\""}, NULLKV }
+      { {"foo", "bar\""}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "k===a",
-      { {"k", "==a"}, NULLKV }
+      { {"k", "==a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "k===  a",
-      { {"k", "==  a"}, NULLKV }
+      { {"k", "==  a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "k===a=b",
-      { {"k", "==a=b"}, NULLKV }
+      { {"k", "==a=b"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "a==b=",
-      { {"a", "=b="}, NULLKV }
+      { {"a", "=b="}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "a=,=b=a",
-      { {"a", ",=b=a"}, NULLKV }
+      { {"a", ",=b=a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "a= =a",
-      { {"a", "=a"}, NULLKV }
+      { {"a", "=a"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo=\"bar baz\"",
-      { {"foo", "bar baz"}, NULLKV }
+      { {"foo", "bar baz"}, {} }
     },
     {
       TC_HEAD,
-      { SPACE_HANDLING_CONFIG, NULLCFG },
+      { SPACE_HANDLING_CONFIG, {} },
       "foo='bar",
-      { {"foo", "'bar"}, NULLKV }
+      { {"foo", "'bar"}, {} }
     },
 
     {}
@@ -1009,23 +1006,23 @@ _provide_cases_for_performance_test_nothing_to_parse(void)
   {
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "Reducing the compressed framebuffer size. This may lead to less power savings than a non-reduced-size. \
 Try to increase stolen memory size if available in BIOS.",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "interrupt took too long (3136 > 3127), lowering kernel.perf_event_max_sample_rate to 63750",
-      { NULLKV }
+      { {} }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "Linux version 4.6.3-040603-generic (kernel@gomeisa) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-4ubuntu1) ) \
 #201606241434 SMP Fri Jun 24 18:36:33 UTC 2016",
-      { NULLKV }
+      { {} }
     },
 
     {}
@@ -1041,7 +1038,7 @@ _provide_cases_for_performance_test_parse_long_msg(void)
   {
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "PF: filter/forward DROP \
       IN=15dd205a6ac8b0c80ab3bcdcc5649c9c830074cdbdc094ff1d79f20f17c56843 \
       OUT=980816f36b77e58d342de41f85854376d10cf9bf33aa1934e129ffd77ddc833d \
@@ -1069,12 +1066,12 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"SPT", "1e7996c7b0181429bba237ac2799ee5edc31aca2d5d90c39a48f9e9a3d4078bd"},
         {"DPT", "ca902d4a8acbdea132ada81a004081f51c5c9279d409cee414de5a39a139fab6"},
         {"LEN", "c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db"},
-        NULLKV
+        {}
       }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "fw=108.53.156.38 pri=6 c=262144 m=98 msg=\"Connection Opened\" f=2 sess=\"None\" \
       n=16351474 src=10.0.5.200:57719:X0:MOGWAI dst=71.250.0.14:53:X1 dstMac=f8:c0:01:73:c7:c1 proto=udp/dns sent=66",
       { {"fw", "108.53.156.38"},
@@ -1090,12 +1087,12 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"dstMac", "f8:c0:01:73:c7:c1"},
         {"proto", "udp/dns"},
         {"sent", "66"},
-        NULLKV
+        {}
       }
     },
     {
       TC_HEAD,
-      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, NULLCFG },
+      { DEFAULT_CONFIG, SPACE_HANDLING_CONFIG, {} },
       "sn=C0EAE484E43E time=\"2016-07-08 13:42:58\" fw=132.237.143.192 pri=5 c=4 m=16 msg=\"Web site access allowed\" \
       app=11 sess=\"Auto\" n=5086 usr=\"DEMO\\primarystudent\" src=10.2.3.64:50682:X2-V3023 dst=157.55.240.220:443:X1 \
       srcMac=00:50:56:8e:55:8e dstMac=c0:ea:e4:84:e4:40 proto=tcp/https dstname=sls.update.microsoft.com arg= code=27 \
@@ -1121,7 +1118,7 @@ _provide_cases_for_performance_test_parse_long_msg(void)
         {"code", "27"},
         {"Category", "Information Technology/Computers"},
         {"fw_action", "process"},
-        NULLKV
+        {}
       }
     },
 
