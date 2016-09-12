@@ -154,7 +154,7 @@ typedef struct Testcase_t
 } Testcase;
 
 KVScanner *
-create_kv_scanner(ScannerConfig config)
+create_kv_scanner(const ScannerConfig config)
 {
   return (config.allow_pair_separator_in_value ?
     kv_scanner_generic_new(config.kv_separator, NULL_KVPARSEVALUE) :
@@ -162,7 +162,7 @@ create_kv_scanner(ScannerConfig config)
 }
 
 static void
-_scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, KV kvs[])
+_scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, const KV kvs[])
 {
   g_assert(input);
   kv_scanner_input(scanner, input);
@@ -176,7 +176,6 @@ _scan_kv_pairs_scanner(KVScanner *scanner, const gchar *input, KV kvs[])
   _assert_no_more_tokens(scanner);
   kv_scanner_free(scanner);
 }
-
 
 static void
 _test_key_buffer_underrun(void)
@@ -285,10 +284,10 @@ _test_parse_value_clone(void)
 
 #define TC_HEAD .line=__LINE__, .function=__FUNCTION__
 
-static Testcase *
+static const Testcase *
 _provide_common_cases(void)
 {
-  static Testcase common_cases[] =
+  static const Testcase common_cases[] =
   {
     {
       TC_HEAD,
@@ -633,10 +632,10 @@ _provide_common_cases(void)
   return common_cases;
 }
 
-static Testcase *
+static const Testcase *
 _provide_cases_without_allow_pair_separator_in_value(void)
 {
-  static Testcase cases_without_allow_pair_separator_in_value[] =
+  static const Testcase cases_without_allow_pair_separator_in_value[] =
   {
     {
       TC_HEAD,
@@ -831,10 +830,10 @@ _provide_cases_without_allow_pair_separator_in_value(void)
   return cases_without_allow_pair_separator_in_value;
 }
 
-static Testcase *
+static const Testcase *
 _provide_cases_with_allow_pair_separator_in_value(void)
 {
-  static Testcase cases_with_allow_pair_separator_in_value[] =
+  static const Testcase cases_with_allow_pair_separator_in_value[] =
   {
     {
       TC_HEAD,
@@ -999,10 +998,10 @@ _provide_cases_with_allow_pair_separator_in_value(void)
   return cases_with_allow_pair_separator_in_value;
 }
 
-static Testcase *
+static const Testcase *
 _provide_cases_for_performance_test_nothing_to_parse(void)
 {
-  static Testcase cases_for_performance_test_nothing_to_parse[] =
+  static const Testcase cases_for_performance_test_nothing_to_parse[] =
   {
     {
       TC_HEAD,
@@ -1031,10 +1030,10 @@ Try to increase stolen memory size if available in BIOS.",
   return cases_for_performance_test_nothing_to_parse;
 }
 
-static Testcase *
+static const Testcase *
 _provide_cases_for_performance_test_parse_long_msg(void)
 {
-  static Testcase cases_for_performance_test_parse_long_msg[] =
+  static const Testcase cases_for_performance_test_parse_long_msg[] =
   {
     {
       TC_HEAD,
@@ -1128,7 +1127,7 @@ _provide_cases_for_performance_test_parse_long_msg(void)
 }
 
 static GString *
-_expected_to_string(KV *kvs)
+_expected_to_string(const KV *kvs)
 {
   GString *result = g_string_new("");
   gboolean first = TRUE;
@@ -1147,10 +1146,10 @@ _expected_to_string(KV *kvs)
 }
 
 static void
-_run_testcase(Testcase tc)
+_run_testcase(const Testcase tc)
 {
   GString *pretty_expected;
-  ScannerConfig *cfg = tc.config;
+  const ScannerConfig *cfg = tc.config;
   while (cfg->kv_separator != 0)
     {
       pretty_expected = _expected_to_string(tc.expected);
@@ -1169,9 +1168,9 @@ _run_testcase(Testcase tc)
 }
 
 static void
-_run_testcases(Testcase *cases)
+_run_testcases(const Testcase *cases)
 {
-  Testcase *tc = cases;
+  const Testcase *tc = cases;
   while (tc->input)
     {
       _run_testcase(*tc);
@@ -1182,12 +1181,12 @@ _run_testcases(Testcase *cases)
 #define ITERATION_NUMBER 10000
 
 static void
-_test_performance(Testcase *tcs, gchar *title)
+_test_performance(const Testcase *tcs, gchar *title)
 {
   GString *pretty_expected;
-  ScannerConfig *cfg = NULL;
+  const ScannerConfig *cfg = NULL;
   gint cfg_index = 0;
-  Testcase *tc;
+  const Testcase *tc;
   gint iteration_index = 0;
 
   if (title)
