@@ -337,14 +337,14 @@ _extract_value(KVScannerGeneric *self)
       self->super.input_pos++;
     }
 
-  if (*self->next_value.begin == self->super.quote_char && *(self->next_value.end-1) == self->super.quote_char)
+  if (*self->next_value.begin == self->super.quote_char && *(self->next_value.end - 1) == self->super.quote_char)
     {
       self->super.value_was_quoted = TRUE;
       self->next_value.begin++;
       self->next_value.end--;
     }
 
-  for (cur = self->next_value.begin; cur < self->next_value.end ; cur++)
+  for (cur = self->next_value.begin; cur < self->next_value.end; cur++)
     {
       g_string_append_c(self->super.value, *cur);
     }
@@ -365,7 +365,7 @@ _find_first_key(KVScannerGeneric *self)
       if (!separator)
         return FALSE;
 
-      end_of_key = separator-1;
+      end_of_key = separator - 1;
       while (end_of_key >= self->super.input && *end_of_key == ' ')
         end_of_key--;
 
