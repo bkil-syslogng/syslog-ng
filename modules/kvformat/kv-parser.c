@@ -64,7 +64,7 @@ kv_parser_set_prefix(LogParser *p, const gchar *prefix)
 }
 
 void
-kv_parser_allow_pair_separator_in_value(LogParser *s, gboolean allow_pair_separator_in_value)
+kv_parser_set_allow_pair_separator_in_value(LogParser *s, gboolean allow_pair_separator_in_value)
 {
   KVParser *self = (KVParser *) s;
   self->allow_pair_separator_in_value = allow_pair_separator_in_value;
@@ -139,7 +139,7 @@ kv_parser_clone(LogPipe *s)
 
   cloned = kv_parser_new(s->cfg, self->input_format);
   kv_parser_set_prefix(cloned, self->prefix);
-  kv_parser_allow_pair_separator_in_value(cloned, self->allow_pair_separator_in_value);
+  kv_parser_set_allow_pair_separator_in_value(cloned, self->allow_pair_separator_in_value);
   kv_parser_set_value_separator(cloned, self->value_separator);
   log_parser_set_template(cloned, log_template_ref(self->super.template));
 
