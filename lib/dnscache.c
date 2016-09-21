@@ -138,6 +138,7 @@ dns_cache_fill_key(DNSCacheKey *key, gint family, void *addr)
       break;
 #endif
     default:
+      msg_error("Unsupported address family", evt_tag_int("family", family));
       g_assert_not_reached();
       break;
     }
