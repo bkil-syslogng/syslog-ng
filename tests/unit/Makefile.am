@@ -9,9 +9,11 @@ check_PROGRAMS				+= \
 unit_test_extra_modules			= \
 	$(PREOPEN_SYSLOGFORMAT)
 
+tests_unit_test_logwriter_CFLAGS		= $(TEST_CFLAGS)
 tests_unit_test_logwriter_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
+tests_unit_test_zone_CFLAGS		= $(TEST_CFLAGS)
 tests_unit_test_zone_LDADD		= \
 	$(TEST_LDADD) $(unit_test_extra_modules)
 
