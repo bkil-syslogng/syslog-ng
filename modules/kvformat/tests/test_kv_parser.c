@@ -27,13 +27,16 @@
   do                                                            \
     {                                                           \
       testcase_begin("%s(%s)", func, args);                     \
-      kv_parser = kv_parser_new(NULL, kv_scanner_new());        \
+      kv_parser =                                               \
+        kv_parser_new(NULL, KV_PARSER_INPUT_IS_GENERIC);        \
+      log_pipe_init((LogPipe*)kv_parser, NULL);                 \
     }                                                           \
   while (0)
 
 #define kv_parser_testcase_end()                           \
   do                                                            \
     {                                                           \
+      log_pipe_deinit((LogPipe*)kv_parser);                     \
       log_pipe_unref(&kv_parser->super);                      \
       testcase_end();                                           \
     }                                                           \
