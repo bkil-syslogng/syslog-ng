@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <pthread.h>
 
 typedef struct _LogProtoFileWriter
 {
@@ -39,9 +40,11 @@ typedef struct _LogProtoFileWriter
   gint fd;
   gint sum_len;
   gboolean fsync;
-  GMutex mutex_write;
   struct iovec buffer[0];
 } LogProtoFileWriter;
+
+pthread_mutex_t mutex_write;
+unsigned short int write_mutex_init = 1;
 
 /*
  * log_proto_file_writer_flush:
@@ -79,6 +82,12 @@ log_proto_file_writer_flush(LogProtoClient *s)
           g_free(self->partial);
           self->partial = NULL;
         }
+    }
+
+  if(write_mutex_init)
+    {
+      write_mutex_init = 0;
+      pthread_mutex_init(&mutex_write, NULL);
     }
 
   /* we might be called from log_writer_deinit() without having a buffer at all */
@@ -123,14 +132,14 @@ log_proto_file_writer_flush(LogProtoClient *s)
     }
 
   /* free the previous message strings (the remaning part has been copied to the partial buffer) */
-  if (g_mutex_trylock(&self->mutex_write)) /* guard against double-free from another thread */
+  if (pthread_mutex_trylock(&mutex_write) == 0) /* guard against double-free from another thread */
     {
       for (i = 0; i < self->buf_count; ++i)
         g_free(self->buffer[i].iov_base);
       self->buf_count = 0;
       self->sum_len = 0;
 
-      g_mutex_unlock(&self->mutex_write);
+      pthread_mutex_unlock(&mutex_write);
     }
   else /* other thread is doing the free, log a message and continue */
     msg_warning("Multiple threads detected in log_proto_file_writer_flush", NULL);
@@ -234,7 +243,6 @@ log_proto_file_writer_new(LogTransport *transport, const LogProtoClientOptions *
   self->fd = transport->fd;
   self->buf_size = flush_lines;
   self->fsync = fsync_;
-  g_mutex_init(&self->mutex_write);
   self->super.prepare = log_proto_file_writer_prepare;
   self->super.post = log_proto_file_writer_post;
   self->super.flush = log_proto_file_writer_flush;
