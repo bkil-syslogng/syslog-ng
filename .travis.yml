@@ -33,6 +33,7 @@ install:
       sqlite3
       xsltproc
       criterion-dev
+      valgrind
   - sudo pip install -r requirements.txt
 before_script:
   - ./autogen.sh
@@ -66,6 +67,9 @@ script:
       if [ "$S" = "0" ]; then
         . scripts/get-libjvm-path.sh || return $?;
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$JNI_LIBDIR";
+        export G_SLICE="always-malloc,debug-blocks";
+        export MALLOC_CHECK_="2";
+        export G_DEBUG="fatal-warnings,fatal-criticals,gc-friendly";
         make func-test V=1;
       elif [ "$S" = "42" ]; then
         return $S;
