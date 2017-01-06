@@ -53,7 +53,26 @@ def start_syslogng(conf, keep_persist=False, verbose=False):
     if syslogng_pid == 0:
         os.putenv("RANDFILE", "rnd")
         module_path = get_module_path()
-        rc = os.execl(get_syslog_ng_binary(), get_syslog_ng_binary(), '-f', 'test.conf', '--fd-limit', '1024', '-F', verbose_opt, '-p', 'syslog-ng.pid', '-R', 'syslog-ng.persist', '--no-caps', '--enable-core', '--seed', '--module-path', module_path)
+        os.putenv("G_SLICE", "always-malloc,debug-blocks")
+        os.putenv("MALLOC_CHECK_", "2")
+        os.putenv("G_DEBUG", "fatal-warnings,fatal-criticals,gc-friendly")
+
+        rc = os.execl(
+            '/usr/bin/valgrind',
+            '/usr/bin/valgrind',
+            '--tool=helgrind',
+            '--free-is-write=yes',
+            get_syslog_ng_binary(),
+            '-f', 'test.conf',
+            '--fd-limit', '1024',
+            '-F',
+            verbose_opt,
+            '-p', 'syslog-ng.pid',
+            '-R', 'syslog-ng.persist',
+            '--no-caps',
+            '--enable-core',
+            '--seed',
+            '--module-path', module_path)
         sys.exit(rc)
     time.sleep(5)
     print_user("Syslog-ng started")
