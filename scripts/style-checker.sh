@@ -52,12 +52,35 @@ function astyle_c_format
     exit 0
 }
 
+function astyle_c_diff
+{
+    astyle --options="$root_dir/.astylerc" "$root_dir/*.c" |
+    grep "Formatted" |
+    tee badly-formatted-files.list |
+    wc -l | {
+        read badly_formatted_c_files
+
+        cat badly-formatted-files.list
+
+        git diff |
+        cat
+
+        echo "Number of badly formatted files: $badly_formatted_c_files"
+        if [ "$badly_formatted_c_files" == "0" ]; then
+            exit 0
+        else
+            exit 1
+        fi
+    }
+}
+
 function print_help
 {
     echo "Format C source files to comply with coding standards of syslog-ng"
     echo "Possible actions:"
     echo "    check    Check the format of sources in current directory"
     echo "    format   Format sources in current directory"
+    echo "    diff     Format sources in current directory, show git diff"
     echo "    help     Print this message"
 }
 
@@ -70,6 +93,9 @@ function run_checker
     elif [ "$action" == "format" ]; then
         echo "Formatting C source files"
         astyle_c_format
+    elif [ "$action" == "diff" ]; then
+        echo "Formatting C source files"
+        astyle_c_diff
     elif [ "$action" == "help" ]; then
         print_help
     else
